@@ -6,7 +6,7 @@ import RecomendadorRutas from "./RecomendadorRutas";
 import { useGpsSocket } from "../Service/GpsDataService";
 import { get, post } from "../Service/api";
 import { cerrarSesion, obtenerUsuario } from "../Service/sesion";
-import iconoMoto from "../assets/motorcycle.svg";
+import iconoMoto from "../assets/motorcycle.svg"
 import "../Styles/PanelControl.css";
 
 const AVATAR_RESPALDO = "https://lh3.googleusercontent.com/aida-public/AB6AXuAY2LUZy8-2hH4EHpzk3fYPcKWGWO-KFLJi026AWK5hVL8IclrSHzl6nHY3IZDOrMGLfe0y5DCDS_FbOuiQ876MODJCixKpcuhqt9IP42G9ZbNMWt3Bdr3dMicj7oIubOipTqySE4VggkfaXCfjOuO0VP9fVLkKxVRfzrtRfRQW7ZCt9glPMhZinrCn3jhl-cG33Ww0CnjKHUBe4ScbYvWaYi-tMR7xoPPQbShkWGwwFivAB0UuhNoOHFCQlvudSkPAz5W2aANPLQE";
@@ -79,7 +79,7 @@ export default function PanelControl() {
     const otros = vehiculos.filter((v) => v !== vehiculoSel);
 
     // Un solo WebSocket, para la unidad seleccionada
-    const { position: posSocket, connected } = useGpsSocket(imei);
+    const { position: posSocket, connected } = useGpsSocket(imei)
 
     // Hasta que llegue el primer mensaje en vivo se muestra la última posición guardada.
     const position = posSocket?.imei === imei ? posSocket : ultima?.imei === imei ? ultima : null;

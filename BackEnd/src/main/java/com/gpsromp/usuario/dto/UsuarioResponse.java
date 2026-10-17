@@ -1,5 +1,6 @@
 package com.gpsromp.usuario.dto;
 
+import com.gpsromp.usuario.model.PlanTipo;
 import com.gpsromp.usuario.model.Rol;
 
 import java.time.LocalDateTime;
@@ -25,6 +26,7 @@ public record UsuarioResponse(
         String correo,
         String telefono,
         Rol rol,
+        PlanTipo plan,
         Boolean activo,
         String imagenUrl,
         LocalDateTime creadoEn,

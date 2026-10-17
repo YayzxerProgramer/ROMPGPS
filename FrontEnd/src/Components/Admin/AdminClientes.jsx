@@ -4,7 +4,7 @@ import { obtenerUsuario } from "../../Service/sesion";
 import { Confirmar, InsigniaEstado, Modal, Paginacion, Segmentos, Vacio } from "./AdminUI";
 import { useAvisar } from "./avisos";
 import { FormContrasena, FormUsuario } from "./AdminFormularios";
-import { ROLES, contar, fecha, iniciales, nombreCompleto, olvidarPropietario, query } from "./adminUtils";
+import { PLANES, ROLES, contar, fecha, iniciales, nombreCompleto, olvidarPropietario, query } from "./adminUtils";
 
 const FILTRO_ROL = [
   { valor: "", etiqueta: "Todos" },
@@ -118,7 +118,7 @@ export default function AdminClientes({ busqueda, abrirAlta, onAltaAbierta, onCa
         <div className="adm-tabla-scroll">
           <div className="adm-tabla adm-tabla--usuarios">
             <div className="adm-tabla-fila adm-tabla-fila--cab">
-              <span>USUARIO</span><span>CONTACTO</span><span>ROL</span><span>ESTADO</span><span>ALTA</span><span className="der">ACCIONES</span>
+              <span>USUARIO</span><span>CONTACTO</span><span>ROL</span><span>PLAN</span><span>ESTADO</span><span>ALTA</span><span className="der">ACCIONES</span>
             </div>
 
             {cargando && usuarios.length === 0 && <div className="adm-tabla-vacia">Cargando usuarios…</div>}
@@ -128,6 +128,12 @@ export default function AdminClientes({ busqueda, abrirAlta, onAltaAbierta, onCa
 
             {usuarios.map((u) => {
               const soyYo = u.usuario === yo;
+              const planClase =
+                u.plan === "ENTERPRISE"
+                  ? "adm-insignia--dorado"
+                  : u.plan === "PRO"
+                  ? "adm-insignia--verde"
+                  : "adm-insignia--gris";
               return (
                 <div key={u.id} className="adm-tabla-fila" onClick={() => setDialogo({ tipo: "ficha", usuario: u })}>
                   <div className="adm-propietario">
@@ -142,6 +148,7 @@ export default function AdminClientes({ busqueda, abrirAlta, onAltaAbierta, onCa
                     <span className="adm-celda-mono">{u.telefono || "—"}</span>
                   </div>
                   <div><span className={`adm-rol adm-rol--${u.rol}`}>{ROLES[u.rol] || u.rol}</span></div>
+                  <div><span className={`adm-insignia ${planClase}`}>{PLANES[u.plan] || u.plan || "Personal"}</span></div>
                   <div><InsigniaEstado estado={u.activo ? "marcha" : "off"} texto={u.activo ? "ACTIVO" : "INACTIVO"} /></div>
                   <div className="adm-alta">{fecha(u.creadoEn)}</div>
                   <div className="der adm-acciones" onClick={(e) => e.stopPropagation()}>
@@ -238,6 +245,7 @@ function FichaUsuario({ usuario, onCerrar, onEditar }) {
       <div className="adm-ficha-rejilla">
         <div><span className="adm-etiqueta">CORREO</span><b>{usuario.correo}</b></div>
         <div><span className="adm-etiqueta">TELÉFONO</span><b>{usuario.telefono || "—"}</b></div>
+        <div><span className="adm-etiqueta">PLAN</span><b>{PLANES[usuario.plan] || usuario.plan || "Personal"}</b></div>
         <div><span className="adm-etiqueta">ESTADO</span><InsigniaEstado estado={usuario.activo ? "marcha" : "off"} texto={usuario.activo ? "ACTIVO" : "INACTIVO"} /></div>
         <div><span className="adm-etiqueta">ALTA</span><b>{fecha(usuario.creadoEn)}</b></div>
       </div>

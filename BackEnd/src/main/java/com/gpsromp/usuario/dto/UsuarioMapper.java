@@ -26,6 +26,7 @@ public final class UsuarioMapper {
                 u.getCorreo(),
                 u.getTelefono(),
                 u.getRol(),
+                u.getPlan() != null ? u.getPlan() : com.gpsromp.usuario.model.PlanTipo.PERSONAL,
                 u.getActivo(),
                 u.getImagenUrl(),
                 u.getCreadoEn(),

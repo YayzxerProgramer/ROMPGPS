@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48" fill="none">
+  <!-- Outer halo / radar pulse -->
+  <circle cx="24" cy="24" r="22" fill="#22c55e" fill-opacity="0.2"/>
+  <circle cx="24" cy="24" r="16" fill="#22c55e" fill-opacity="0.35"/>
+  <!-- Shadow offset -->
+  <circle cx="24" cy="25" r="11.5" fill="#000000" fill-opacity="0.45"/>
+  <!-- Dark backing / outer contrast border -->
+  <circle cx="24" cy="24" r="11" fill="#0f120e"/>
+  <!-- Crisp white ring -->
+  <circle cx="24" cy="24" r="9.5" fill="#ffffff"/>
+  <!-- Emerald core circle -->
+  <circle cx="24" cy="24" r="7" fill="#22c55e"/>
+  <!-- Center specular highlight dot -->
+  <circle cx="24" cy="24" r="2.2" fill="#ffffff" fill-opacity="0.95"/>
+</svg>

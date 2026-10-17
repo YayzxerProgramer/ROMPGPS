@@ -1,11 +1,14 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { haySesionValida, obtenerUsuario, obtenerToken } from "../Service/sesion";
+import { API_URL, api } from "../Service/api";
 import "../Styles/Pricing.css";
 
 const DESCUENTO_ANUAL = 0.8;   // 20% de ahorro al prepagar el año
 const MESES_ANIO = 12;
 
 /* Única fuente de verdad de los precios. Tanto el importe que se
-muestra como el que va al checkout se derivan de `precioMensual`,
+   muestra como el que va al checkout se derivan de `precioMensual`,
    así que no pueden quedar desalineados. */
 const PLANES = [
     {
@@ -58,8 +61,6 @@ const LLAVE_PRUEBAS = "pub_test_Q5y15286524589254823";
 const wompiPublicKey = import.meta.env.VITE_WOMPI_PUB_KEY || LLAVE_PRUEBAS;
 
 if (!import.meta.env.VITE_WOMPI_PUB_KEY) {
-    // Antes caía en la llave de pruebas sin avisar: en producción eso
-    // significa procesar pagos contra el entorno de test en silencio.
     console.warn(
         "[Pricing] Falta VITE_WOMPI_PUB_KEY. Se usará la llave de PRUEBAS de Wompi."
     );
@@ -82,74 +83,142 @@ const precioACobrar = (plan, anual) =>
         : plan.precioMensual;
 
 function Pricing() {
+    const navigate = useNavigate();
     const [facturacionAnual, setFacturacionAnual] = useState(false);
     const [estadoPago, setEstadoPago] = useState(null);
+    const [usuarioData, setUsuarioData] = useState(null);
+    const [modalAuth, setModalAuth] = useState(false);
+    const [planParaComprar, setPlanParaComprar] = useState(null);
+    const [guardandoVenta, setGuardandoVenta] = useState(false);
 
-    const lanzarCheckout = (plan, referencia, montoCentavos) => {
-        if (!window.WidgetCheckout) return;
-
-        const checkout = new window.WidgetCheckout({
-            currency: "COP",
-            amountInCents: montoCentavos,
-            reference: referencia,
-            publicKey: wompiPublicKey,
-            // Ojo: /panel-control está detrás de RutaProtegida. Si no hay
-            // sesión activa, el usuario acaba en /login. Ver nota al pie.
-            redirectUrl: window.location.origin + "/panel-control",
-        });
-
-        checkout.open((result) => {
-            const transaccion = result?.transaction;
-
-            if (!transaccion) {
-                setEstadoPago({
-                    tipo: "pendiente",
-                    mensaje: "No recibimos confirmación de la transacción. Revisa tu correo antes de volver a intentarlo.",
-                });
-                return;
+    // Cargar información del usuario actual si está autenticado
+    useEffect(() => {
+        if (haySesionValida()) {
+            const username = obtenerUsuario();
+            const token = obtenerToken();
+            if (username) {
+                fetch(`${API_URL}/usuario/usuario/${username}`, {
+                    headers: { Authorization: `Bearer ${token}` },
+                })
+                    .then((res) => (res.ok ? res.json() : null))
+                    .then((data) => {
+                        if (data) setUsuarioData(data);
+                    })
+                    .catch(() => {});
             }
-
-            if (transaccion.status === "APPROVED") {
-                setEstadoPago({
-                    tipo: "ok",
-                    mensaje: `Pago aprobado para el plan ${plan.nombre}. Referencia: ${referencia}`,
-                });
-            } else if (transaccion.status === "DECLINED") {
-                setEstadoPago({
-                    tipo: "error",
-                    mensaje: "El pago fue rechazado. Verifica los datos o prueba con otro medio.",
-                });
-            } else {
-                setEstadoPago({
-                    tipo: "pendiente",
-                    mensaje: `Transacción en estado "${transaccion.status}". Te avisaremos cuando se confirme.`,
-                });
-            }
-        });
-    };
+        }
+    }, []);
 
     const abrirWompiCheckout = (plan) => {
-        const montoCentavos = precioACobrar(plan, facturacionAnual) * 100;
-        // eslint-disable-next-line react-hooks/purity
-        const referencia = `SUB-${Date.now()}-${plan.id.toUpperCase()}`;
+        const aCobrar = precioACobrar(plan, facturacionAnual);
+        const montoCentavos = aCobrar * 100;
+        const periodo = facturacionAnual ? "ANUAL" : "MENSUAL";
+        const userId = usuarioData?.id || "CLIENTE";
+        const referencia = `SUB-${userId}-${Date.now()}-${plan.id.toUpperCase()}-${periodo}`;
 
         setEstadoPago(null);
 
+        const lanzarCheckout = () => {
+            if (!window.WidgetCheckout) return;
+
+            const customerData = usuarioData ? {
+                email: usuarioData.correo,
+                fullName: `${usuarioData.nombre || ""} ${usuarioData.apellido || ""}`.trim() || usuarioData.usuario,
+                phoneNumber: usuarioData.telefono || undefined,
+            } : undefined;
+
+            const checkout = new window.WidgetCheckout({
+                currency: "COP",
+                amountInCents: montoCentavos,
+                reference: referencia,
+                publicKey: wompiPublicKey,
+                customerData: customerData,
+                redirectUrl: window.location.origin + "/panel-control",
+            });
+
+            checkout.open(async (result) => {
+                const transaccion = result?.transaction;
+
+                if (!transaccion) {
+                    setEstadoPago({
+                        tipo: "pendiente",
+                        mensaje: "No recibimos confirmación de la transacción. Revisa tu correo o cuenta bancaria.",
+                    });
+                    return;
+                }
+
+                if (transaccion.status === "APPROVED") {
+                    try {
+                        setGuardandoVenta(true);
+                        // Confirmar compra directamente en backend para reflejar la venta y actualizar el plan
+                        await api("/pagos/confirmar-compra", {
+                            method: "POST",
+                            body: {
+                                referencia,
+                                transaccionId: transaccion.id,
+                                plan: plan.id.toUpperCase(),
+                                periodo,
+                                monto: aCobrar,
+                                metodoPago: transaccion.payment_method_type || "WOMPI",
+                            },
+                        });
+
+                        localStorage.setItem("plan", plan.id.toUpperCase());
+                        if (usuarioData) {
+                            setUsuarioData((prev) => ({ ...prev, plan: plan.id.toUpperCase() }));
+                        }
+
+                        setEstadoPago({
+                            tipo: "ok",
+                            mensaje: `¡Pago aprobado con éxito! Tu cuenta ha sido activada en el plan ${plan.nombre}. La venta ya fue registrada en el sistema.`,
+                        });
+                    } catch (err) {
+                        console.error("Error al registrar la venta:", err);
+                        setEstadoPago({
+                            tipo: "ok",
+                            mensaje: `¡Pago aprobado en Wompi! (Ref: ${referencia}). Tu plan se actualizará en breves momentos.`,
+                        });
+                    } finally {
+                        setGuardandoVenta(false);
+                    }
+                } else if (transaccion.status === "DECLINED") {
+                    setEstadoPago({
+                        tipo: "error",
+                        mensaje: "El pago fue rechazado. Verifica los datos o prueba con otro medio de pago.",
+                    });
+                } else {
+                    setEstadoPago({
+                        tipo: "pendiente",
+                        mensaje: `Transacción en estado "${transaccion.status}". Te avisaremos cuando se confirme.`,
+                    });
+                }
+            });
+        };
+
         if (window.WidgetCheckout) {
-            lanzarCheckout(plan, referencia, montoCentavos);
+            lanzarCheckout();
             return;
         }
 
         const script = document.createElement("script");
         script.src = "https://checkout.wompi.co/widget.js";
         script.async = true;
-        script.onload = () => lanzarCheckout(plan, referencia, montoCentavos);
+        script.onload = lanzarCheckout;
         script.onerror = () =>
             setEstadoPago({
                 tipo: "error",
                 mensaje: "No pudimos cargar la pasarela de pago. Revisa tu conexión e inténtalo de nuevo.",
             });
         document.body.appendChild(script);
+    };
+
+    const manejarClicPagar = (plan) => {
+        if (!haySesionValida()) {
+            setPlanParaComprar(plan);
+            setModalAuth(true);
+            return;
+        }
+        abrirWompiCheckout(plan);
     };
 
     return (
@@ -191,15 +260,18 @@ function Pricing() {
                     {PLANES.map((plan) => {
                         const porMes = precioPorMes(plan, facturacionAnual);
                         const aCobrar = precioACobrar(plan, facturacionAnual);
+                        const esPlanActual = usuarioData?.plan?.toUpperCase() === plan.id.toUpperCase();
 
                         return (
                             <div
                                 key={plan.id}
-                                className={`tarjeta-precio ${plan.destacado ? "destacado" : ""}`}
+                                className={`tarjeta-precio ${plan.destacado ? "destacado" : ""} ${esPlanActual ? "tarjeta-precio--actual" : ""}`}
                             >
-                                {plan.destacado && (
+                                {esPlanActual ? (
+                                    <div className="insignia-plan-activo">Tu Plan Actual</div>
+                                ) : plan.destacado ? (
                                     <div className="insignia-destacado">Recomendado</div>
-                                )}
+                                ) : null}
 
                                 <div className="parte-superior-plan">
                                     <span className={`etiqueta-plan ${plan.destacado ? "texto-destacado" : ""}`}>
@@ -234,10 +306,13 @@ function Pricing() {
 
                                 <button
                                     type="button"
-                                    onClick={() => abrirWompiCheckout(plan)}
-                                    className={`boton-precio ${plan.destacado ? "primario" : "secundario"}`}
+                                    onClick={() => manejarClicPagar(plan)}
+                                    disabled={guardandoVenta}
+                                    className={`boton-precio ${esPlanActual ? "actual" : plan.destacado ? "primario" : "secundario"}`}
                                 >
-                                    {facturacionAnual
+                                    {esPlanActual
+                                        ? `Renovar ${plan.nombre}`
+                                        : facturacionAnual
                                         ? `Pagar 12 meses · ${formatoCOP.format(aCobrar)}`
                                         : `Pagar ${formatoCOP.format(aCobrar)} · PSE / Nequi / Tarjeta`}
                                 </button>
@@ -252,11 +327,58 @@ function Pricing() {
                         role="status"
                         aria-live="polite"
                     >
-                        {estadoPago.mensaje}
+                        <p>{estadoPago.mensaje}</p>
+                        {estadoPago.tipo === "ok" && (
+                            <button
+                                type="button"
+                                className="btn-ir-panel-exito"
+                                onClick={() => navigate("/panel-control")}
+                            >
+                                Ir a mi Panel de Control
+                            </button>
+                        )}
                     </div>
                 )}
 
             </div>
+
+            {/* Modal de requerimiento de autenticación para vincular plan al cliente */}
+            {modalAuth && (
+                <div className="modal-pricing-overlay" onClick={() => setModalAuth(false)}>
+                    <div className="modal-pricing-card" onClick={(e) => e.stopPropagation()}>
+                        <div className="modal-pricing-icono">
+                            <span className="material-symbols-outlined">lock</span>
+                        </div>
+                        <h3>Inicia sesión para activar tu plan</h3>
+                        <p>
+                            Para contratar o mejorar al plan <strong>{planParaComprar?.nombre}</strong>, debes iniciar sesión o registrarte con tu cuenta de ROMP GPS. Así tu plan se vinculará directamente a tus vehículos y monitoreo.
+                        </p>
+                        <div className="modal-pricing-acciones">
+                            <button
+                                type="button"
+                                className="modal-pricing-btn-primario"
+                                onClick={() => navigate("/login")}
+                            >
+                                Iniciar Sesión
+                            </button>
+                            <button
+                                type="button"
+                                className="modal-pricing-btn-secundario"
+                                onClick={() => navigate("/registro")}
+                            >
+                                Registrarme
+                            </button>
+                        </div>
+                        <button
+                            type="button"
+                            className="modal-pricing-btn-cancelar"
+                            onClick={() => setModalAuth(false)}
+                        >
+                            Cancelar
+                        </button>
+                    </div>
+                </div>
+            )}
         </section>
     );
 }

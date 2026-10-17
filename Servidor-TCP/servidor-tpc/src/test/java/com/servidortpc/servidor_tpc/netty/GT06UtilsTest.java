@@ -76,6 +76,10 @@ class GT06UtilsTest {
         assertEquals((byte) 0x78, bytes[1]);
         assertEquals((byte) 0x05, bytes[2], "longitud");
         assertEquals((byte) 0x01, bytes[3], "protocolo de login");
+        assertEquals((byte) 0x00, bytes[4], "serial alto");
+        assertEquals((byte) 0x01, bytes[5], "serial bajo");
+        assertEquals((byte) 0xD9, bytes[6], "CRC alto (Big-Endian)");
+        assertEquals((byte) 0xDC, bytes[7], "CRC bajo (Big-Endian)");
         assertEquals((byte) 0x0D, bytes[8]);
         assertEquals((byte) 0x0A, bytes[9]);
 

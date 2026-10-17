@@ -51,9 +51,8 @@ public class GT06Utils {
 
         int crc = calcularCRC(crcData);
 
-        // GT06 usa little-endian para el CRC
-        paquete.writeByte(crc & 0xFF);
-        paquete.writeByte((crc >> 8) & 0xFF);
+        // GT06 usa Big-Endian (Network Byte Order) para el CRC
+        paquete.writeShort(crc);
 
         paquete.writeByte(0x0D);
         paquete.writeByte(0x0A);
@@ -78,9 +77,8 @@ public class GT06Utils {
 
         int crc = calcularCRC(datos);
 
-        // GT06 usa Little-Endian para el CRC
-        buffer.writeByte(crc & 0xFF);
-        buffer.writeByte((crc >> 8) & 0xFF);
+        // GT06 usa Big-Endian (Network Byte Order) para el CRC
+        buffer.writeShort(crc);
 
         buffer.writeByte(0x0D);
         buffer.writeByte(0x0A);

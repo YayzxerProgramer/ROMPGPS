@@ -13,7 +13,6 @@ import java.io.Serializable;
 @Table(name = "Usuarios")
 @Data
 @NoArgsConstructor
-@AllArgsConstructor
 public class Usuario implements Serializable {
 
     @Id
@@ -27,11 +26,6 @@ public class Usuario implements Serializable {
     @Column(unique = true, nullable = false)
     private String usuario;
 
-    /**
-     * Hash BCrypt. @JsonIgnore es defensa en profundidad: la API responde con
-     * UsuarioResponse, que ni siquiera declara este campo, pero si alguien
-     * serializa la entidad por error el hash no sale.
-     */
     @JsonIgnore
     private String contrasena;
 
@@ -43,6 +37,10 @@ public class Usuario implements Serializable {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
     private Rol rol = Rol.USUARIO;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 30)
+    private PlanTipo plan = PlanTipo.PERSONAL;
 
     @Column(nullable = false)
     private Boolean activo = true;

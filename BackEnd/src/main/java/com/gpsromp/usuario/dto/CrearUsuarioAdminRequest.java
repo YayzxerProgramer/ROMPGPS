@@ -44,6 +44,8 @@ public record CrearUsuarioAdminRequest(
         @NotNull(message = "El rol es obligatorio")
         Rol rol,
 
+        com.gpsromp.usuario.model.PlanTipo plan,
+
         Boolean activo,
 
         @Size(max = 500, message = "La URL de imagen no puede superar 500 caracteres")

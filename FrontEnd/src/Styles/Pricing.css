@@ -331,3 +331,165 @@
         letter-spacing: 0.03em;
     }
 }
+
+/* ── Insignia Plan Actual & Tarjeta Actual ───────────────── */
+.tarjeta-precio--actual {
+    border-color: rgba(56, 189, 248, 0.5) !important;
+    background: linear-gradient(180deg, rgba(56, 189, 248, 0.08) 0%, rgba(20, 24, 20, 0.95) 100%) !important;
+}
+
+.insignia-plan-activo {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    padding: 4px 10px;
+    background: rgba(56, 189, 248, 0.2);
+    border: 1px solid rgba(56, 189, 248, 0.5);
+    border-radius: 999px;
+    color: #7dd3fc;
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
+
+.boton-precio.actual {
+    background: rgba(56, 189, 248, 0.15);
+    border-color: rgba(56, 189, 248, 0.4);
+    color: #e0f2fe;
+}
+
+.boton-precio.actual:hover {
+    background: rgba(56, 189, 248, 0.25);
+}
+
+.btn-ir-panel-exito {
+    display: inline-block;
+    margin-top: 10px;
+    padding: 8px 18px;
+    background: #b2cea8;
+    color: #111411;
+    border: none;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-ir-panel-exito:hover {
+    background: #c7dec0;
+    transform: translateY(-1px);
+}
+
+/* ── Modal requerimiento de autenticación ────────────────── */
+.modal-pricing-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.75);
+    backdrop-filter: blur(6px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    z-index: 9999;
+}
+
+.modal-pricing-card {
+    background: #181d18;
+    border: 1px solid rgba(178, 206, 168, 0.25);
+    border-radius: 20px;
+    padding: 32px 28px;
+    max-width: 440px;
+    width: 100%;
+    text-align: center;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+}
+
+.modal-pricing-icono {
+    width: 56px;
+    height: 56px;
+    margin: 0 auto 16px;
+    border-radius: 50%;
+    background: rgba(178, 206, 168, 0.12);
+    border: 1px solid rgba(178, 206, 168, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #b2cea8;
+}
+
+.modal-pricing-icono .material-symbols-outlined {
+    font-size: 28px;
+}
+
+.modal-pricing-card h3 {
+    margin: 0 0 10px;
+    color: #f1f4ef;
+    font-size: 1.35rem;
+    font-weight: 700;
+}
+
+.modal-pricing-card p {
+    color: #9ea59e;
+    font-size: 0.92rem;
+    line-height: 1.6;
+    margin: 0 0 24px;
+}
+
+.modal-pricing-card p strong {
+    color: #b2cea8;
+}
+
+.modal-pricing-acciones {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 14px;
+}
+
+.modal-pricing-btn-primario,
+.modal-pricing-btn-secundario {
+    flex: 1;
+    padding: 12px 16px;
+    border-radius: 10px;
+    font-weight: 700;
+    font-size: 0.88rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.modal-pricing-btn-primario {
+    background: #b2cea8;
+    border: none;
+    color: #111411;
+}
+
+.modal-pricing-btn-primario:hover {
+    background: #c7dec0;
+    transform: translateY(-1px);
+}
+
+.modal-pricing-btn-secundario {
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: #f1f4ef;
+}
+
+.modal-pricing-btn-secundario:hover {
+    background: rgba(255, 255, 255, 0.12);
+    border-color: rgba(178, 206, 168, 0.3);
+}
+
+.modal-pricing-btn-cancelar {
+    background: transparent;
+    border: none;
+    color: #727a71;
+    font-size: 0.82rem;
+    cursor: pointer;
+    transition: color 0.2s ease;
+    padding: 6px 12px;
+}
+
+.modal-pricing-btn-cancelar:hover {
+    color: #f1f4ef;
+}

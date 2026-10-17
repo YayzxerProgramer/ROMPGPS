@@ -78,10 +78,10 @@ public class GpsServerHandler extends SimpleChannelInboundHandler<TramaGt06> {
                 heartbeat(contexto, trama);
                 break;
             case PROTO_ESTADO:
-                log.debug("Trama de estado (0x16) recibida de {}", imeiCorto());
+                log.info("Trama de estado (0x16) recibida de {}", imeiCorto());
                 break;
             default:
-                log.debug("Protocolo no soportado: {}", hex(trama.protocolo()));
+                log.warn("Protocolo no soportado: {} de {}", hex(trama.protocolo()), imeiCorto());
                 break;
         }
     }
@@ -157,7 +157,7 @@ public class GpsServerHandler extends SimpleChannelInboundHandler<TramaGt06> {
         GPSData gps = new GPSData(imei, instante, latitud, longitud,
                 velocidad, gpsValido, accEncendido, corteMotor);
 
-        log.debug("Posición de {}: {},{} a {} km/h (GPS {})",
+        log.info("Posición de {}: {},{} a {} km/h (GPS {})",
                 imeiCorto(), latitud, longitud, velocidad, gpsValido ? "válido" : "inválido");
 
         gpsDataService.recibirData(gps);
@@ -187,7 +187,7 @@ public class GpsServerHandler extends SimpleChannelInboundHandler<TramaGt06> {
         }
 
         if (datos.length >= 3) {
-            log.debug("Heartbeat de {}: voltaje {}, señal GSM {}",
+            log.info("Heartbeat de {}: voltaje {}, señal GSM {}",
                     imeiCorto(), datos[1] & 0xFF, datos[2] & 0xFF);
         }
 

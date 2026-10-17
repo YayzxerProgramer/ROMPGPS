@@ -464,6 +464,7 @@
     from {
         transform: rotate(0deg);
     }
+
     to {
         transform: rotate(360deg);
     }
@@ -528,7 +529,7 @@
 }
 
 .valor-dato {
-    font-size: 0.8rem;
+    font-size: 0.75rem;
     font-weight: 500;
     color: var(--color-en-superficie);
 }

@@ -16,6 +16,7 @@ import com.gpsromp.common.exception.RecursoNoEncontradoException;
 import com.gpsromp.usuario.dto.ActualizarUsuarioRequest;
 import com.gpsromp.usuario.dto.CrearUsuarioAdminRequest;
 import com.gpsromp.usuario.dto.RegistroRequest;
+import com.gpsromp.usuario.model.PlanTipo;
 import com.gpsromp.usuario.model.Rol;
 import com.gpsromp.usuario.model.Usuario;
 import com.gpsromp.usuario.repository.UsuarioRepository;
@@ -135,6 +136,7 @@ public class UsuarioService {
         usuario.setTelefono(vacioANull(peticion.telefono()));
         usuario.setContrasena(passwordEncoder.encode(peticion.contrasena()));
         usuario.setRol(peticion.rol());
+        usuario.setPlan(peticion.plan() != null ? peticion.plan() : PlanTipo.PERSONAL);
         usuario.setActivo(peticion.activo() == null || peticion.activo());
         usuario.setImagenUrl(peticion.imagenUrl());
 
@@ -148,6 +150,7 @@ public class UsuarioService {
     @Transactional
     public Usuario crearDesdeOauth(Usuario usuario) {
         usuario.setRol(Rol.USUARIO);
+        usuario.setPlan(PlanTipo.PERSONAL);
         usuario.setActivo(true);
         usuario.setContrasena(passwordEncoder.encode(usuario.getContrasena()));
         return usuarioRepository.save(usuario);
@@ -184,10 +187,23 @@ public class UsuarioService {
         if (peticion.telefono() != null) {
             usuario.setTelefono(vacioANull(peticion.telefono()));
         }
+        if (peticion.plan() != null) {
+            usuario.setPlan(peticion.plan());
+        }
         if (peticion.imagenUrl() != null) {
             usuario.setImagenUrl(peticion.imagenUrl());
         }
 
+        return usuarioRepository.save(usuario);
+    }
+
+    /**
+     * Cambio de plan desde el panel administrativo.
+     */
+    @Transactional
+    public Usuario cambiarPlan(UUID id, PlanTipo nuevoPlan) {
+        Usuario usuario = obtenerPorIdOFallar(id);
+        usuario.setPlan(nuevoPlan != null ? nuevoPlan : PlanTipo.PERSONAL);
         return usuarioRepository.save(usuario);
     }
 

@@ -90,7 +90,7 @@ function NavegacionLateral({ enlaceActivo, setEnlaceActivo }) {
                     ))}
                 </nav>
 
-                                <div className="pie-nav-lateral">
+                <div className="pie-nav-lateral">
                     {/* Un administrador que llega aquí puede volver a su panel. */}
                     {esAdmin() && (
                         <a href="/admin" className="enlace-lateral" onClick={(e) => { e.preventDefault(); navigate("/admin"); }}>
@@ -172,6 +172,20 @@ function TarjetaIdentidad({ usuarioData, onSubirFoto, subiendoFoto }) {
             <h3 className="nombre-perfil">{usuarioData?.usuario || "Usuario"}</h3>
             <p className="rol-perfil">{usuarioData?.rol || "USUARIO"}</p>
             <div className="datos-identidad">
+                <div className="fila-dato">
+                    <span className="etiqueta-dato">Plan Activo</span>
+                    <span className="insignia-plan" style={{
+                        display: "inline-block",
+                        padding: "2px 8px",
+                        borderRadius: "6px",
+                        fontSize: "11px",
+                        fontWeight: 600,
+                        background: usuarioData?.plan === "ENTERPRISE" ? "rgba(224, 185, 122, 0.2)" : usuarioData?.plan === "PRO" ? "rgba(178, 206, 168, 0.2)" : "rgba(255, 255, 255, 0.08)",
+                        color: usuarioData?.plan === "ENTERPRISE" ? "#e0b97a" : usuarioData?.plan === "PRO" ? "#b2cea8" : "inherit"
+                    }}>
+                        {usuarioData?.plan === "ENTERPRISE" ? "Empresarial Custom" : usuarioData?.plan === "PRO" ? "Flotas & Negocios Pro" : "Personal (Moto / Auto)"}
+                    </span>
+                </div>
                 <div className="fila-dato">
                     <span className="etiqueta-dato">Estado</span>
                     <span className="insignia-activo">{usuarioData?.activo ? "Activo" : "Inactivo"}</span>
@@ -493,9 +507,6 @@ export default function PerfilUsuario() {
                         <PanelVehiculo />
                     )}
                 </div>
-
-                <PiePagina />
-
                 <ModalGuardar
                     modalGuardar={modalGuardar}
                     setModalGuardar={setModalGuardar}

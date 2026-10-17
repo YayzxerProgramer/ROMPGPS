@@ -11,11 +11,22 @@ export const ESTADOS = {
 
 export const ROLES = {
   ADMINISTRADOR: "Administrador",
-  ADMIN: "Administrador",
   USUARIO: "Cliente",
-  USER: "Cliente",
   VIEWER: "Solo lectura",
 };
+
+export const PLANES = {
+  PERSONAL: "Personal (Moto / Auto)",
+  PRO: "Flotas & Negocios Pro",
+  ENTERPRISE: "Empresarial Custom",
+};
+
+export const formatoMoneda = (valor) =>
+  new Intl.NumberFormat("es-CO", {
+    style: "currency",
+    currency: "COP",
+    maximumFractionDigits: 0,
+  }).format(valor || 0);
 
 /** Normaliza una trama GPSData del backend. */
 export function aPosicion(d) {

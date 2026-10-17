@@ -14,11 +14,16 @@ const CLAVE_TOKEN = "token";
 const CLAVE_REFRESCO = "refreshToken";
 const CLAVE_USUARIO = "usuario";
 const CLAVE_ROL = "rol";
+const CLAVE_PLAN = "plan";
 
-export function guardarSesion({ token, refreshToken, usuario, rol }) {
+export function guardarSesion({ token, refreshToken, usuario, rol, plan }) {
     localStorage.setItem(CLAVE_TOKEN, token);
     localStorage.setItem(CLAVE_USUARIO, usuario);
     localStorage.setItem(CLAVE_ROL, rol || "USUARIO");
+
+    if (plan) {
+        localStorage.setItem(CLAVE_PLAN, plan);
+    }
 
     if (refreshToken) {
         localStorage.setItem(CLAVE_REFRESCO, refreshToken);
@@ -47,6 +52,10 @@ export function obtenerUsuario() {
 
 export function obtenerRol() {
     return localStorage.getItem(CLAVE_ROL) || "USUARIO";
+}
+
+export function obtenerPlan() {
+    return localStorage.getItem(CLAVE_PLAN) || "PERSONAL";
 }
 
 export function esAdmin() {
@@ -92,6 +101,7 @@ export function cerrarSesion() {
     localStorage.removeItem(CLAVE_REFRESCO);
     localStorage.removeItem(CLAVE_USUARIO);
     localStorage.removeItem(CLAVE_ROL);
+    localStorage.removeItem(CLAVE_PLAN);
 }
 
 /** A dónde llevar al usuario tras iniciar sesión, según su rol. */

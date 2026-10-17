@@ -74,7 +74,7 @@ public class ServicioAutenticacion {
         servicioTokens.registrar(jti, usuario.getUsuario(), jwtUtil.getExpiracionRefrescoMs());
 
         return SesionResponse.de(acceso, refresco, usuario.getUsuario(),
-                usuario.getRol(), jwtUtil.getExpiracionAccesoMs());
+                usuario.getRol(), usuario.getPlan(), jwtUtil.getExpiracionAccesoMs());
     }
 
     /**

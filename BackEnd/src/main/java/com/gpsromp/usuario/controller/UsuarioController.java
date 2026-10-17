@@ -33,14 +33,15 @@ import lombok.RequiredArgsConstructor;
  * terceros embebidas a ser una capa fina de enrutado.
  *
  * Autorización (antes la única regla era .anyRequest().authenticated(), de modo
- * que cualquier cuenta podía leer, editar y borrar los datos de cualquier otra):
+ * que cualquier cuenta podía leer, editar y borrar los datos de cualquier
+ * otra):
  *
- *   GET    /usuario            → solo ADMIN
- *   GET    /usuario/{id}       → el propio usuario o un ADMIN
- *   PUT    /usuario/{id}       → el propio usuario o un ADMIN
- *   DELETE /usuario/{id}       → solo ADMIN
- *   PATCH  contraseña          → el titular (con la actual) o un ADMIN
- *   GET    /usuario/vehiculos/ → el propio usuario o un ADMIN
+ * GET /usuario → solo ADMIN
+ * GET /usuario/{id} → el propio usuario o un ADMIN
+ * PUT /usuario/{id} → el propio usuario o un ADMIN
+ * DELETE /usuario/{id} → solo ADMIN
+ * PATCH contraseña → el titular (con la actual) o un ADMIN
+ * GET /usuario/vehiculos/ → el propio usuario o un ADMIN
  */
 @RestController
 @RequestMapping("/usuario")
@@ -157,8 +158,7 @@ public class UsuarioController {
     // ======================================================== autenticación
 
     @PostMapping("/login")
-    public ResponseEntity<SesionResponse> login(
-            @Valid @RequestBody LoginRequest credenciales,
+    public ResponseEntity<SesionResponse> login(@Valid @RequestBody LoginRequest credenciales,
             HttpServletRequest peticionHttp) {
 
         return ResponseEntity.ok(servicioAutenticacion.login(

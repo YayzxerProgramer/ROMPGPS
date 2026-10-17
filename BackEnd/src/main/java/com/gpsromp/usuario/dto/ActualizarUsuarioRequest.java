@@ -34,6 +34,8 @@ public record ActualizarUsuarioRequest(
         @Pattern(regexp = "^$|^[0-9+()\\s-]{7,20}$", message = "El teléfono no tiene un formato válido")
         String telefono,
 
+        com.gpsromp.usuario.model.PlanTipo plan,
+
         @Size(max = 500, message = "La URL de imagen no puede superar 500 caracteres")
         String imagenUrl) {
 }

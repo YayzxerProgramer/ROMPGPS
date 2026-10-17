@@ -1,6 +1,6 @@
 import { GoogleMap, useJsApiLoader, Polyline } from "@react-google-maps/api";
 import { useState, useRef, useEffect } from "react";
-import carIcon from "../assets/motorcycle.svg";
+import markerCircle from "../assets/marker-circle.svg";
 import "../Styles/MapaGPS.css";
 
 const GOOGLE_MAPS_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
@@ -27,7 +27,7 @@ const darkMapStyle = [
   { featureType: "landscape", elementType: "geometry", stylers: [{ color: "#161916" }] },
 ];
 
-function MapaGPS({ position, connected, onMapLoad }) {
+function MapaGPS({ position, connected, siguiendo = true, atenuado = false, onArrastre, onMapLoad }) {
   const { isLoaded } = useJsApiLoader({
     id: "google-map-script",
     googleMapsApiKey: GOOGLE_MAPS_API_KEY || "",
@@ -64,7 +64,7 @@ function MapaGPS({ position, connected, onMapLoad }) {
       return [...prev.slice(-100), newTarget];
     });
 
-    if (mapRef.current) {
+    if (mapRef.current && siguiendo) {
       mapRef.current.panTo(newTarget);
     }
 
@@ -104,7 +104,7 @@ function MapaGPS({ position, connected, onMapLoad }) {
     return () => {
       if (animationRef.current) cancelAnimationFrame(animationRef.current);
     };
-  }, [position]);
+  }, [position, siguiendo]);
 
   useEffect(() => {
     return () => {
@@ -129,10 +129,11 @@ function MapaGPS({ position, connected, onMapLoad }) {
     const marker = new window.google.maps.Marker({
       map,
       position: posInicial,
+      opacity: atenuado ? 0.35 : 1,
       icon: {
-        url: carIcon,
-        scaledSize: new window.google.maps.Size(50, 50),
-        anchor: new window.google.maps.Point(25, 25),
+        url: markerCircle,
+        scaledSize: new window.google.maps.Size(48, 48),
+        anchor: new window.google.maps.Point(24, 24),
       },
     });
 
@@ -147,6 +148,12 @@ function MapaGPS({ position, connected, onMapLoad }) {
       onMapLoad(map, window.google);
     }
   };
+
+  useEffect(() => {
+    if (markerRef.current) {
+      markerRef.current.setOpacity(atenuado ? 0.35 : 1);
+    }
+  }, [atenuado]);
 
   useEffect(() => {
     if (markerRef.current) {
@@ -168,6 +175,7 @@ function MapaGPS({ position, connected, onMapLoad }) {
         center={centroDefault}
         zoom={15}
         onLoad={handleMapLoad}
+        onDragStart={onArrastre}
         options={{
           styles: darkMapStyle,
           disableDefaultUI: true,

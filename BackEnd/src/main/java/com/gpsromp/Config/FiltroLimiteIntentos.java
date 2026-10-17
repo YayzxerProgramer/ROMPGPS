@@ -50,7 +50,7 @@ public class FiltroLimiteIntentos extends OncePerRequestFilter {
     private static final String PREFIJO_EXISTS = "/usuario/exists/";
 
     private final ServicioLimiteIntentos limiteIntentos;
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper;
 
     @org.springframework.beans.factory.annotation.Value("${seguridad.rate-limit.publico:20}")
     private int maximoPublico;
@@ -60,8 +60,7 @@ public class FiltroLimiteIntentos extends OncePerRequestFilter {
         String ruta = request.getRequestURI();
 
         boolean esPostCubierto = "POST".equals(request.getMethod()) && RUTAS_POST.contains(ruta);
-        boolean esConsultaDisponibilidad =
-                "GET".equals(request.getMethod()) && ruta.startsWith(PREFIJO_EXISTS);
+        boolean esConsultaDisponibilidad = "GET".equals(request.getMethod()) && ruta.startsWith(PREFIJO_EXISTS);
 
         return !(esPostCubierto || esConsultaDisponibilidad);
     }

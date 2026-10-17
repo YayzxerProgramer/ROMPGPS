@@ -8,6 +8,7 @@ import MapaFlota from "./Admin/MapaFlota";
 import AdminClientes from "./Admin/AdminClientes";
 import AdminUnidades from "./Admin/AdminUnidades";
 import AdminAnalitica from "./Admin/AdminAnalitica";
+import AdminVentas from "./Admin/AdminVentas";
 import AdminCuenta from "./Admin/AdminCuenta";
 import { FormVehiculo } from "./Admin/AdminFormularios";
 import { InsigniaEstado, Modal, ProveedorAvisos, Segmentos } from "./Admin/AdminUI";
@@ -24,6 +25,7 @@ const NAV = [
   { id: "fleet", label: "Monitor de flota", icon: "radar" },
   { id: "clients", label: "Clientes", icon: "group" },
   { id: "gps", label: "Unidades GPS", icon: "satellite_alt" },
+  { id: "sales", label: "Ventas", icon: "payments" },
   { id: "analytics", label: "Analítica", icon: "monitoring" },
 ];
 
@@ -34,6 +36,7 @@ const PLACEHOLDER = {
   fleet: "Filtrar unidades del monitor…",
   clients: "Buscar nombre, usuario o correo…",
   gps: "Buscar placa, modelo o IMEI…",
+  sales: "Buscar referencia, cliente o plan…",
 };
 
 /** Unidades que sigue el monitor: las más recientes del inventario. */
@@ -591,6 +594,10 @@ function PanelAdmin() {
                 onCambio={() => cargar(filtroFlota)}
                 onUbicar={ubicar}
               />
+            )}
+
+            {seccion === "sales" && (
+              <AdminVentas busqueda={busqueda} />
             )}
 
             {seccion === "analytics" && (

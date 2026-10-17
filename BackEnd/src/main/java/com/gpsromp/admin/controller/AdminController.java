@@ -157,6 +157,19 @@ public class AdminController {
         return ResponseEntity.ok(UsuarioMapper.aResponse(actualizado));
     }
 
+    /**
+     * Cambio de plan desde el panel administrativo.
+     */
+    @PatchMapping("/usuarios/{id}/plan")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<UsuarioResponse> cambiarPlan(
+            @PathVariable UUID id,
+            @Valid @RequestBody CambiarPlanRequest peticion) {
+
+        Usuario actualizado = usuarioService.cambiarPlan(id, peticion.plan());
+        return ResponseEntity.ok(UsuarioMapper.aResponse(actualizado));
+    }
+
     /** Activa o desactiva. Desactivar corta el acceso en la siguiente petición. */
     @PatchMapping("/usuarios/{id}/estado")
     @PreAuthorize("hasRole('ADMIN')")

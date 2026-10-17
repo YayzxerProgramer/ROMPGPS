@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef, useMemo } from "react";
 import { get } from "../Service/api";
-import iconoMoto from "../assets/motorcycle.svg";
 import { distancia, decimal, horaMinutos, crearMarcadorHtml, htmlPunto, encuadrar } from "./mapaUtils";
 
 const PRESETS = [["hoy", "Hoy"], ["ayer", "Ayer"], ["7dias", "7 días"]];
@@ -11,7 +10,7 @@ const HUECO_MS = 10 * 60 * 1000;
 const PARADA_LARGA_MS = 15 * 60 * 1000;
 const MIN_KM = 0.1;
 
-const HTML_UNIDAD = `<div style="width:34px;height:34px;border-radius:50%;background:#b2cea8;box-shadow:0 0 18px rgba(178,206,168,.7),0 0 0 3px rgba(15,18,14,.85);display:grid;place-items:center"><img src="${iconoMoto}" alt="" style="width:18px;height:18px;filter:brightness(0);opacity:.78"></div>`;
+const HTML_UNIDAD = `<div style="width:34px;height:34px;border-radius:50%;background:rgba(34,197,94,0.22);display:grid;place-items:center"><div style="width:20px;height:20px;border-radius:50%;background:#22c55e;border:2.5px solid #ffffff;box-shadow:0 0 14px rgba(34,197,94,.85),0 0 0 1.5px rgba(15,18,14,.9);display:grid;place-items:center"><div style="width:5px;height:5px;border-radius:50%;background:#ffffff"></div></div></div>`;
 const HTML_DESTINO = `<span class="material-symbols-outlined" style="font-size:30px;color:#b2cea8;font-variation-settings:'FILL' 1">location_on</span>`;
 
 // Nombres de lugar ya resueltos, compartidos entre montajes de la pestaña.
