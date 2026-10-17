@@ -43,4 +43,15 @@ export default defineConfig([
       'no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
     },
   },
+  {
+    // Dentro del Canvas de React Three Fiber, <primitive object>,
+    // <ambientLight intensity> o <directionalLight position> son props de
+    // three.js, no atributos DOM. Solo se relaja en la carpeta del visor 3D.
+    files: ['src/Components/three/**/*.{js,jsx}'],
+    rules: {
+      'react/no-unknown-property': ['error', {
+        ignore: ['object', 'intensity', 'position', 'rotation', 'args', 'dispose'],
+      }],
+    },
+  },
 ])

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { patch, post, put } from "../../Service/api";
 import { Campo, Modal, Segmentos, SelectorUsuario } from "./AdminUI";
 import { ROLES, errorDeFormulario, nombreCompleto, olvidarPropietario } from "./adminUtils";
+import VistaVehiculo3D, { SugerenciasModelo3D } from "../three/VistaVehiculo3D";
 
 const OPCIONES_ROL = [
   { valor: "ADMINISTRADOR", etiqueta: "Administrador" },
@@ -209,12 +210,18 @@ export function FormVehiculo({ vehiculo, onCerrar, onGuardado }) {
     >
       <form id="form-vehiculo" className="adm-form" onSubmit={guardar} noValidate>
         <AvisoError error={errores.general} />
+        <div className="adm-campo--ancho">
+          <VistaVehiculo3D modelo={datos.modelo} tipo={datos.tipo} />
+        </div>
         <Campo etiqueta="Placa" error={c.placa} ayuda="5 o 6 caracteres">
           <input className="adm-entrada adm-entrada--placa" value={datos.placa} onChange={cambiar("placa", (v) => v.toUpperCase())} required minLength={5} maxLength={6} autoFocus />
         </Campo>
         <Campo etiqueta="Modelo" error={c.modelo}>
           <input className="adm-entrada" value={datos.modelo} onChange={cambiar("modelo")} required maxLength={60} placeholder="Ej. Pulsar NS 200" />
         </Campo>
+        <div className="adm-campo--ancho">
+          <SugerenciasModelo3D valor={datos.modelo} onElegir={(m) => setDatos((d) => ({ ...d, modelo: m.nombre, tipo: m.tipo }))} />
+        </div>
         <Campo etiqueta="IMEI del equipo GPS" error={c.imei} ayuda="15 o 16 dígitos. Déjalo vacío si aún no tiene equipo." ancho>
           <input className="adm-entrada adm-entrada--mono" value={datos.imei} onChange={cambiar("imei", (v) => v.replace(/\D/g, ""))} inputMode="numeric" maxLength={16} />
         </Campo>

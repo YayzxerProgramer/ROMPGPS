@@ -1,0 +1,154 @@
+/* ── Vista 3D de vehículos (Components/three/VistaVehiculo3D.jsx) ── */
+
+.vista-vehiculo3d {
+    position: relative;
+    width: 100%;
+    height: clamp(180px, 34vw, 240px);
+    border-radius: 16px;
+    overflow: hidden;
+    background:
+        radial-gradient(120% 90% at 50% 20%, rgba(178, 206, 168, 0.1), transparent 60%),
+        linear-gradient(180deg, #1c211d, #121512);
+    border: 1px solid rgba(178, 206, 168, 0.1);
+}
+
+.vista-vehiculo3d__escena {
+    position: absolute;
+    inset: 0;
+    margin: 0;
+    animation: vista3d-entrar 0.35s ease both;
+}
+
+.vista-vehiculo3d__pie {
+    position: absolute;
+    top: 10px;
+    left: 12px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: #dfe7db;
+    font-size: 12px;
+    font-weight: 600;
+    pointer-events: none;
+}
+
+.vista-vehiculo3d__chip {
+    padding: 2px 7px;
+    border-radius: 6px;
+    background: rgba(178, 206, 168, 0.16);
+    color: #b2cea8;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+}
+
+.vista-vehiculo3d__respaldo {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 1rem;
+    text-align: center;
+}
+
+.vista-vehiculo3d__respaldo p {
+    margin: 4px 0 0;
+    color: #dfe7db;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.vista-vehiculo3d__respaldo small {
+    color: #8f988c;
+    font-size: 11.5px;
+}
+
+.silueta-vehiculo {
+    width: min(150px, 46%);
+    height: auto;
+    fill: none;
+    stroke: #b2cea8;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    opacity: 0.5;
+}
+
+/* Atajos de modelo bajo el campo de texto */
+.sugerencias-3d {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+}
+
+.sugerencias-3d__titulo {
+    margin-right: 2px;
+    color: #8f988c;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.sugerencias-3d__chip {
+    min-height: 32px;
+    padding: 4px 12px;
+    border-radius: 999px;
+    border: 1px solid rgba(178, 206, 168, 0.22);
+    background: transparent;
+    color: #c9d8c3;
+    font: inherit;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+.sugerencias-3d__chip:hover {
+    border-color: rgba(178, 206, 168, 0.5);
+}
+
+.sugerencias-3d__chip[aria-pressed="true"] {
+    background: rgba(178, 206, 168, 0.18);
+    border-color: #b2cea8;
+    color: #eef4ea;
+}
+
+@media (pointer: coarse) {
+    .sugerencias-3d__chip {
+        min-height: var(--tactil-min, 44px);
+    }
+}
+
+/* Miniatura estática para listas (una imagen, nunca un canvas por fila) */
+.miniatura-vehiculo {
+    display: grid;
+    place-items: center;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(180deg, #1c211d, #141714);
+}
+
+.miniatura-vehiculo img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    transform: scale(1.25);
+}
+
+.miniatura-vehiculo--generica .silueta-vehiculo {
+    width: 72%;
+}
+
+@keyframes vista3d-entrar {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .vista-vehiculo3d__escena {
+        animation: none;
+    }
+}

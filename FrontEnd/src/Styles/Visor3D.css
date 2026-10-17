@@ -1,0 +1,126 @@
+/* ── Visor 3D (Components/three/Visor3D.jsx) ─────────────────────── */
+
+.visor3d {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    isolation: isolate;
+}
+
+/* Póster de Blender: ocupa el sitio desde el primer momento (sin saltos de
+   maquetación) y se funde con el canvas cuando el 3D está pintado. */
+.visor3d__poster {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    user-select: none;
+    transition: opacity 0.6s ease;
+}
+
+.visor3d__lienzo {
+    opacity: 0;
+    transition: opacity 0.6s ease;
+}
+
+.visor3d--listo .visor3d__lienzo {
+    opacity: 1;
+}
+
+.visor3d--listo .visor3d__poster {
+    opacity: 0;
+}
+
+/* OrbitControls pone touch-action: none en el canvas y en móvil el visor
+   atrapaba el scroll de la página. Con pan-y el deslizamiento vertical
+   desplaza la página y el horizontal sigue girando el modelo. */
+.visor3d__lienzo canvas {
+    touch-action: pan-y !important;
+    cursor: grab;
+}
+
+.visor3d__lienzo canvas:active {
+    cursor: grabbing;
+}
+
+.visor3d__cargando {
+    position: absolute;
+    right: 14px;
+    bottom: 14px;
+    display: grid;
+    place-items: center;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: rgba(13, 15, 13, 0.6);
+    border: 1px solid rgba(178, 206, 168, 0.18);
+    pointer-events: none;
+}
+
+.visor3d__giro {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    border: 2px solid rgba(178, 206, 168, 0.25);
+    border-top-color: #b2cea8;
+    animation: visor3d-girar 0.9s linear infinite;
+}
+
+.visor3d__pista {
+    position: absolute;
+    left: 50%;
+    bottom: 14px;
+    transform: translateX(-50%);
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border-radius: 999px;
+    background: rgba(13, 15, 13, 0.62);
+    border: 1px solid rgba(178, 206, 168, 0.16);
+    color: #c9d8c3;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    white-space: nowrap;
+    pointer-events: none;
+    animation: visor3d-aparecer 0.6s ease 0.4s both;
+}
+
+.visor3d__oculto {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+@keyframes visor3d-girar {
+    to { transform: rotate(360deg); }
+}
+
+@keyframes visor3d-aparecer {
+    from { opacity: 0; transform: translate(-50%, 6px); }
+    to { opacity: 1; transform: translate(-50%, 0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .visor3d__poster,
+    .visor3d__lienzo {
+        transition: none;
+    }
+
+    .visor3d__giro {
+        animation-duration: 2.4s;
+    }
+
+    .visor3d__pista {
+        animation: none;
+    }
+}

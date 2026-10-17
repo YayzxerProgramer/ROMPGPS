@@ -1,17 +1,19 @@
 import { useState, useEffect, useRef } from "react";
 import "../Styles/PanelVehiculo.css";
 import { API_URL } from "../Service/api";
+import VistaVehiculo3D, { MiniaturaVehiculo, SugerenciasModelo3D } from "./three/VistaVehiculo3D";
+import { resolverModeloVehiculo } from "../config/vehicleModels";
 
 
-function TarjetaVehiculo({ vehiculo, onDelete }) {
+function TarjetaVehiculo({ vehiculo, onDelete, abierto3D, onAlternar3D }) {
+    const con3D = Boolean(resolverModeloVehiculo(vehiculo.modelo));
+    const idPanel = `vista3d-${vehiculo.id}`;
     return (
+        <>
         <article className="tarjeta-vehiculo-configuracion" role="row">
+            {/* Miniatura estática (póster del modelo o silueta): ningún canvas por fila */}
             <div className="tarjeta-vehiculo__celda-imagen tarjeta-vehiculo__imagen-envoltorio">
-                <div className="avatar-vehiculo-placeholder">
-                    <span className="material-symbols-outlined" style={{ fontSize: "2rem" }}>
-                        {vehiculo.tipo === "MOTO" ? "motorcycle" : "directions_car"}
-                    </span>
-                </div>
+                <MiniaturaVehiculo modelo={vehiculo.modelo} tipo={vehiculo.tipo} />
             </div>
             <div className="tarjeta-vehiculo__celda-modelo">
                 <h3 className="tarjeta-vehiculo__nombre">{vehiculo.modelo}</h3>
@@ -37,11 +39,30 @@ function TarjetaVehiculo({ vehiculo, onDelete }) {
                 </div>
             </div>
             <div className="tarjeta-vehiculo__celda-acciones tarjeta-vehiculo__acciones">
+                {con3D && (
+                    <button
+                        className={`tarjeta-vehiculo__boton-accion ${abierto3D ? "tarjeta-vehiculo__boton-accion--activo" : ""}`}
+                        type="button"
+                        aria-label={abierto3D ? "Ocultar vista 3D" : "Ver en 3D"}
+                        title={abierto3D ? "Ocultar vista 3D" : "Ver en 3D"}
+                        aria-expanded={abierto3D}
+                        aria-controls={idPanel}
+                        onClick={() => onAlternar3D(vehiculo.id)}
+                    >
+                        <span className="material-symbols-outlined">view_in_ar</span>
+                    </button>
+                )}
                 <button className="tarjeta-vehiculo__boton-accion" type="button" aria-label="Eliminar vehículo" onClick={() => onDelete(vehiculo.id)}>
                     <span className="material-symbols-outlined">delete</span>
                 </button>
             </div>
         </article>
+        {con3D && abierto3D && (
+            <div className="tarjeta-vehiculo__panel-3d" id={idPanel}>
+                <VistaVehiculo3D modelo={vehiculo.modelo} tipo={vehiculo.tipo} />
+            </div>
+        )}
+        </>
     );
 }
 
@@ -78,6 +99,10 @@ function ModalRegistro({ visible, onCerrar, onRegistrado, usuarioId, token }) {
 
     const manejarCambio = (e) =>
         setFormulario((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+
+    // Los atajos rellenan el nombre completo y, como son motos, el tipo.
+    const elegirModelo3D = (modelo) =>
+        setFormulario((prev) => ({ ...prev, modelo: modelo.nombre, tipo: modelo.tipo }));
 
     const manejarConfirmar = async () => {
         setError("");
@@ -142,6 +167,9 @@ function ModalRegistro({ visible, onCerrar, onRegistrado, usuarioId, token }) {
 
                 <div className="formulario">
 
+                    {/* Vista previa 3D en vivo según el modelo escrito */}
+                    <VistaVehiculo3D modelo={formulario.modelo} tipo={formulario.tipo} />
+
                     {/* Modelo */}
                     <div className="formulario__grupo">
                         <label className="formulario__etiqueta" htmlFor="campo-modelo">
@@ -152,11 +180,13 @@ function ModalRegistro({ visible, onCerrar, onRegistrado, usuarioId, token }) {
                             id="campo-modelo"
                             name="modelo"
                             type="text"
-                            placeholder="Ej: Toyota Hilux 2022"
+                            placeholder="Ej: Bajaj Boxer CT 100 o Toyota Hilux 2022"
                             autoComplete="off"
+                            maxLength={60}
                             value={formulario.modelo}
                             onChange={manejarCambio}
                         />
+                        <SugerenciasModelo3D valor={formulario.modelo} onElegir={elegirModelo3D} />
                     </div>
 
                     {/* Placa e IMEI */}
@@ -242,6 +272,8 @@ export default function PanelVehiculo() {
     const token = localStorage.getItem("token");
     const [modalVisible, setModalVisible] = useState(false);
     const [vehiculoEditando, setVehiculoEditando] = useState(null);
+    // Un solo visor 3D abierto en la lista: un único canvas por vista.
+    const [abierto3D, setAbierto3D] = useState(null);
     const orbePrimarioRef = useRef(null);
     const orbeSecundarioRef = useRef(null);
 
@@ -324,7 +356,7 @@ export default function PanelVehiculo() {
                     </div>
                     <div className="encabezado-dashboard__acciones">
                         <button className="encabezado-dashboard__boton-registrar" type="button"
-                            onClick={() => setModalVisible(true)} aria-haspopup="dialog">
+                            onClick={() => { setAbierto3D(null); setModalVisible(true); }} aria-haspopup="dialog">
                             <span className="material-symbols-outlined" aria-hidden="true">add_circle</span>
                             Registrar Nuevo Vehículo
                         </button>
@@ -362,7 +394,13 @@ export default function PanelVehiculo() {
                             </div>
                         ) : (
                             vehiculos.map((v) => (
-                                <TarjetaVehiculo key={v.id} vehiculo={v} onDelete={eliminarVehiculo} />
+                                <TarjetaVehiculo
+                                    key={v.id}
+                                    vehiculo={v}
+                                    onDelete={eliminarVehiculo}
+                                    abierto3D={abierto3D === v.id}
+                                    onAlternar3D={(id) => setAbierto3D((actual) => (actual === id ? null : id))}
+                                />
                             ))
                         )}
                     </div>

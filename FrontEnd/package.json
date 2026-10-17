@@ -13,11 +13,14 @@
   "dependencies": {
     "@react-google-maps/api": "^2.20.8",
     "@react-oauth/google": "^0.13.5",
+    "@react-three/drei": "^9.122.0",
+    "@react-three/fiber": "^8.18.0",
     "@stomp/stompjs": "^7.3.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-router-dom": "^6.30.3",
-    "react-type-animation": "^3.2.0"
+    "react-type-animation": "^3.2.0",
+    "three": "^0.172.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.5",

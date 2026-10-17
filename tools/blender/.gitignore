@@ -1,0 +1,3 @@
+# GLB crudos que exporta Blender antes de comprimirlos con gltf-transform.
+build/
+__pycache__/
