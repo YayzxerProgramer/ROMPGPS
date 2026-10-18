@@ -872,24 +872,3 @@ input {
         left: calc(16rem + 2rem);
     }
 }
-/* ── Vista 3D de la unidad ──
-   La miniatura es el póster estático; el canvas solo existe en el panel
-   desplegado, y solo puede haber uno abierto a la vez. */
-.tarjeta-vehiculo__boton-accion--activo {
-    color: var(--color-primario);
-}
-
-.tarjeta-vehiculo__panel-3d {
-    margin-top: -0.5rem;
-    animation: entrar-modal 0.35s ease both;
-}
-
-.tarjeta-vehiculo__panel-3d .vista-vehiculo3d {
-    height: clamp(220px, 42vw, 360px);
-}
-
-@media (prefers-reduced-motion: reduce) {
-    .tarjeta-vehiculo__panel-3d {
-        animation: none;
-    }
-}

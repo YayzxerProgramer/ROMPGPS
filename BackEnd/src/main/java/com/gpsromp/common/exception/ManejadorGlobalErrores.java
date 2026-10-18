@@ -31,6 +31,9 @@ import java.util.Map;
 @Slf4j
 public class ManejadorGlobalErrores {
 
+    private static final String MENSAJE_ERROR_INTERNO =
+            "Ocurrió un error interno. Inténtalo de nuevo en unos minutos.";
+
     @ExceptionHandler(RecursoNoEncontradoException.class)
     public ResponseEntity<ErrorResponse> noEncontrado(RecursoNoEncontradoException e, HttpServletRequest req) {
         return construir(HttpStatus.NOT_FOUND, e.getMessage(), req);
@@ -120,12 +123,15 @@ public class ManejadorGlobalErrores {
         return construir(HttpStatus.UNAUTHORIZED, "No autenticado", req);
     }
 
-    /** Último recurso: se registra con stacktrace y se responde detallando el error. */
+    /**
+     * Último recurso: el detalle (stacktrace, SQL) va al log y al cliente solo un
+     * mensaje genérico. Devolver e.getMessage() exponía en el navegador las
+     * consultas SQL, nombres de tablas y columnas de la base de datos.
+     */
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> inesperado(Exception e, HttpServletRequest req) {
         log.error("Error no controlado en {} {}", req.getMethod(), req.getRequestURI(), e);
-        String mensaje = (e.getMessage() != null && !e.getMessage().isBlank()) ? e.getMessage() : "Error interno del servidor";
-        return construir(HttpStatus.INTERNAL_SERVER_ERROR, mensaje, req);
+        return construir(HttpStatus.INTERNAL_SERVER_ERROR, MENSAJE_ERROR_INTERNO, req);
     }
 
     private ResponseEntity<ErrorResponse> construir(HttpStatus estado, String mensaje, HttpServletRequest req) {

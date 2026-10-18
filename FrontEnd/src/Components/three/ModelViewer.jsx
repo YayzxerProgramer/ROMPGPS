@@ -65,8 +65,8 @@ function distanciaEncuadre(puntos, centro, direccion, fovVertical, aspecto) {
 
 /**
  * Normaliza el modelo (lado mayor = 1 y apoyado en y = 0, así sombras y
- * límites de cámara valen para el GPS de 18 cm y para una moto de 2 m) y
- * coloca la cámara para encuadrarlo. Avisa con `onListo` tras el primer cuadro.
+ * límites de cámara no dependen de su tamaño real) y coloca la cámara para
+ * encuadrarlo. Avisa con `onListo` tras el primer cuadro.
  */
 function Encuadre({ vista, onListo, children }) {
   const grupo = useRef(null);
@@ -123,7 +123,7 @@ function Encuadre({ vista, onListo, children }) {
 
 /** OrbitControls limitados: sin desplazar, sin pasar bajo el suelo y con
  *  auto-rotación que se pausa mientras el usuario interactúa. */
-function Controles({ movimiento, zoom }) {
+function Controles({ movimiento }) {
   const [interactuando, setInteractuando] = useState(false);
   const temporizador = useRef(null);
 
@@ -136,7 +136,7 @@ function Controles({ movimiento, zoom }) {
     <OrbitControls
       makeDefault
       enablePan={false}
-      enableZoom={zoom}
+      enableZoom={false}
       enableDamping
       dampingFactor={0.08}
       rotateSpeed={0.6}
@@ -186,14 +186,13 @@ function EtiquetaLienzo({ etiqueta }) {
 
 /**
  * @param {object} props
- * @param {keyof typeof MODELOS_3D} props.modelo id del modelo ("gps-device", "boxer-ct100", ...)
+ * @param {keyof typeof MODELOS_3D} props.modelo id del modelo ("gps-device")
  * @param {string} props.etiqueta aria-label del canvas
  * @param {boolean} [props.movimiento=true] false con prefers-reduced-motion: sin auto-rotación ni animaciones
  * @param {boolean} [props.activo=true] false fuera de pantalla: el render pasa a bajo demanda
- * @param {boolean} [props.zoom=false] rueda/pellizco para acercar (limitado)
  * @param {(modelo: string) => void} [props.onListo] primer cuadro pintado del modelo
  */
-export default function ModelViewer({ modelo, etiqueta, movimiento = true, activo = true, zoom = false, onListo }) {
+export default function ModelViewer({ modelo, etiqueta, movimiento = true, activo = true, onListo }) {
   const definicion = MODELOS_3D[modelo];
   if (!definicion) throw new Error(`Modelo 3D desconocido: ${modelo}`);
   const { Componente, vista } = definicion;
@@ -209,8 +208,8 @@ export default function ModelViewer({ modelo, etiqueta, movimiento = true, activ
     >
       <EtiquetaLienzo etiqueta={etiqueta} />
       <Iluminacion />
-      <Controles movimiento={movimiento} zoom={zoom} />
-      {/* La clave reinicia el encuadre y la sombra al cambiar de moto sin
+      <Controles movimiento={movimiento} />
+      {/* La clave reinicia el encuadre y la sombra al cambiar de modelo sin
           crear otro canvas (un solo contexto WebGL por vista). */}
       <Suspense key={modelo} fallback={null}>
         <Encuadre vista={vista} onListo={() => onListo?.(modelo)}>

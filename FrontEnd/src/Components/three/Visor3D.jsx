@@ -48,11 +48,10 @@ function IconoGirar() {
  * @param {string} props.modelo id del modelo (ver models/registro.js)
  * @param {string} props.poster URL del render estático (.webp)
  * @param {string} props.etiqueta descripción accesible del modelo
- * @param {boolean} [props.zoom=false]
  * @param {boolean} [props.pista=true] muestra "Arrastra para girar" hasta la primera interacción
  * @param {string} [props.className]
  */
-export default function Visor3D({ modelo, poster, etiqueta, zoom = false, pista = true, className = "" }) {
+export default function Visor3D({ modelo, poster, etiqueta, pista = true, className = "" }) {
   const contenedor = useRef(null);
   const [webgl] = useState(hayWebGL);
   const reducido = usePrefiereMovimientoReducido();
@@ -61,7 +60,7 @@ export default function Visor3D({ modelo, poster, etiqueta, zoom = false, pista 
   const [falloDe, setFalloDe] = useState(null);
   const [interactuado, setInteractuado] = useState(false);
 
-  // Por modelo: al cambiar de moto vuelve el póster hasta que la nueva carga,
+  // Por modelo: si cambia el modelo vuelve el póster hasta que el nuevo carga,
   // y un fallo de un modelo no bloquea a los demás.
   const listo = listoDe === modelo;
   const usar3D = webgl && falloDe !== modelo;
@@ -91,7 +90,6 @@ export default function Visor3D({ modelo, poster, etiqueta, zoom = false, pista 
               etiqueta={etiqueta}
               movimiento={!reducido}
               activo={visible}
-              zoom={zoom}
               onListo={alListo}
             />
           </Suspense>

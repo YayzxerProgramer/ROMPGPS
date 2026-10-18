@@ -19,18 +19,56 @@
     min-width: 0;
 }
 
-/* Contiene el modelo 3D del GNXIS (antes, una foto de 1,8 MB en gris que se
-   coloreaba al pasar el ratón). El halo verde da profundidad al equipo negro
-   sobre el fondo oscuro; el póster y el canvas comparten el mismo encuadre. */
+/* Contiene el modelo 3D del GNXIS, que se desvanece en partículas verdes.
+   El fondo usa los mismos verdes que el borde brillante y las partículas: un
+   halo detrás del equipo, luz verde que sube desde abajo, dos órbitas finas
+   (las trayectorias de los satélites) y destellos. El póster y el canvas
+   comparten el mismo encuadre. */
 .caja-imagen-producto {
+    --destello: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 0C12.9 8.2 15.8 11.1 24 12C15.8 12.9 12.9 15.8 12 24C11.1 15.8 8.2 12.9 0 12C8.2 11.1 11.1 8.2 12 0Z' fill='%23b2cea8' fill-opacity='0.75'/%3E%3C/svg%3E");
     position: relative;
     aspect-ratio: 1 / 1;
     overflow: hidden;
     border-radius: 28px;
+    border: 1px solid rgba(178, 206, 168, 0.12);
     background:
-        radial-gradient(70% 60% at 50% 42%, rgba(178, 206, 168, 0.16), transparent 70%),
-        linear-gradient(180deg, #1f251f 0%, #1c211d 55%, #151915 100%);
-    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.45);
+        var(--destello) 84% 17% / 18px no-repeat,
+        var(--destello) 13% 68% / 12px no-repeat,
+        var(--destello) 76% 84% / 10px no-repeat,
+        var(--destello) 24% 24% / 8px no-repeat,
+        radial-gradient(40% 36% at 50% 54%, rgba(178, 206, 168, 0.32), rgba(178, 206, 168, 0.09) 55%, transparent 78%),
+        radial-gradient(90% 55% at 50% 100%, rgba(95, 143, 88, 0.42), transparent 70%),
+        linear-gradient(180deg, #182a1c 0%, #122016 48%, #0b150d 100%);
+    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.45), inset 0 0 90px rgba(178, 206, 168, 0.07);
+}
+
+.caja-imagen-producto::before,
+.caja-imagen-producto::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 56%;
+    border-radius: 50%;
+    pointer-events: none;
+}
+
+.caja-imagen-producto::before {
+    width: 118%;
+    height: 44%;
+    border: 1px solid rgba(178, 206, 168, 0.2);
+    transform: translate(-50%, -50%) rotate(-14deg);
+}
+
+.caja-imagen-producto::after {
+    width: 92%;
+    height: 66%;
+    border: 1px solid rgba(178, 206, 168, 0.12);
+    transform: translate(-50%, -50%) rotate(22deg);
+}
+
+/* El visor va por encima de las órbitas. */
+.caja-imagen-producto > .visor3d {
+    z-index: 1;
 }
 
 .metrica-flotante {

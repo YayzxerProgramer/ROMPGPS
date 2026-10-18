@@ -1,4 +1,4 @@
-package com.gpsromp.WebSocket;
+package com.gpsromp.websocket;
 
 import java.util.List;
 

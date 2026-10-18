@@ -30,25 +30,13 @@ export function liberarObjeto(raiz) {
  * las motos que se abren una vez no ocupen memoria el resto de la sesión.
  *
  * @param {string} url
- * @param {{ conservarCache?: boolean, materialesPropios?: string[] }} [opciones]
- *   materialesPropios: nombres de nodos cuyos materiales se clonan para poder
- *   animarlos sin afectar a otras copias (el LED del GPS).
+ * @param {{ conservarCache?: boolean }} [opciones]
  */
-export default function useModeloGlb(url, { conservarCache = false, materialesPropios = [] } = {}) {
+export default function useModeloGlb(url, { conservarCache = false } = {}) {
   // Sin Draco (no se usa) y con el decodificador meshopt, que va embebido en
   // el bundle: no hay que descargar decodificadores de una CDN.
   const { scene } = useGLTF(url, false, true);
-  const clave = materialesPropios.join("|");
-
-  const escena = useMemo(() => {
-    const copia = scene.clone(true);
-    for (const nombre of clave ? clave.split("|") : []) {
-      copia.getObjectByName(nombre)?.traverse((nodo) => {
-        if (nodo.isMesh) nodo.material = nodo.material.clone();
-      });
-    }
-    return copia;
-  }, [scene, clave]);
+  const escena = useMemo(() => scene.clone(true), [scene]);
 
   useEffect(
     () => () => {

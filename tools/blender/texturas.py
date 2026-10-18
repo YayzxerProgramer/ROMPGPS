@@ -66,89 +66,11 @@ def imagen(nombre, datos, no_color=True):
 
 # ── Catálogo ─────────────────────────────────────────────────────────────────
 
-def grano_plastico(n=256):
-    """Plástico texturizado (carenados mate, mandos, guardabarros interiores)."""
-    h = ruido(n, 0.9, 11) * 0.7 + ruido(n, 2.5, 12) * 0.3
-    return imagen("normal_plastico", normal_desde_altura(h, 0.35))
-
-
-def grano_cuero(n=512):
-    """Polipiel del asiento: poro fino con arrugas suaves."""
-    poro = ruido(n, 1.1, 21)
-    celdas = np.abs(ruido(n, 4.0, 22))
-    h = poro * 0.45 - celdas * 0.8 + ruido(n, 14.0, 23) * 0.4
-    return imagen("normal_cuero", normal_desde_altura(h, 0.55))
-
-
-def aluminio_cepillado(n=256):
-    h = ruido(n, 0.7, 31, anisotropia=(0.05, 1.0))
-    return imagen("normal_cepillado", normal_desde_altura(h, 0.22))
-
-
-def aluminio_fundido(n=256):
-    """Superficie de fundición (cárter, culata): granallado fino."""
-    h = ruido(n, 0.8, 41) * 0.8 + ruido(n, 3.0, 42) * 0.2
-    return imagen("normal_fundido", normal_desde_altura(h, 0.3))
-
-
-def piel_naranja(n=256):
-    """Ondulación de la laca (efecto piel de naranja): reflejos de pintura real."""
-    h = ruido(n, 6.0, 51)
-    return imagen("normal_laca", normal_desde_altura(h, 0.06))
-
-
-def estrias_puno(n=256):
-    """Puños de goma: estrías en diamante."""
-    y, x = np.mgrid[0:n, 0:n] / n
-    h = np.sin(2 * math.pi * (x * 8 + y * 8)) + np.sin(2 * math.pi * (x * 8 - y * 8))
-    h = np.clip(h, -0.4, 2.0) + ruido(n, 1.0, 61) * 0.15
-    return imagen("normal_puno", normal_desde_altura(h, 0.8))
-
-
-def dibujo_neumatico(tipo, ancho=512, alto=256):
-    """Dibujo de la banda de rodadura. u (columnas) = sentido de giro, una
-    repetición; v (filas) = perfil del neumático de talón a talón (0..1), con
-    la banda de rodadura en el centro y los flancos lisos.
-
-    tipo: "costillas" (Boxer delantera), "tacos" (Boxer trasera) o
-    "deportivo" (Raider y Pulsar: surcos en ángulo alternados).
-    """
-    v, u = np.mgrid[0:alto, 0:ancho].astype(np.float64)
-    u /= ancho
-    v /= alto
-    banda = np.clip(1 - np.abs(v - 0.5) / 0.23, 0, 1)  # 1 en la corona, 0 en los flancos
-    corona = banda > 0
-    h = np.zeros_like(u)
-    w = (v - 0.5) / 0.23  # -1..1 a lo ancho de la banda
-
-    def surco(distancia, ancho_surco):
-        return np.exp(-(distancia / ancho_surco) ** 2)
-
-    if tipo == "costillas":
-        for centro in (-0.62, -0.2, 0.2, 0.62):
-            zig = centro + 0.05 * np.sin(2 * math.pi * u * 2)
-            h -= surco(w - zig, 0.06)
-    elif tipo == "tacos":
-        for fila in range(2):
-            desfase = 0.5 * fila
-            fase = (u * 2 + desfase) % 1.0
-            lado = 1 if fila == 0 else -1
-            bloque = (np.abs(fase - 0.5) < 0.32) & (lado * w > 0.08) & (lado * w < 0.95)
-            h += bloque * 0.9
-        h -= surco(w, 0.05) * 0.6
-        h = h - 0.9
-    else:  # deportivo
-        for lado, desfase in ((1, 0.0), (-1, 0.5)):
-            # Surco curvo que nace cerca del centro y sale hacia el hombro.
-            t = (u * 2 + desfase) % 1.0
-            recorrido = lado * w
-            curva = 0.12 + recorrido * 0.38 + 0.08 * recorrido ** 2
-            dentro = (recorrido > 0.15) & (recorrido < 0.92)
-            h -= surco(t - curva, 0.035) * dentro
-    h *= corona
-    h += ruido(alto, 1.2, 71)[:, :1].repeat(ancho, 1) * 0.0  # sin ruido: banda limpia
-    normal = normal_desde_altura(h, 6.0)
-    return imagen(f"normal_neumatico_{tipo}", normal)
+def grano_molde(n=256):
+    """Punteado de molde erosionado (acabado VDI) de carcasas de ABS: el
+    "mate con brillitos" de la cara del logo del GPS en la foto."""
+    h = ruido(n, 1.3, 81) * 0.7 + ruido(n, 3.2, 82) * 0.3
+    return imagen("normal_molde", normal_desde_altura(h, 0.5))
 
 
 # ── Materiales PBR con texturas ──────────────────────────────────────────────

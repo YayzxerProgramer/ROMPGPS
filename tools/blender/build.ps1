@@ -1,27 +1,27 @@
 <#
 .SYNOPSIS
-  Regenera los modelos 3D de ROMP GPS: Blender headless -> GLB -> gltf-transform (meshopt).
+  Regenera el modelo 3D del GPS de ROMP GPS: Blender headless -> GLB -> gltf-transform (meshopt).
 
 .DESCRIPTION
-  1. Ejecuta cada script de modelado con Blender en modo background. El script
+  1. Ejecuta el script de modelado con Blender en modo background. El script
      valida presupuesto de triangulos, normales y apoyo en el suelo, exporta el
      GLB crudo a tools/blender/build/ y renderiza el poster .webp en
      FrontEnd/public/models/previews/.
-  2. Comprime cada GLB con gltf-transform (EXT_meshopt_compression +
+  2. Comprime el GLB con gltf-transform (EXT_meshopt_compression +
      cuantizacion) a FrontEnd/public/models/, sin aplanar la escena ni unir
-     mallas para conservar los nodos animables (rueda_delantera, led_estado...).
+     mallas para conservar sus nodos (carcasa, impresos).
 
 .EXAMPLE
   powershell -ExecutionPolicy Bypass -File tools\blender\build.ps1
 
 .EXAMPLE
-  powershell -ExecutionPolicy Bypass -File tools\blender\build.ps1 -Blender "D:\Blender\blender.exe" -Modelos boxer_ct100
+  powershell -ExecutionPolicy Bypass -File tools\blender\build.ps1 -Blender "D:\Blender\blender.exe" -SinRender
 #>
 param(
     # Ruta a blender.exe. Si se omite: variable BLENDER, PATH o instalacion estandar.
     [string]$Blender = $env:BLENDER,
-    [ValidateSet('gps_device', 'boxer_ct100', 'tvs_raider_125', 'pulsar_200')]
-    [string[]]$Modelos = @('gps_device', 'boxer_ct100', 'tvs_raider_125', 'pulsar_200'),
+    [ValidateSet('gps_device')]
+    [string[]]$Modelos = @('gps_device'),
     # No renderiza los posters (mas rapido mientras se itera la geometria).
     [switch]$SinRender
 )
@@ -42,7 +42,9 @@ function Buscar-Blender {
     }
     $enPath = Get-Command blender -ErrorAction SilentlyContinue
     if ($enPath) { return $enPath.Source }
-    $instalados = Get-ChildItem 'C:\Program Files\Blender Foundation\*\blender.exe' -ErrorAction SilentlyContinue |
+    # Instalacion normal o zip portable en la carpeta de programas del usuario.
+    $instalados = Get-ChildItem 'C:\Program Files\Blender Foundation\*\blender.exe',
+        (Join-Path $env:LOCALAPPDATA 'Programs\Blender\*\blender.exe') -ErrorAction SilentlyContinue |
         Sort-Object { [version](($_.Directory.Name -replace '[^0-9.]', '') + '.0') } -Descending
     if ($instalados) { return $instalados[0].FullName }
     throw "No se encontro Blender. Instalalo (winget install BlenderFoundation.Blender) o pasa -Blender <ruta\blender.exe>."

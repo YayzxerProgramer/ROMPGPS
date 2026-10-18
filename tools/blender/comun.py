@@ -12,11 +12,10 @@ reproducible: no hay .blend versionados ni pasos manuales.
 Convenciones (Blender es Z arriba; el exportador glTF lo convierte a Y arriba):
   * Unidades en metros, escala real.
   * El frente del modelo mira a -Y en Blender, que es +Z en glTF.
-  * El lado derecho del piloto es -X (escape de las motos).
   * El origen está en la base: el suelo es z = 0.
   * Las piezas animables son un Empty con nombre (pivote) y su malla como hija,
     así la compresión (que reescribe las transformaciones de las mallas) nunca
-    mueve el eje de giro de las ruedas.
+    mueve su eje de giro.
 """
 
 import math
@@ -769,7 +768,8 @@ def validar(nombre, presupuesto):
 
 # ── Exportación y póster ─────────────────────────────────────────────────────
 
-def exportar_glb(ruta):
+def exportar_glb(ruta, formato_imagen="AUTO"):
+    """formato_imagen: "AUTO" (PNG/JPEG según la imagen) o "WEBP" (EXT_texture_webp)."""
     os.makedirs(os.path.dirname(ruta), exist_ok=True)
     bpy.ops.export_scene.gltf(
         filepath=ruta,
@@ -778,7 +778,7 @@ def exportar_glb(ruta):
         export_apply=True,
         export_yup=True,
         export_texcoords=True,  # texturas repetibles (grano, cepillado, dibujo) y calcomanías
-        export_image_format="AUTO",
+        export_image_format=formato_imagen,
         export_normals=True,
         export_materials="EXPORT",
         export_cameras=False,
@@ -873,12 +873,17 @@ def _activar_gpu():
     return "CPU"
 
 
-def estudio(centro, tam, verde=True):
+def estudio(centro, tam, verde=True, luces=None):
     """Iluminación de estudio de producto, la misma disposición que el
     Environment del visor (ModelViewer.jsx): caja de luz cenital, tira lateral
     del lado de la cámara, contraluz verde de la marca y relleno trasero.
-    Las luces de área se ven en los reflejos del cromo y la laca."""
+    Las luces de área se ven en los reflejos del cromo y la laca.
+
+    luces: {nombre: factor} para atenuar o apagar una luz en un modelo concreto."""
     def area(nombre, pos, tam_xy, potencia, color="#ffffff", forma="RECTANGLE"):
+        potencia *= (luces or {}).get(nombre, 1.0)
+        if potencia <= 0:
+            return None
         datos = bpy.data.lights.new(nombre, "AREA")
         datos.shape = forma
         datos.size = tam_xy[0] * tam
@@ -922,7 +927,7 @@ def _atrapasombras(tam):
     return obj
 
 
-def render_preview(ruta, ancho, alto, azimut, elevacion, fov=30.0, muestras=160):
+def render_preview(ruta, ancho, alto, azimut, elevacion, fov=30.0, muestras=160, luces=None):
     """Render fotorrealista (Cycles) con fondo transparente y sombra en el
     suelo: póster mientras carga el 3D, respaldo sin WebGL y miniatura."""
     escena = bpy.context.scene
@@ -976,7 +981,7 @@ def render_preview(ruta, ancho, alto, azimut, elevacion, fov=30.0, muestras=160)
     cam.rotation_euler = (-direccion).to_track_quat("-Z", "Y").to_euler()
     escena.camera = cam
 
-    estudio(centro, tam)
+    estudio(centro, tam, luces=luces)
     _atrapasombras(tam)
 
     os.makedirs(os.path.dirname(ruta), exist_ok=True)
@@ -985,7 +990,7 @@ def render_preview(ruta, ancho, alto, azimut, elevacion, fov=30.0, muestras=160)
     print(f"Póster renderizado: {ruta} ({os.path.getsize(ruta) / 1024:.1f} KB)")
 
 
-def poster(opciones, nombre, ancho, alto, azimut, elevacion):
+def poster(opciones, nombre, ancho, alto, azimut, elevacion, luces=None):
     """Renderiza el póster salvo con --sin-render. Con --azimut (revisión desde
     otro ángulo) escribe <nombre>-az<grados>.webp en la carpeta de build, que
     no se publica, y no pisa el póster real."""
@@ -995,4 +1000,5 @@ def poster(opciones, nombre, ancho, alto, azimut, elevacion):
     if opciones["azimut"] is not None:
         azimut = opciones["azimut"]
         carpeta, sufijo = opciones["salida"], f"-az{int(azimut)}"
-    render_preview(os.path.join(carpeta, f"{nombre}{sufijo}.webp"), ancho, alto, azimut, elevacion)
+    render_preview(os.path.join(carpeta, f"{nombre}{sufijo}.webp"), ancho, alto, azimut, elevacion,
+                   luces=luces)

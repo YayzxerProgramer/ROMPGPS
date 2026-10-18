@@ -6,7 +6,7 @@ creíble:
 
   * anillos(): superficies a partir de secciones arbitrarias (no solo
     superelipses), con subdivisión Catmull-Clark y pliegues en las aristas
-    vivas. Tanques, carenados, colines, asientos y la carcasa del GPS.
+    vivas. La carcasa del GPS, el manguito y el cable plano.
   * caja_redondeada(): piezas duras con biseles reales.
   * normales_ponderadas(): reflejos limpios en superficies grandes con
     biseles pequeños (lo que hace que una pieza "parezca de fábrica").

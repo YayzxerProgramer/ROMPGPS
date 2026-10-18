@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import Visor3D from "./Visor3D";
 import { alQuedarOcioso, cargarModeloGps, cargarVisor, hayWebGL } from "./soporte3d";
-import { MODELO_GPS, urlPoster3D } from "../../config/vehicleModels";
+import { MODELO_GPS, urlPoster3D } from "../../config/modelos3d";
 
 /**
  * Rastreador GNXIS en 3D para la sección Producto de la landing.
@@ -25,7 +25,7 @@ export default function GpsDevice3D() {
     <Visor3D
       modelo={MODELO_GPS}
       poster={urlPoster3D(MODELO_GPS)}
-      etiqueta="Rastreador GPS GNXIS en 3D, con su cable y el arnés de conexión. Arrastra para girarlo."
+      etiqueta="Rastreador GPS GNXIS en 3D, con su cable plano y el conector de 4 vías, que se desvanece en partículas verdes al hacer scroll. Arrastra para girarlo."
       className="visor3d--gps"
     />
   );
