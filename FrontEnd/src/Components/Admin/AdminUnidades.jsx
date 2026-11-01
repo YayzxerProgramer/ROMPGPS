@@ -3,6 +3,7 @@ import { del, get, patch } from "../../Service/api";
 import { Confirmar, InsigniaEstado, Modal, Paginacion, Segmentos, Vacio } from "./AdminUI";
 import { useAvisar } from "./avisos";
 import { FormVehiculo, FormVincular } from "./AdminFormularios";
+import MantenimientoVehiculo from "../Mantenimiento/MantenimientoVehiculo";
 import {
   ESTADOS, fecha, haceCuanto,
   contar, iniciales, query,
@@ -164,6 +165,7 @@ export default function AdminUnidades({ busqueda, dialogoInicial, onDialogoAbier
                         <span className="material-symbols-outlined">my_location</span>
                       </button>
                     )}
+                    <MantenimientoVehiculo idVehiculo={v.id} etiqueta={`${v.modelo} · ${v.placa}`} variante="icono" claseBoton="adm-accion" />
                     <button className="adm-accion" title="Vincular propietario" onClick={() => setDialogo({ tipo: "vincular", vehiculo: v, propietario: duenno })}>
                       <span className="material-symbols-outlined">link</span>
                     </button>

@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import "../Styles/PanelVehiculo.css";
 import { API_URL } from "../Service/api";
+import MantenimientoVehiculo from "./Mantenimiento/MantenimientoVehiculo";
 
 
 function TarjetaVehiculo({ vehiculo, onDelete }) {
@@ -16,6 +17,7 @@ function TarjetaVehiculo({ vehiculo, onDelete }) {
             <div className="tarjeta-vehiculo__celda-modelo">
                 <h3 className="tarjeta-vehiculo__nombre">{vehiculo.modelo}</h3>
                 <p className="tarjeta-vehiculo__serie">IMEI: {vehiculo.imei}</p>
+                <MantenimientoVehiculo idVehiculo={vehiculo.id} etiqueta={`${vehiculo.modelo} · ${vehiculo.placa}`} />
             </div>
             <div className="tarjeta-vehiculo__celda-tipo">
                 <span className="tarjeta-vehiculo__tipo-etiqueta">

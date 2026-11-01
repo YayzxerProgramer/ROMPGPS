@@ -11,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.gpsromp.common.exception.RecursoDuplicadoException;
 import com.gpsromp.common.exception.RecursoNoEncontradoException;
+import com.gpsromp.mantenimiento.service.MantenimientoService;
 import com.gpsromp.usuario.repository.UsuarioRepository;
 import com.gpsromp.vehiculo.dto.ActualizarVehiculoRequest;
 import com.gpsromp.vehiculo.dto.CrearVehiculoRequest;
@@ -40,6 +41,7 @@ public class VehiculoService {
 
     private final VehiculoRepository vehiculoRepository;
     private final UsuarioRepository usuarioRepository;
+    private final MantenimientoService mantenimientoService;
 
     // ---------------------------------------------------------------- consultas
 
@@ -194,6 +196,7 @@ public class VehiculoService {
     @Transactional
     public void eliminar(UUID id) {
         Vehiculo vehiculo = obtenerPorIdOFallar(id);
+        mantenimientoService.eliminarDeVehiculo(id);
         vehiculoRepository.delete(vehiculo);
     }
 

@@ -1,0 +1,98 @@
+{
+  "modelo": "GradientBoosting",
+  "hiperparametros": {
+    "m__learning_rate": 0.05,
+    "m__max_depth": 3,
+    "m__n_estimators": 400
+  },
+  "entrenado_en": "2026-10-24T22:26:31+00:00",
+  "datos": "SIMULADOS",
+  "validacion": {
+    "linea_base": {
+      "MAE_km": 442.4062170494778,
+      "RMSE_km": 617.0865140956874,
+      "R2": 0.6105842868639051,
+      "recall_alto_pct": 27.358490566037737,
+      "precision_alto_pct": 37.66233766233766,
+      "casos_alto": 106,
+      "filas": 1840,
+      "umbral_alerta_km": 150.0
+    },
+    "Ridge": {
+      "MAE_km": 235.8303227405248,
+      "RMSE_km": 305.8393714303182,
+      "R2": 0.9043448965620687,
+      "recall_alto_pct": 45.283018867924525,
+      "precision_alto_pct": 39.02439024390244,
+      "casos_alto": 106,
+      "filas": 1840,
+      "umbral_alerta_km": 150.0
+    },
+    "RandomForest": {
+      "MAE_km": 242.80866251076685,
+      "RMSE_km": 314.25156818326616,
+      "R2": 0.8990104893120633,
+      "recall_alto_pct": 5.660377358490566,
+      "precision_alto_pct": 54.54545454545455,
+      "casos_alto": 106,
+      "filas": 1840,
+      "umbral_alerta_km": 150.0
+    },
+    "GradientBoosting": {
+      "MAE_km": 233.11206543124413,
+      "RMSE_km": 302.73991493379293,
+      "R2": 0.9062738603395711,
+      "recall_alto_pct": 17.92452830188679,
+      "precision_alto_pct": 47.5,
+      "casos_alto": 106,
+      "filas": 1840,
+      "umbral_alerta_km": 150.0
+    }
+  },
+  "umbral_alerta_km": 565.5937831699557,
+  "prueba": {
+    "linea_base": {
+      "MAE_km": 485.61382561369567,
+      "RMSE_km": 706.5587458998436,
+      "R2": 0.6345765914122002,
+      "recall_alto_pct": 95.1923076923077,
+      "precision_alto_pct": 20.711297071129707,
+      "casos_alto": 104,
+      "filas": 1840,
+      "umbral_alerta_km": 869.3976053894712
+    },
+    "GradientBoosting": {
+      "MAE_km": 323.64570096682115,
+      "RMSE_km": 442.6165004302358,
+      "R2": 0.8565980650463788,
+      "recall_alto_pct": 92.3076923076923,
+      "precision_alto_pct": 23.414634146341463,
+      "casos_alto": 104,
+      "filas": 1840,
+      "umbral_alerta_km": 565.5937831699557
+    },
+    "modelo_con_umbral_literal": {
+      "MAE_km": 323.64570096682115,
+      "RMSE_km": 442.6165004302358,
+      "R2": 0.8565980650463788,
+      "recall_alto_pct": 21.153846153846153,
+      "precision_alto_pct": 55.0,
+      "casos_alto": 104,
+      "filas": 1840,
+      "umbral_alerta_km": 150.0
+    },
+    "reduccion_mae_pct": 33.35
+  },
+  "importancia_variables": {
+    "km_desde_ult_mant": 874.07,
+    "tipo_vehiculo": 593.32,
+    "paradas_por_100km": 101.61,
+    "tipo_ultimo_mant": 46.02,
+    "vel_prom_mov_30d": 19.87,
+    "dist_media_recorrido_km": 14.46,
+    "horas_mov_desde_mant": 10.66,
+    "num_mant_previos": 2.53,
+    "km_diarios_prom_30d": 0.98,
+    "dias_desde_ult_mant": -0.62
+  }
+}
