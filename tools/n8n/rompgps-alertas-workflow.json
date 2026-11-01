@@ -1,0 +1,124 @@
+{
+  "name": "RompGPS - Despachador de Alertas y Correos 2FA",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "rompgps-alertas",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "1",
+      "name": "Webhook Inbound RompGPS",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [200, 300]
+    },
+    {
+      "parameters": {
+        "dataType": "string",
+        "value1": "={{ $json.body.canal }}",
+        "rules": {
+          "rules": [
+            {
+              "value2": "EMAIL"
+            },
+            {
+              "value2": "WHATSAPP"
+            }
+          ]
+        }
+      },
+      "id": "2",
+      "name": "Enrutador por Canal",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 1,
+      "position": [440, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "const body = $input.item.json.body || {};\nconst tipo = body.tipo || 'OTP';\nconst codigo = body.datos?.codigo || '';\nconst nombre = body.destinatario?.nombre || 'Usuario';\nconst asunto = body.datos?.asunto || 'Notificación RompGPS';\n\nlet htmlContent = '';\nif (tipo === 'RECUPERAR_PASSWORD') {\n  htmlContent = `\n    <div style=\"background-color:#0b0f14; color:#ffffff; padding:30px; font-family:Arial,sans-serif; border-radius:12px; max-width:500px; margin:auto; border:1px solid #10b981;\">\n      <h2 style=\"color:#10b981; margin-top:0;\">Recuperación de Contraseña - RompGPS</h2>\n      <p>Hola <strong>${nombre}</strong>,</p>\n      <p>Recibimos una solicitud para restablecer tu contraseña. Tu código de seguridad temporal es:</p>\n      <div style=\"background-color:#161f28; font-size:32px; font-weight:bold; letter-spacing:8px; text-align:center; padding:18px; border-radius:8px; color:#10b981; margin:20px 0;\">\n        ${codigo}\n      </div>\n      <p style=\"font-size:13px; color:#9ca3af;\">Este código expira en 10 minutos. Si tú no solicitaste este cambio, ignora este mensaje.</p>\n    </div>`;\n} else {\n  htmlContent = `\n    <div style=\"background-color:#0b0f14; color:#ffffff; padding:30px; font-family:Arial,sans-serif; border-radius:12px; max-width:500px; margin:auto; border:1px solid #10b981;\">\n      <h2 style=\"color:#10b981; margin-top:0;\">Código de Acceso 2FA - RompGPS</h2>\n      <p>Hola <strong>${nombre}</strong>,</p>\n      <p>Tu código de verificación de dos factores para iniciar sesión es:</p>\n      <div style=\"background-color:#161f28; font-size:32px; font-weight:bold; letter-spacing:8px; text-align:center; padding:18px; border-radius:8px; color:#10b981; margin:20px 0;\">\n        ${codigo}\n      </div>\n      <p style=\"font-size:13px; color:#9ca3af;\">Válido durante 5 minutos. No lo compartas con nadie.</p>\n    </div>`;\n}\n\nreturn {\n  json: {\n    toEmail: body.destinatario?.correo,\n    subject: asunto,\n    html: htmlContent\n  }\n};"
+      },
+      "id": "3",
+      "name": "Generar Plantilla HTML Email",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [680, 200]
+    },
+    {
+      "parameters": {
+        "jsCode": "const body = $input.item.json.body || {};\nconst tipo = body.tipo;\nconst datos = body.datos || {};\nconst placa = datos.vehiculoPlaca || 'Vehículo';\n\nlet texto = '';\nif (tipo === 'ALERTA_MOVIMIENTO') {\n  texto = `🚨 *ALERTA DE SEGURIDAD ROMPGPS*\\n\\nTu vehículo *[Placa: ${placa}]* registró movimiento no autorizado con el motor apagado.\\n\\n📍 Ingresa de inmediato a la plataforma para rastrear su posición en vivo.`;\n} else if (tipo === 'CORTE_MOTOR') {\n  texto = `⚡ *CORTE DE MOTOR CONFIRMADO*\\n\\nEl corte de motor ha sido ejecutado con éxito en el vehículo *[Placa: ${placa}]*. El relé de encendido ha sido inmovilizado.`;\n} else if (tipo === 'MANTENIMIENTO_PREDICTIVO') {\n  texto = `🔧 *MANTENIMIENTO PREDICTIVO ROMPGPS*\\n\\nHola, tu vehículo *[Placa: ${placa}]* ha acumulado *${datos.kilometrosActuales || 0} km*.\\nSegún el modelo de desgaste, te restan aproximadamente *${(datos.kilometrosMantenimiento || 5000) - (datos.kilometrosActuales || 0)} km* para el mantenimiento recomendado.`;\n} else {\n  texto = `🔐 *RompGPS 2FA*\\n\\nTu código de verificación es: *${datos.codigo}* (Válido por 5 minutos).`;\n}\n\nreturn {\n  json: {\n    toPhone: body.destinatario?.telefono,\n    message: texto\n  }\n};"
+      },
+      "id": "4",
+      "name": "Formatear Mensaje WhatsApp",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [680, 420]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{\n  \"status\": \"exito\",\n  \"mensaje\": \"Notificación procesada y despachada por n8n\"\n}",
+        "options": {}
+      },
+      "id": "5",
+      "name": "Respuesta Exitosa Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [950, 300]
+    }
+  ],
+  "connections": {
+    "Webhook Inbound RompGPS": {
+      "main": [
+        [
+          {
+            "node": "Enrutador por Canal",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Enrutador por Canal": {
+      "main": [
+        [
+          {
+            "node": "Generar Plantilla HTML Email",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Formatear Mensaje WhatsApp",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generar Plantilla HTML Email": {
+      "main": [
+        [
+          {
+            "node": "Respuesta Exitosa Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Formatear Mensaje WhatsApp": {
+      "main": [
+        [
+          {
+            "node": "Respuesta Exitosa Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  }
+}

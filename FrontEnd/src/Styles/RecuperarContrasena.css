@@ -1,0 +1,406 @@
+/* ============================================================
+   RecuperarContrasena.css — ROMP GPS
+   ============================================================ */
+
+.recuperar-page {
+    position: relative;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background: #090c0b;
+    color: #e2f1e0;
+    overflow-x: hidden;
+    font-family: inherit;
+}
+
+/* Deshabilitar cualquier outline azul o ring predeterminado del navegador */
+.recuperar-page :focus,
+.recuperar-page :focus-visible,
+.recuperar-page input:focus,
+.recuperar-page input:focus-visible,
+.recuperar-page button:focus,
+.recuperar-page button:focus-visible {
+    outline: none !important;
+    box-shadow: none;
+    -webkit-tap-highlight-color: transparent !important;
+}
+
+.recuperar-header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 100;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px clamp(16px, 4vw, 40px);
+    background: linear-gradient(to bottom, rgba(9, 12, 11, 0.85), transparent);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+}
+
+.recuperar-header__brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.recuperar-header__volver {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #b2cea8;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 600;
+    padding: 8px 16px;
+    border-radius: 8px;
+    background: rgba(178, 206, 168, 0.08);
+    border: 1px solid rgba(178, 206, 168, 0.2);
+    transition: all 0.25s ease;
+}
+
+.recuperar-header__volver:hover {
+    background: rgba(178, 206, 168, 0.16);
+    border-color: rgba(178, 206, 168, 0.4);
+    transform: translateX(-2px);
+}
+
+.recuperar-main {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 100px 20px 40px;
+    position: relative;
+    z-index: 10;
+}
+
+.recuperar-card {
+    width: 100%;
+    max-width: 480px;
+    background: rgba(14, 20, 16, 0.75);
+    border: 1px solid rgba(178, 206, 168, 0.22);
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6), 0 0 30px rgba(178, 206, 168, 0.08);
+    border-radius: 20px;
+    padding: clamp(24px, 5vw, 40px);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    animation: fadeUp 0.45s ease forwards;
+}
+
+.recuperar-card__badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    color: #b2cea8;
+    background: rgba(178, 206, 168, 0.12);
+    border: 1px solid rgba(178, 206, 168, 0.25);
+    padding: 4px 12px;
+    border-radius: 100px;
+    margin-bottom: 16px;
+}
+
+.recuperar-card__badge .material-symbols-outlined {
+    font-size: 14px;
+}
+
+.recuperar-card__titulo {
+    font-size: clamp(22px, 3vw, 28px);
+    font-weight: 800;
+    color: #f3fff0;
+    letter-spacing: -0.5px;
+    margin: 0 0 10px;
+}
+
+.recuperar-card__subtitulo {
+    font-size: 14px;
+    line-height: 1.5;
+    color: #a4bfa0;
+    margin: 0 0 24px;
+}
+
+.recuperar-form {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.recuperar-campo {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.recuperar-campo label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #c7dec4;
+}
+
+.recuperar-campo__input-box {
+    position: relative;
+    display: flex;
+    align-items: center;
+    background: rgba(8, 12, 10, 0.65);
+    border: 1px solid rgba(178, 206, 168, 0.25);
+    border-radius: 12px;
+    transition: border-color 0.2s ease, background 0.2s ease;
+    outline: none !important;
+}
+
+/* Focus limpio en el verde sutil del sistema ROMP GPS (sin halo azul) */
+.recuperar-campo__input-box:focus-within {
+    border-color: #b2cea8 !important;
+    background: rgba(10, 16, 12, 0.9) !important;
+    box-shadow: none !important;
+    outline: none !important;
+}
+
+.recuperar-campo__icono {
+    position: absolute;
+    left: 14px;
+    width: 20px;
+    height: 20px;
+    color: #7d9678;
+    pointer-events: none;
+}
+
+.recuperar-campo__input-box input {
+    width: 100%;
+    padding: 13px 44px 13px 44px;
+    background: transparent;
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+    color: #ffffff;
+    font-size: 15px;
+    font-family: inherit;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+}
+
+.recuperar-campo__input-box input:focus,
+.recuperar-campo__input-box input:focus-visible,
+.recuperar-campo__input-box input:active {
+    outline: none !important;
+    box-shadow: none !important;
+    border: none !important;
+}
+
+.recuperar-campo__input-box input::placeholder {
+    color: rgba(164, 191, 160, 0.45);
+}
+
+/* Evitar el color azul en autofill de Chromium */
+.recuperar-campo__input-box input:-webkit-autofill,
+.recuperar-campo__input-box input:-webkit-autofill:hover, 
+.recuperar-campo__input-box input:-webkit-autofill:focus, 
+.recuperar-campo__input-box input:-webkit-autofill:active {
+    -webkit-box-shadow: 0 0 0 1000px #090c0b inset !important;
+    -webkit-text-fill-color: #ffffff !important;
+    caret-color: #ffffff !important;
+    transition: background-color 5000s ease-in-out 0s;
+}
+
+/* Input especial para código OTP */
+.recuperar-campo__input-box--codigo {
+    justify-content: center;
+}
+
+.recuperar-campo__input-box--codigo input {
+    padding: 14px 16px;
+    text-align: center;
+    font-size: 24px;
+    font-weight: 800;
+    letter-spacing: 10px;
+    font-family: monospace;
+    color: #b2cea8;
+}
+
+.recuperar-campo__ojo {
+    position: absolute;
+    right: 12px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #7d9678;
+    display: flex;
+    align-items: center;
+    padding: 4px;
+    outline: none !important;
+}
+
+.recuperar-campo__ojo:hover {
+    color: #b2cea8;
+}
+
+/* ── Fortaleza de Contraseña ──────────────────────────────── */
+.fortaleza-box {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: -6px;
+}
+
+.fortaleza-barras {
+    display: flex;
+    gap: 4px;
+    flex: 1;
+}
+
+.fortaleza-barra {
+    height: 4px;
+    flex: 1;
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.1);
+    transition: all 0.3s ease;
+}
+
+.fortaleza-barra.activa--1 {
+    background: #ef4444;
+}
+
+.fortaleza-barra.activa--2 {
+    background: #f59e0b;
+}
+
+.fortaleza-barra.activa--3 {
+    background: #10b981;
+}
+
+.fortaleza-barra.activa--4 {
+    background: #b2cea8;
+    box-shadow: 0 0 8px rgba(178, 206, 168, 0.5);
+}
+
+.fortaleza-texto {
+    font-size: 12px;
+    font-weight: 600;
+    color: #a4bfa0;
+    min-width: 65px;
+    text-align: right;
+}
+
+/* ── Botones ──────────────────────────────────────────────── */
+.recuperar-btn {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 24px;
+    background: linear-gradient(135deg, #b2cea8 0%, #87ad7b 100%);
+    color: #0b120c;
+    border: none;
+    border-radius: 12px;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    box-shadow: 0 8px 20px rgba(178, 206, 168, 0.25);
+    margin-top: 6px;
+    outline: none !important;
+}
+
+.recuperar-btn:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 25px rgba(178, 206, 168, 0.4);
+    filter: brightness(1.05);
+}
+
+.recuperar-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.recuperar-btn-secundario {
+    background: transparent;
+    border: none;
+    color: #a4bfa0;
+    font-size: 13px;
+    cursor: pointer;
+    padding: 6px;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    transition: color 0.2s;
+    outline: none !important;
+}
+
+.recuperar-btn-secundario:hover {
+    color: #e2f1e0;
+}
+
+.recuperar-acciones-secundarias {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    margin-top: 6px;
+}
+
+/* ── Alertas ──────────────────────────────────────────────── */
+.recuperar-alerta {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 16px;
+    border-radius: 10px;
+    font-size: 13px;
+    line-height: 1.4;
+}
+
+.recuperar-alerta--error {
+    background: rgba(239, 68, 68, 0.12);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    color: #fca5a5;
+}
+
+.recuperar-alerta--exito {
+    background: rgba(16, 185, 129, 0.12);
+    border: 1px solid rgba(16, 185, 129, 0.3);
+    color: #6ee7b7;
+}
+
+/* ── Pantalla de Éxito ────────────────────────────────────── */
+.recuperar-exito {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    padding: 20px 0;
+}
+
+.recuperar-exito__icono {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: rgba(178, 206, 168, 0.16);
+    border: 1px solid rgba(178, 206, 168, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #b2cea8;
+}
+
+.recuperar-exito__icono .material-symbols-outlined {
+    font-size: 36px;
+}
+
+@keyframes fadeUp {
+    from {
+        opacity: 0;
+        transform: translateY(16px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

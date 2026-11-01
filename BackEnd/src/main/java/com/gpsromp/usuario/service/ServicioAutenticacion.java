@@ -31,6 +31,7 @@ public class ServicioAutenticacion {
     private final JwtUtil jwtUtil;
     private final ServicioTokens servicioTokens;
     private final ServicioLimiteIntentos limiteIntentos;
+    private final DosFactoresService dosFactoresService;
 
     /**
      * Login con usuario y contraseña.
@@ -61,7 +62,11 @@ public class ServicioAutenticacion {
         limiteIntentos.registrarExito(claveIp);
         limiteIntentos.registrarExito(claveUsuario);
 
-        Usuario usuario = usuarioService.obtenerPorNombreUsuarioOFallar(nombreUsuario);
+        Usuario usuario = usuarioService.buscarPorIdentificador(nombreUsuario)
+                .orElseGet(() -> usuarioService.obtenerPorNombreUsuarioOFallar(nombreUsuario));
+        if (Boolean.TRUE.equals(usuario.getDosFactoresActivo())) {
+            return dosFactoresService.iniciarDesafioLogin(usuario);
+        }
         return emitirSesion(usuario);
     }
 
@@ -109,6 +114,9 @@ public class ServicioAutenticacion {
             throw new OperacionNoPermitidaException("La cuenta está desactivada");
         }
 
+        if (Boolean.TRUE.equals(usuario.getDosFactoresActivo())) {
+            return dosFactoresService.iniciarDesafioLogin(usuario);
+        }
         return emitirSesion(usuario);
     }
 
@@ -132,3 +140,4 @@ public class ServicioAutenticacion {
         }
     }
 }
+

@@ -23,7 +23,22 @@ public class ServicioDetallesUsuario implements UserDetailsService {
     @Transactional(readOnly = true)
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
 
-        Usuario usuarioEncontrado = repositorioUsuario.findByUsuario(username)
+        Usuario usuarioEncontrado = repositorioUsuario.findByUsuarioIgnoreCase(username)
+                .or(() -> repositorioUsuario.findByCorreoIgnoreCase(username))
+                .or(() -> repositorioUsuario.findByTelefono(username))
+                .or(() -> {
+                    String soloDigitos = username.replaceAll("[^0-9]", "");
+                    if (soloDigitos.length() >= 7) {
+                        String conPrefijo = soloDigitos.startsWith("57") ? soloDigitos : "57" + soloDigitos;
+                        String conMas = "+" + conPrefijo;
+                        String sinPrefijo = soloDigitos.startsWith("57") && soloDigitos.length() > 2 ? soloDigitos.substring(2) : soloDigitos;
+                        return repositorioUsuario.findByTelefono(conPrefijo)
+                                .or(() -> repositorioUsuario.findByTelefono(conMas))
+                                .or(() -> repositorioUsuario.findByTelefono(sinPrefijo))
+                                .or(() -> repositorioUsuario.findByTelefono(soloDigitos));
+                    }
+                    return java.util.Optional.empty();
+                })
                 .orElseThrow(() -> new UsernameNotFoundException(
                         "No se encontró el usuario: " + username));
 

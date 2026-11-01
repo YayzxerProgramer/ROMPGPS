@@ -75,6 +75,38 @@ public class UsuarioService {
         return usuarioRepository.findByCorreo(correo);
     }
 
+    /**
+     * Busca un usuario por nombre de usuario, correo electrónico o teléfono (incluyendo formatos con o sin código de país).
+     */
+    public Optional<Usuario> buscarPorIdentificador(String identificador) {
+        if (identificador == null || identificador.isBlank()) {
+            return Optional.empty();
+        }
+        String idTrim = identificador.trim();
+        Optional<Usuario> usuario = usuarioRepository.findByUsuarioIgnoreCase(idTrim)
+                .or(() -> usuarioRepository.findByCorreoIgnoreCase(idTrim))
+                .or(() -> usuarioRepository.findByTelefono(idTrim));
+
+        if (usuario.isPresent()) {
+            return usuario;
+        }
+
+        // Si contiene dígitos, probar variaciones de formato telefónico
+        String soloDigitos = idTrim.replaceAll("[^0-9]", "");
+        if (soloDigitos.length() >= 7) {
+            String conPrefijo = soloDigitos.startsWith("57") ? soloDigitos : "57" + soloDigitos;
+            String conMas = "+" + conPrefijo;
+            String sinPrefijo = soloDigitos.startsWith("57") && soloDigitos.length() > 2 ? soloDigitos.substring(2) : soloDigitos;
+
+            return usuarioRepository.findByTelefono(conPrefijo)
+                    .or(() -> usuarioRepository.findByTelefono(conMas))
+                    .or(() -> usuarioRepository.findByTelefono(sinPrefijo))
+                    .or(() -> usuarioRepository.findByTelefono(soloDigitos));
+        }
+
+        return Optional.empty();
+    }
+
     public boolean existeUsuario(String usuario) {
         return usuarioRepository.existsByUsuario(usuario);
     }

@@ -3,6 +3,7 @@ package com.gpsromp.config;
 import java.util.UUID;
 
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 import com.gpsromp.usuario.model.Rol;
@@ -91,5 +92,10 @@ public class SeguridadService {
         return auth.getAuthorities().stream()
                 .anyMatch(a -> ("ROLE_" + Rol.ADMINISTRADOR.name()).equals(a.getAuthority())
                         || "ROLE_ADMIN".equals(a.getAuthority()));
+    }
+
+    /** ¿El usuario en el contexto de seguridad actual es administrador? */
+    public boolean esAdminActual() {
+        return esAdmin(SecurityContextHolder.getContext().getAuthentication());
     }
 }

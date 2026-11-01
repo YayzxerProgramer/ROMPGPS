@@ -1,5 +1,6 @@
 package com.gpsromp.usuario.dto;
 
+import com.gpsromp.usuario.model.Canal2fa;
 import com.gpsromp.usuario.model.PlanTipo;
 import com.gpsromp.usuario.model.Rol;
 
@@ -8,15 +9,6 @@ import java.util.UUID;
 
 /**
  * Representación pública de un usuario.
- *
- * No declara el campo contrasena, así que el hash BCrypt no puede filtrarse por
- * ninguna vía. Antes se serializaba la entidad Usuario entera y el hash viajaba
- * al navegador en GET /usuario, GET /usuario/{id}, GET /usuario/usuario/{u},
- * la respuesta del registro y la del PUT.
- *
- * Los nombres de campo coinciden con los que ya consume el frontend
- * (PanelControl, PerfilUsuario, CambiarContrasena, PanelVehiculo), así que el
- * cambio es transparente para el cliente.
  */
 public record UsuarioResponse(
         UUID id,
@@ -28,6 +20,8 @@ public record UsuarioResponse(
         Rol rol,
         PlanTipo plan,
         Boolean activo,
+        Boolean dosFactoresActivo,
+        Canal2fa canal2fa,
         String imagenUrl,
         LocalDateTime creadoEn,
         LocalDateTime actualizadoEn) {

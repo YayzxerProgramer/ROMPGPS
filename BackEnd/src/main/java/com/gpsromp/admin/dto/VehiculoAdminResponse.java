@@ -9,12 +9,14 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * Incluye logística y cálculos resueltos en el backend:
  * - Estado operativo de rastreo ("marcha", "detenido", "sin", "nogps", "off")
  * - Propietario consolidado
- * - Última posición de telemetría GPS
+ * - Última posición de telemetría
+ * - Línea celular / SIM Card del dispositivo GPS (extraída desde MongoDB para visibilidad administrativa)
  */
 public record VehiculoAdminResponse(
         UUID id,
         String placa,
         String imei,
+        String numeroSim,
         String modelo,
         String tipo,
         Boolean activo,

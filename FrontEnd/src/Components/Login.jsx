@@ -50,6 +50,15 @@ function IconoTelefono({ className }) {
     );
 }
 
+function IconoCorreo({ className }) {
+    return (
+        <svg className={className} viewBox="0 0 24 24" aria-hidden="true">
+            <rect {...trazo} x="3" y="4" width="18" height="16" rx="2" />
+            <path {...trazo} d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
+        </svg>
+    );
+}
+
 function IconoMensaje({ className }) {
     return (
         <svg className={className} viewBox="0 0 24 24" aria-hidden="true">
@@ -213,156 +222,332 @@ function CampoEntrada({
     );
 }
 
+/* ── Chip de Identificador Actual ─────────────────────────── */
+
+function ChipIdentificador({ identificador, onCambiar }) {
+    return (
+        <div className="tarjeta-identificador-actual">
+            <div className="tarjeta-identificador-actual__info">
+                <IconoUsuario className="tarjeta-identificador-actual__icono" />
+                <span className="tarjeta-identificador-actual__texto">{identificador}</span>
+            </div>
+            <button
+                type="button"
+                className="tarjeta-identificador-actual__cambiar"
+                onClick={onCambiar}
+                aria-label="Cambiar usuario, correo o teléfono"
+            >
+                Cambiar
+            </button>
+        </div>
+    );
+}
+
 /* ── Formulario ───────────────────────────────────────────── */
 
 function FormularioSesion() {
     const navigate = useNavigate();
 
-    const [modo, setModo] = useState("password"); // "password" | "sms"
-    const [usuario, setUsuario] = useState("");
+    // Flujo por pasos: "identificador" -> "password" | "menu_metodos" | "sms_otp" | "email_otp"
+    const [pasoLogin, setPasoLogin] = useState("identificador");
+    const [identificador, setIdentificador] = useState("");
     const [contrasena, setContrasena] = useState("");
 
-    const [telefono, setTelefono] = useState("");
-    const [codigoOtp, setCodigoOtp] = useState("");
-    const [otpSolicitado, setOtpSolicitado] = useState(false);
+    const [codigoSms, setCodigoSms] = useState("");
+    const [destinoSms, setDestinoSms] = useState("");
 
-    const [cargandoPassword, setCargandoPassword] = useState(false);
-    const [cargandoSms, setCargandoSms] = useState(false);
+    const [codigoEmail, setCodigoEmail] = useState("");
+    const [destinoEmail, setDestinoEmail] = useState("");
+
+    const [cargandoAuth, setCargandoAuth] = useState(false);
+    const [cargandoMetodo, setCargandoMetodo] = useState(false);
     const [cargandoGoogle, setCargandoGoogle] = useState(false);
 
+    // ── Estado 2FA ──
+    const [desafio2FA, setDesafio2FA] = useState(null); // { ticket2FA, canal2FA, destino2FA, usuario }
+    const [codigo2FA, setCodigo2FA] = useState("");
+    const [cargando2FA, setCargando2FA] = useState(false);
+    const [cambiandoCanal, setCambiandoCanal] = useState(false);
+
     const [mensajeError, setMensajeError] = useState("");
-    /* Antes un único `error` pintaba de rojo TODOS los campos a la
-    vez. Ahora sólo se marca el campo que falla la validación;
-       un fallo de credenciales muestra el aviso sin teñir nada. */
     const [campoError, setCampoError] = useState(null);
 
-    const cargando = cargandoPassword || cargandoSms || cargandoGoogle;
+    const cargando = cargandoAuth || cargandoMetodo || cargandoGoogle;
 
     function limpiarError() {
         setMensajeError("");
         setCampoError(null);
     }
 
-    function cambiarModo(nuevo) {
-        setModo(nuevo);
-        limpiarError();
-    }
-
-    /* ───── LOGIN NORMAL ───── */
-    async function autenticar() {
-        if (!usuario.trim()) {
-            setCampoError("usuario");
-            setMensajeError("Ingresa tu usuario");
+    /* ───── PASO 1: CONTINUAR CON IDENTIFICADOR ───── */
+    function continuarIdentificador(e) {
+        if (e) e.preventDefault();
+        if (!identificador.trim()) {
+            setCampoError("identificador");
+            setMensajeError("Ingresa tu usuario, correo o teléfono");
             return;
         }
+        limpiarError();
+        setPasoLogin("password");
+    }
+
+    /* ───── PASO 2: LOGIN CON CONTRASEÑA ───── */
+    async function autenticarPassword(e) {
+        if (e) e.preventDefault();
         if (!contrasena) {
             setCampoError("contrasena");
             setMensajeError("Ingresa tu contraseña");
             return;
         }
 
-        setCargandoPassword(true);
+        setCargandoAuth(true);
         limpiarError();
 
         try {
             const res = await fetch(`${API_URL}/usuario/login`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ usuario, contrasena }),
+                body: JSON.stringify({ usuario: identificador.trim(), contrasena }),
             });
 
             if (!res.ok) {
-                throw new Error("Usuario o contraseña incorrectos");
+                const errorData = await res.json().catch(() => null);
+                throw new Error(errorData?.error || errorData?.mensaje || "Usuario o contraseña incorrectos");
             }
 
             const data = await res.json();
+            if (data.requiere2FA) {
+                setDesafio2FA({
+                    ticket2FA: data.ticket2FA,
+                    canal2FA: data.canal2FA,
+                    destino2FA: data.destino2FA,
+                    usuario: data.usuario,
+                });
+                setCodigo2FA("");
+                return;
+            }
             guardarSesion(data);
             navigate(rutaInicial());
         } catch (err) {
             console.error(err);
+            setCampoError("contrasena");
             setMensajeError(
                 err instanceof TypeError
                     ? "No pudimos conectar con el servidor. Revisa tu conexión."
                     : err.message
             );
         } finally {
-            setCargandoPassword(false);
+            setCargandoAuth(false);
         }
     }
 
-    /* ───── SMS OTP ───── */
-    async function solicitarOtpSms() {
-        if (!telefono.trim()) {
-            setCampoError("telefono");
-            setMensajeError("Ingresa tu número celular");
+    /* ───── OTRAS FORMAS: SOLICITAR Y VERIFICAR EMAIL OTP ───── */
+    async function solicitarOtpEmail() {
+        setCargandoMetodo(true);
+        limpiarError();
+
+        try {
+            const res = await fetch(`${API_URL}/usuario/email/solicitar-codigo`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ identificador: identificador.trim() }),
+            });
+
+            const data = await res.json();
+            if (!res.ok || !data.exito) {
+                throw new Error(data.mensaje || data.error || "No se pudo enviar el correo de acceso");
+            }
+            setDestinoEmail(data.destino || identificador);
+            setCodigoEmail("");
+            setPasoLogin("email_otp");
+        } catch (err) {
+            setMensajeError(err.message || "Error al solicitar código por correo");
+        } finally {
+            setCargandoMetodo(false);
+        }
+    }
+
+    async function verificarOtpEmail(e) {
+        if (e) e.preventDefault();
+        if (!codigoEmail.trim() || codigoEmail.trim().length !== 6) {
+            setCampoError("codigo_email");
+            setMensajeError("Ingresa el código de 6 dígitos enviado a tu correo");
             return;
         }
 
-        setCargandoSms(true);
+        setCargandoAuth(true);
+        limpiarError();
+
+        try {
+            const res = await fetch(`${API_URL}/usuario/email/verificar-codigo`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ identificador: identificador.trim(), codigo: codigoEmail.trim() }),
+            });
+
+            const data = await res.json();
+            if (!res.ok) {
+                throw new Error(data.error || data.mensaje || "Código de correo inválido");
+            }
+
+            if (data.requiere2FA) {
+                setDesafio2FA({
+                    ticket2FA: data.ticket2FA,
+                    canal2FA: data.canal2FA,
+                    destino2FA: data.destino2FA,
+                    usuario: data.usuario,
+                });
+                setCodigo2FA("");
+                return;
+            }
+
+            guardarSesion(data);
+            navigate(rutaInicial());
+        } catch (err) {
+            setCampoError("codigo_email");
+            setMensajeError(err.message || "Código inválido o expirado");
+        } finally {
+            setCargandoAuth(false);
+        }
+    }
+
+    /* ───── OTRAS FORMAS: SOLICITAR Y VERIFICAR SMS OTP ───── */
+    async function solicitarOtpSms() {
+        setCargandoMetodo(true);
         limpiarError();
 
         try {
             const res = await fetch(`${API_URL}/usuario/sms/solicitar-codigo`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ telefono }),
+                body: JSON.stringify({ identificador: identificador.trim() }),
             });
 
             const data = await res.json();
             if (!res.ok || !data.exito) {
-                throw new Error(data.mensaje || "Error al solicitar el código");
+                throw new Error(data.mensaje || data.error || "No se pudo enviar el SMS con el código");
             }
-            setOtpSolicitado(true);
+            setDestinoSms(data.destino || identificador);
+            setCodigoSms("");
+            setPasoLogin("sms_otp");
         } catch (err) {
-            setCampoError("telefono");
-            setMensajeError(err.message || "Error al enviar el SMS");
+            setMensajeError(err.message || "Error al solicitar código por SMS");
         } finally {
-            setCargandoSms(false);
+            setCargandoMetodo(false);
         }
     }
 
-    async function verificarOtpSms() {
-        if (!codigoOtp.trim()) {
-            setCampoError("otp");
-            setMensajeError("Ingresa el código que recibiste");
+    async function verificarOtpSms(e) {
+        if (e) e.preventDefault();
+        if (!codigoSms.trim() || codigoSms.trim().length !== 6) {
+            setCampoError("codigo_sms");
+            setMensajeError("Ingresa el código de 6 dígitos que recibiste por SMS");
             return;
         }
 
-        setCargandoSms(true);
+        setCargandoAuth(true);
         limpiarError();
 
         try {
             const res = await fetch(`${API_URL}/usuario/sms/verificar-codigo`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ telefono, codigo: codigoOtp }),
+                body: JSON.stringify({ identificador: identificador.trim(), codigo: codigoSms.trim() }),
             });
 
             const data = await res.json();
             if (!res.ok) {
-                throw new Error(data.error || "Código inválido");
+                throw new Error(data.error || data.mensaje || "Código inválido");
+            }
+
+            if (data.requiere2FA) {
+                setDesafio2FA({
+                    ticket2FA: data.ticket2FA,
+                    canal2FA: data.canal2FA,
+                    destino2FA: data.destino2FA,
+                    usuario: data.usuario,
+                });
+                setCodigo2FA("");
+                return;
             }
 
             guardarSesion(data);
             navigate(rutaInicial());
         } catch (err) {
-            setCampoError("otp");
+            setCampoError("codigo_sms");
             setMensajeError(err.message || "Código inválido o expirado");
         } finally {
-            setCargandoSms(false);
+            setCargandoAuth(false);
         }
     }
 
-    function formularioSubmit(e) {
-        e.preventDefault();
-        if (cargando) return;
+    /* ───── DESAFÍO 2FA ───── */
+    async function verificar2faLogin() {
+        if (!codigo2FA.trim() || codigo2FA.trim().length !== 6) {
+            setCampoError("codigo2fa");
+            setMensajeError("Ingresa el código de 6 dígitos");
+            return;
+        }
 
-        if (modo === "password") {
-            autenticar();
-        } else if (!otpSolicitado) {
-            solicitarOtpSms();
-        } else {
-            verificarOtpSms();
+        setCargando2FA(true);
+        limpiarError();
+
+        try {
+            const res = await fetch(`${API_URL}/usuario/login/verificar-2fa`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    ticket2FA: desafio2FA.ticket2FA,
+                    codigo: codigo2FA.trim(),
+                }),
+            });
+
+            const data = await res.json();
+            if (!res.ok) {
+                throw new Error(data.error || data.mensaje || "Código de verificación incorrecto");
+            }
+
+            guardarSesion(data);
+            navigate(rutaInicial());
+        } catch (err) {
+            setCampoError("codigo2fa");
+            setMensajeError(err.message || "Error al verificar código 2FA");
+        } finally {
+            setCargando2FA(false);
+        }
+    }
+
+    async function cambiarCanal2fa(nuevoCanal) {
+        if (!desafio2FA?.ticket2FA || cambiandoCanal) return;
+        setCambiandoCanal(true);
+        limpiarError();
+
+        try {
+            const res = await fetch(`${API_URL}/usuario/login/cambiar-canal-2fa`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    ticket2FA: desafio2FA.ticket2FA,
+                    nuevoCanal: nuevoCanal,
+                }),
+            });
+
+            const data = await res.json();
+            if (!res.ok) {
+                throw new Error(data.error || data.mensaje || "No se pudo cambiar de canal");
+            }
+
+            setDesafio2FA({
+                ticket2FA: data.ticket2FA,
+                canal2FA: data.canal2FA,
+                destino2FA: data.destino2FA,
+                usuario: data.usuario,
+            });
+            setCodigo2FA("");
+        } catch (err) {
+            setMensajeError(err.message || "Error al cambiar de canal");
+        } finally {
+            setCambiandoCanal(false);
         }
     }
 
@@ -397,6 +582,16 @@ function FormularioSesion() {
                 }
 
                 const data = await backendRes.json();
+                if (data.requiere2FA) {
+                    setDesafio2FA({
+                        ticket2FA: data.ticket2FA,
+                        canal2FA: data.canal2FA,
+                        destino2FA: data.destino2FA,
+                        usuario: data.usuario,
+                    });
+                    setCodigo2FA("");
+                    return;
+                }
                 guardarSesion(data);
                 navigate(rutaInicial());
             } catch (err) {
@@ -409,134 +604,398 @@ function FormularioSesion() {
         onError: () => setMensajeError("Fallo en la autenticación con Google"),
     });
 
-    const textoBoton = modo === "password"
-        ? (cargandoPassword ? "Verificando..." : "Iniciar Sesión")
-        : !otpSolicitado
-            ? (cargandoSms ? "Enviando SMS..." : "Enviar Código SMS")
-            : (cargandoSms ? "Verificando..." : "Ingresar con OTP");
+    if (desafio2FA) {
+        return (
+            <div className="formulario-sesion-wrapper">
+                <div className="bloque-2fa-card">
+                    <div className="insignia-2fa">
+                        <span className="material-symbols-outlined">security</span>
+                        Seguridad 2FA
+                    </div>
+                    <h2 className="titulo-2fa">Verificación en Dos Pasos</h2>
+                    <p className="desc-2fa">
+                        Hemos enviado un código de 6 dígitos a <strong>{desafio2FA.destino2FA}</strong> por <strong>{desafio2FA.canal2FA}</strong>.
+                    </p>
+
+                    <form onSubmit={(e) => { e.preventDefault(); verificar2faLogin(); }}>
+                        <CampoEntrada
+                            id="codigo-2fa"
+                            tipo="text"
+                            etiqueta="Código de 6 dígitos"
+                            placeholder="123456"
+                            Icono={IconoMensaje}
+                            entrada={codigo2FA}
+                            fun={(e) => { setCodigo2FA(e.target.value.replace(/\D/g, "")); limpiarError(); }}
+                            error={campoError === "codigo2fa"}
+                            autoComplete="one-time-code"
+                            inputMode="numeric"
+                            maxLength={6}
+                        />
+
+                        {mensajeError && (
+                            <div className="alerta-error" role="alert" style={{ marginTop: '12px' }}>
+                                <IconoAlerta className="alerta-error__icono" />
+                                <span>{mensajeError}</span>
+                            </div>
+                        )}
+
+                        <button type="submit" className="boton-sesion" disabled={cargando2FA} style={{ marginTop: '20px' }}>
+                            {cargando2FA ? "Verificando..." : "Verificar e Ingresar"}
+                            {!cargando2FA && <span className="boton-sesion__flecha">→</span>}
+                        </button>
+                    </form>
+
+                    <div className="opciones-canal-2fa">
+                        <p className="texto-ayuda-canal">¿No recibiste el código? Intentar por:</p>
+                        <div className="botones-canales-alternos">
+                            {["CORREO", "SMS", "WHATSAPP"].map((canal) => (
+                                <button
+                                    key={canal}
+                                    type="button"
+                                    className={`btn-canal-alt ${desafio2FA.canal2FA === canal ? 'activo' : ''}`}
+                                    onClick={() => cambiarCanal2fa(canal)}
+                                    disabled={cambiandoCanal || desafio2FA.canal2FA === canal}
+                                >
+                                    {canal === "CORREO" && <span className="material-symbols-outlined icono-btn-canal">mail</span>}
+                                    {canal === "SMS" && <span className="material-symbols-outlined icono-btn-canal">sms</span>}
+                                    {canal === "WHATSAPP" && <span className="material-symbols-outlined icono-btn-canal">chat</span>}
+                                    {canal}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+
+                    <button
+                        type="button"
+                        className="btn-volver-login"
+                        onClick={() => { setDesafio2FA(null); setCodigo2FA(""); limpiarError(); }}
+                    >
+                        ← Volver a ingresar usuario y contraseña
+                    </button>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="formulario-sesion-wrapper">
 
-            <div className="selector-modo" role="tablist" aria-label="Método de acceso">
-                <button
-                    type="button"
-                    role="tab"
-                    aria-selected={modo === "password"}
-                    onClick={() => cambiarModo("password")}
-                    className={`selector-modo__opcion ${modo === "password" ? "selector-modo__opcion--activa" : ""}`}
-                >
-                    <IconoCandado className="selector-modo__icono" />
-                    Contraseña
-                </button>
-                <button
-                    type="button"
-                    role="tab"
-                    aria-selected={modo === "sms"}
-                    onClick={() => cambiarModo("sms")}
-                    className={`selector-modo__opcion ${modo === "sms" ? "selector-modo__opcion--activa" : ""}`}
-                >
-                    <IconoTelefono className="selector-modo__icono" />
-                    Código SMS
-                </button>
-            </div>
+            {/* ── PASO 1: IDENTIFICADOR (Usuario, Correo o Teléfono) ── */}
+            {pasoLogin === "identificador" && (
+                <form className="formulario-sesion" onSubmit={continuarIdentificador} noValidate>
+                    <CampoEntrada
+                        id="identificador"
+                        tipo="text"
+                        etiqueta="Usuario, correo o teléfono"
+                        placeholder="Tu usuario, correo o teléfono"
+                        Icono={IconoUsuario}
+                        entrada={identificador}
+                        fun={(e) => { setIdentificador(e.target.value); limpiarError(); }}
+                        error={campoError === "identificador"}
+                        autoComplete="username"
+                    />
 
-            <form className="formulario-sesion" onSubmit={formularioSubmit} noValidate>
+                    {mensajeError && (
+                        <div className="alerta-error" role="alert">
+                            <IconoAlerta className="alerta-error__icono" />
+                            <span>{mensajeError}</span>
+                        </div>
+                    )}
 
-                {modo === "password" ? (
-                    <>
-                        <CampoEntrada
-                            id="usuario"
-                            tipo="text"
-                            etiqueta="Usuario"
-                            placeholder="Tu nombre de usuario"
-                            Icono={IconoUsuario}
-                            entrada={usuario}
-                            fun={(e) => { setUsuario(e.target.value); limpiarError(); }}
-                            error={campoError === "usuario"}
-                            autoComplete="username"
-                        />
+                    <button type="submit" className="boton-sesion" disabled={cargando}>
+                        Continuar
+                        <span className="boton-sesion__flecha">→</span>
+                    </button>
 
-                        <CampoEntrada
-                            id="contrasena"
-                            tipo="password"
-                            etiqueta="Contraseña"
-                            placeholder="••••••••"
-                            Icono={IconoCandado}
-                            entrada={contrasena}
-                            fun={(e) => { setContrasena(e.target.value); limpiarError(); }}
-                            error={campoError === "contrasena"}
-                            autoComplete="current-password"
-                            conOjo
-                            /* No hay ruta pública de recuperación, pero sí un
-                               acceso sin contraseña por SMS: lo reutilizamos. */
-                            botonAyuda={{
-                                texto: "¿Olvidaste tu contraseña?",
-                                onClick: () => cambiarModo("sms"),
-                            }}
-                        />
-                    </>
-                ) : (
-                    <>
-                        <CampoEntrada
-                            id="telefono"
-                            tipo="tel"
-                            etiqueta="Número Celular"
-                            placeholder="+57 300 123 4567"
-                            Icono={IconoTelefono}
-                            entrada={telefono}
-                            fun={(e) => { setTelefono(e.target.value); limpiarError(); }}
-                            error={campoError === "telefono"}
-                            autoComplete="tel"
-                            inputMode="tel"
-                        />
+                    <SeparadorOAuth />
 
-                        {otpSolicitado && (
-                            <CampoEntrada
-                                id="codigo-otp"
-                                tipo="text"
-                                etiqueta="Código de 6 dígitos"
-                                placeholder="123456"
-                                Icono={IconoMensaje}
-                                entrada={codigoOtp}
-                                fun={(e) => { setCodigoOtp(e.target.value); limpiarError(); }}
-                                error={campoError === "otp"}
-                                /* Permite el autorrelleno del SMS en iOS */
-                                autoComplete="one-time-code"
-                                inputMode="numeric"
-                                maxLength={6}
-                            />
-                        )}
-                    </>
-                )}
+                    <BotonesSociales
+                        loginConGoogle={loginConGoogle}
+                        cargandoGoogle={cargandoGoogle}
+                        deshabilitado={cargando}
+                    />
+                </form>
+            )}
 
-                {mensajeError && (
-                    <div className="alerta-error" role="alert">
-                        <IconoAlerta className="alerta-error__icono" />
-                        <span>{mensajeError}</span>
+            {/* ── PASO 2: CONTRASEÑA ── */}
+            {pasoLogin === "password" && (
+                <form className="formulario-sesion" onSubmit={autenticarPassword} noValidate>
+                    <ChipIdentificador
+                        identificador={identificador}
+                        onCambiar={() => { setPasoLogin("identificador"); limpiarError(); }}
+                    />
+
+                    <CampoEntrada
+                        id="contrasena"
+                        tipo="password"
+                        etiqueta="Contraseña"
+                        placeholder="••••••••"
+                        Icono={IconoCandado}
+                        entrada={contrasena}
+                        fun={(e) => { setContrasena(e.target.value); limpiarError(); }}
+                        error={campoError === "contrasena"}
+                        autoComplete="current-password"
+                        conOjo
+                        botonAyuda={{
+                            texto: "¿Olvidaste tu contraseña?",
+                            onClick: () => navigate("/recuperar-contrasena"),
+                        }}
+                    />
+
+                    {mensajeError && (
+                        <div className="alerta-error" role="alert">
+                            <IconoAlerta className="alerta-error__icono" />
+                            <span>{mensajeError}</span>
+                        </div>
+                    )}
+
+                    <button type="submit" className="boton-sesion" disabled={cargando}>
+                        {cargandoAuth
+                            ? <span className="boton-sesion__spinner" aria-hidden="true" />
+                            : null}
+                        {cargandoAuth ? "Iniciando sesión..." : "Iniciar Sesión"}
+                        {!cargandoAuth && <span className="boton-sesion__flecha">→</span>}
+                    </button>
+
+                    {/* Mensaje de otras formas de iniciar sesión directamente abajo de la contraseña */}
+                    <div className="bloque-otras-formas">
+                        <button
+                            type="button"
+                            className="boton-otras-formas"
+                            onClick={() => { setPasoLogin("menu_metodos"); limpiarError(); }}
+                        >
+                            Otras formas de iniciar sesión
+                        </button>
                     </div>
-                )}
 
-                <button type="submit" className="boton-sesion" disabled={cargando}>
-                    {cargando
-                        ? <span className="boton-sesion__spinner" aria-hidden="true" />
-                        : null}
-                    {textoBoton}
-                    {!cargando && <span className="boton-sesion__flecha">→</span>}
-                </button>
+                    <SeparadorOAuth />
 
-                {/* El separador va AQUÍ: antes quedaba encima de los
-                    botones sociales, así que anunciaba "o continúa con"
-                    después de aquello con lo que se continúa. */}
-                <SeparadorOAuth />
+                    <BotonesSociales
+                        loginConGoogle={loginConGoogle}
+                        cargandoGoogle={cargandoGoogle}
+                        deshabilitado={cargando}
+                    />
+                </form>
+            )}
 
-                <BotonesSociales
-                    loginConGoogle={loginConGoogle}
-                    cargandoGoogle={cargandoGoogle}
-                    deshabilitado={cargando}
-                />
+            {/* ── PASO 3: MENÚ DE OTRAS FORMAS DE INICIAR SESIÓN ── */}
+            {pasoLogin === "menu_metodos" && (
+                <div className="formulario-sesion">
+                    <ChipIdentificador
+                        identificador={identificador}
+                        onCambiar={() => { setPasoLogin("identificador"); limpiarError(); }}
+                    />
 
-            </form>
+                    <div className="encabezado-otras-formas">
+                        <h3 className="titulo-otras-formas">Otras formas de iniciar sesión</h3>
+                        <p className="desc-otras-formas">
+                            Selecciona cómo prefieres identificarte para ingresar a tu cuenta:
+                        </p>
+                    </div>
+
+                    {mensajeError && (
+                        <div className="alerta-error" role="alert">
+                            <IconoAlerta className="alerta-error__icono" />
+                            <span>{mensajeError}</span>
+                        </div>
+                    )}
+
+                    <div className="menu-metodos-login">
+                        {/* Opción 1: Contraseña */}
+                        <button
+                            type="button"
+                            className="opcion-metodo-card"
+                            onClick={() => { setPasoLogin("password"); limpiarError(); }}
+                        >
+                            <div className="opcion-metodo-card__icono">
+                                <IconoCandado className="opcion-metodo-svg" />
+                            </div>
+                            <div className="opcion-metodo-card__info">
+                                <span className="opcion-metodo-card__titulo">Contraseña</span>
+                                <span className="opcion-metodo-card__desc">Ingresa usando tu clave personal</span>
+                            </div>
+                            <span className="opcion-metodo-card__flecha">›</span>
+                        </button>
+
+                        {/* Opción 2: Correo */}
+                        <button
+                            type="button"
+                            className="opcion-metodo-card"
+                            onClick={solicitarOtpEmail}
+                            disabled={cargandoMetodo}
+                        >
+                            <div className="opcion-metodo-card__icono">
+                                <IconoCorreo className="opcion-metodo-svg" />
+                            </div>
+                            <div className="opcion-metodo-card__info">
+                                <span className="opcion-metodo-card__titulo">Correo electrónico</span>
+                                <span className="opcion-metodo-card__desc">Recibe un código temporal en tu bandeja de entrada</span>
+                            </div>
+                            {cargandoMetodo ? (
+                                <span className="boton-sesion__spinner" style={{ width: 14, height: 14 }} />
+                            ) : (
+                                <span className="opcion-metodo-card__flecha">›</span>
+                            )}
+                        </button>
+
+                        {/* Opción 3: Teléfono */}
+                        <button
+                            type="button"
+                            className="opcion-metodo-card"
+                            onClick={solicitarOtpSms}
+                            disabled={cargandoMetodo}
+                        >
+                            <div className="opcion-metodo-card__icono">
+                                <IconoTelefono className="opcion-metodo-svg" />
+                            </div>
+                            <div className="opcion-metodo-card__info">
+                                <span className="opcion-metodo-card__titulo">Teléfono (SMS)</span>
+                                <span className="opcion-metodo-card__desc">Recibe un código temporal por mensaje de texto</span>
+                            </div>
+                            {cargandoMetodo ? (
+                                <span className="boton-sesion__spinner" style={{ width: 14, height: 14 }} />
+                            ) : (
+                                <span className="opcion-metodo-card__flecha">›</span>
+                            )}
+                        </button>
+                    </div>
+
+                    <button
+                        type="button"
+                        className="btn-volver-opciones"
+                        onClick={() => { setPasoLogin("password"); limpiarError(); }}
+                    >
+                        ← Volver a ingresar contraseña
+                    </button>
+                </div>
+            )}
+
+            {/* ── PASO 4: CÓDIGO SMS ── */}
+            {pasoLogin === "sms_otp" && (
+                <form className="formulario-sesion" onSubmit={verificarOtpSms} noValidate>
+                    <div className="encabezado-otras-formas">
+                        <div className="insignia-metodo-otp">
+                            <IconoTelefono className="insignia-metodo-otp__icono" />
+                            Código por SMS
+                        </div>
+                        <h3 className="titulo-otras-formas">Verificación por Mensaje</h3>
+                        <p className="desc-otras-formas">
+                            Hemos enviado un código de 6 dígitos al número <strong>{destinoSms || identificador}</strong>.
+                        </p>
+                    </div>
+
+                    <CampoEntrada
+                        id="codigo-sms"
+                        tipo="text"
+                        etiqueta="Código de 6 dígitos"
+                        placeholder="123456"
+                        Icono={IconoMensaje}
+                        entrada={codigoSms}
+                        fun={(e) => { setCodigoSms(e.target.value.replace(/\D/g, "")); limpiarError(); }}
+                        error={campoError === "codigo_sms"}
+                        autoComplete="one-time-code"
+                        inputMode="numeric"
+                        maxLength={6}
+                    />
+
+                    {mensajeError && (
+                        <div className="alerta-error" role="alert">
+                            <IconoAlerta className="alerta-error__icono" />
+                            <span>{mensajeError}</span>
+                        </div>
+                    )}
+
+                    <button type="submit" className="boton-sesion" disabled={cargando}>
+                        {cargandoAuth
+                            ? <span className="boton-sesion__spinner" aria-hidden="true" />
+                            : null}
+                        {cargandoAuth ? "Verificando..." : "Verificar e Ingresar"}
+                        {!cargandoAuth && <span className="boton-sesion__flecha">→</span>}
+                    </button>
+
+                    <div className="enlaces-pie-otp">
+                        <button
+                            type="button"
+                            className="btn-reenlace-otp"
+                            onClick={solicitarOtpSms}
+                            disabled={cargandoMetodo}
+                        >
+                            {cargandoMetodo ? "Reenviando..." : "¿No recibiste el SMS? Reenviar código"}
+                        </button>
+                        <button
+                            type="button"
+                            className="btn-cambiar-metodo-otp"
+                            onClick={() => { setPasoLogin("menu_metodos"); limpiarError(); }}
+                        >
+                            Probar otra forma de iniciar sesión
+                        </button>
+                    </div>
+                </form>
+            )}
+
+            {/* ── PASO 5: CÓDIGO EMAIL ── */}
+            {pasoLogin === "email_otp" && (
+                <form className="formulario-sesion" onSubmit={verificarOtpEmail} noValidate>
+                    <div className="encabezado-otras-formas">
+                        <div className="insignia-metodo-otp">
+                            <IconoCorreo className="insignia-metodo-otp__icono" />
+                            Código por Correo
+                        </div>
+                        <h3 className="titulo-otras-formas">Verificación por Correo</h3>
+                        <p className="desc-otras-formas">
+                            Hemos enviado un código de 6 dígitos al correo <strong>{destinoEmail || identificador}</strong>.
+                        </p>
+                    </div>
+
+                    <CampoEntrada
+                        id="codigo-email"
+                        tipo="text"
+                        etiqueta="Código de 6 dígitos"
+                        placeholder="123456"
+                        Icono={IconoMensaje}
+                        entrada={codigoEmail}
+                        fun={(e) => { setCodigoEmail(e.target.value.replace(/\D/g, "")); limpiarError(); }}
+                        error={campoError === "codigo_email"}
+                        autoComplete="one-time-code"
+                        inputMode="numeric"
+                        maxLength={6}
+                    />
+
+                    {mensajeError && (
+                        <div className="alerta-error" role="alert">
+                            <IconoAlerta className="alerta-error__icono" />
+                            <span>{mensajeError}</span>
+                        </div>
+                    )}
+
+                    <button type="submit" className="boton-sesion" disabled={cargando}>
+                        {cargandoAuth
+                            ? <span className="boton-sesion__spinner" aria-hidden="true" />
+                            : null}
+                        {cargandoAuth ? "Verificando..." : "Verificar e Ingresar"}
+                        {!cargandoAuth && <span className="boton-sesion__flecha">→</span>}
+                    </button>
+
+                    <div className="enlaces-pie-otp">
+                        <button
+                            type="button"
+                            className="btn-reenlace-otp"
+                            onClick={solicitarOtpEmail}
+                            disabled={cargandoMetodo}
+                        >
+                            {cargandoMetodo ? "Reenviando..." : "¿No recibiste el correo? Reenviar código"}
+                        </button>
+                        <button
+                            type="button"
+                            className="btn-cambiar-metodo-otp"
+                            onClick={() => { setPasoLogin("menu_metodos"); limpiarError(); }}
+                        >
+                            Probar otra forma de iniciar sesión
+                        </button>
+                    </div>
+                </form>
+            )}
+
         </div>
     );
 }
