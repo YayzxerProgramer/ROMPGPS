@@ -12,6 +12,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import com.gpsromp.config.SeguridadService;
+import com.gpsromp.usuario.service.DosFactoresService;
+import com.gpsromp.usuario.service.RecuperacionContrasenaService;
 import com.gpsromp.usuario.dto.*;
 import com.gpsromp.usuario.model.Usuario;
 import com.gpsromp.usuario.service.ServicioAutenticacion;
@@ -32,16 +34,13 @@ import lombok.RequiredArgsConstructor;
  * ServicioOauth: este controlador pasó de ~400 líneas con llamadas HTTP a
  * terceros embebidas a ser una capa fina de enrutado.
  *
- * Autorización (antes la única regla era .anyRequest().authenticated(), de modo
- * que cualquier cuenta podía leer, editar y borrar los datos de cualquier
- * otra):
- *
- * GET /usuario → solo ADMIN
- * GET /usuario/{id} → el propio usuario o un ADMIN
- * PUT /usuario/{id} → el propio usuario o un ADMIN
- * DELETE /usuario/{id} → solo ADMIN
- * PATCH contraseña → el titular (con la actual) o un ADMIN
- * GET /usuario/vehiculos/ → el propio usuario o un ADMIN
+ * Autorización:
+ * GET /usuario -> solo ADMIN
+ * GET /usuario/{id} -> el propio usuario o un ADMIN
+ * PUT /usuario/{id} -> el propio usuario o un ADMIN
+ * DELETE /usuario/{id} -> solo ADMIN
+ * PATCH contraseña -> el titular (con la actual) o un ADMIN
+ * GET /usuario/vehiculos/ -> el propio usuario o un ADMIN
  */
 @RestController
 @RequestMapping("/usuario")
@@ -53,6 +52,8 @@ public class UsuarioController {
     private final ServicioAutenticacion servicioAutenticacion;
     private final ServicioOauth servicioOauth;
     private final SeguridadService seguridadService;
+    private final DosFactoresService dosFactoresService;
+    private final RecuperacionContrasenaService recuperacionContrasenaService;
 
     // ============================================================== consultas
 
@@ -101,10 +102,7 @@ public class UsuarioController {
 
     /**
      * Registro público.
-     *
-     * Recibe RegistroRequest, no la entidad Usuario: el DTO no declara rol, id,
-     * activo ni vehiculos, así que ya no se puede crear un administrador desde
-     * un endpoint sin autenticación.
+     * Recibe RegistroRequest, no la entidad Usuario.
      */
     @PostMapping
     public ResponseEntity<UsuarioResponse> crearUsuario(@Valid @RequestBody RegistroRequest peticion) {
@@ -125,8 +123,6 @@ public class UsuarioController {
 
     /**
      * Cambio de contraseña. Exige la actual salvo que quien llame sea ADMIN.
-     * Al terminar se revocan todas las sesiones: si alguien había robado un
-     * token, cambiar la contraseña debe echarlo fuera.
      */
     @PatchMapping("/contrasena/{id}")
     @PreAuthorize("hasRole('ADMIN') or @seguridad.esMiUsuario(#id, authentication)")
@@ -166,8 +162,7 @@ public class UsuarioController {
     }
 
     /**
-     * Renueva el par de tokens. El refresco usado se revoca y se emite otro
-     * (rotación), de modo que reutilizar uno robado falla.
+     * Renueva el par de tokens.
      */
     @PostMapping("/refrescar")
     public ResponseEntity<SesionResponse> refrescar(@Valid @RequestBody RefrescarRequest peticion) {
@@ -176,8 +171,6 @@ public class UsuarioController {
 
     /**
      * Cierra la sesión en el servidor.
-     * Antes no existía: el frontend solo borraba el localStorage, así que el
-     * token seguía siendo válido durante 24 horas para quien lo tuviera.
      */
     @PostMapping("/logout")
     public ResponseEntity<Void> logout(@Valid @RequestBody RefrescarRequest peticion) {
@@ -191,6 +184,10 @@ public class UsuarioController {
         String accessToken = requerido(body.get("tokenGoogle"), "Token de Google requerido");
         Usuario usuario = servicioOauth.autenticarConGoogle(accessToken, body.get("telefono"));
 
+        if (Boolean.TRUE.equals(usuario.getDosFactoresActivo())) {
+            return ResponseEntity.ok(dosFactoresService.iniciarDesafioLogin(usuario));
+        }
+
         boolean perfilCompleto = usuario.getTelefono() != null && !usuario.getTelefono().isBlank();
 
         return ResponseEntity.ok(
@@ -203,6 +200,10 @@ public class UsuarioController {
         String accessToken = requerido(body.get("tokenGithub"), "Token de GitHub requerido");
         Usuario usuario = servicioOauth.autenticarConGithub(accessToken);
 
+        if (Boolean.TRUE.equals(usuario.getDosFactoresActivo())) {
+            return ResponseEntity.ok(dosFactoresService.iniciarDesafioLogin(usuario));
+        }
+
         return ResponseEntity.ok(servicioAutenticacion.emitirSesion(usuario));
     }
 
@@ -213,7 +214,51 @@ public class UsuarioController {
         String accessToken = servicioOauth.intercambiarCodigoGithub(code);
         Usuario usuario = servicioOauth.autenticarConGithub(accessToken);
 
+        if (Boolean.TRUE.equals(usuario.getDosFactoresActivo())) {
+            return ResponseEntity.ok(dosFactoresService.iniciarDesafioLogin(usuario));
+        }
+
         return ResponseEntity.ok(servicioAutenticacion.emitirSesion(usuario));
+    }
+
+    // ==================================================== 2FA & Recuperación
+
+    @PostMapping("/login/verificar-2fa")
+    public ResponseEntity<SesionResponse> verificar2faLogin(@Valid @RequestBody Verificar2faRequest request) {
+        return ResponseEntity.ok(dosFactoresService.verificarDesafioLogin(request.ticket2FA(), request.codigo()));
+    }
+
+    @PostMapping("/login/cambiar-canal-2fa")
+    public ResponseEntity<SesionResponse> cambiarCanal2fa(@Valid @RequestBody CambiarCanal2faRequest request) {
+        return ResponseEntity.ok(dosFactoresService.cambiarCanalDesafio(request.ticket2FA(), request.nuevoCanal()));
+    }
+
+    @PostMapping("/recuperar-contrasena/solicitar")
+    public ResponseEntity<Map<String, String>> solicitarRecuperacion(@Valid @RequestBody SolicitarRecuperacionRequest request) {
+        recuperacionContrasenaService.solicitarRecuperacion(request.identificador());
+        return ResponseEntity.ok(Map.of("mensaje", "Hemos enviado un código de recuperación a tu correo electrónico"));
+    }
+
+    @PostMapping("/recuperar-contrasena/validar-codigo")
+    public ResponseEntity<Map<String, Object>> validarCodigoRecuperacion(@Valid @RequestBody ValidarCodigoRecuperacionRequest request) {
+        recuperacionContrasenaService.validarCodigo(request.identificador(), request.codigo());
+        return ResponseEntity.ok(Map.of("valido", true, "mensaje", "Código de recuperación verificado correctamente"));
+    }
+
+    @PostMapping("/recuperar-contrasena/restablecer")
+    public ResponseEntity<Map<String, String>> restablecerContrasena(@Valid @RequestBody RestablecerContrasenaRequest request) {
+        recuperacionContrasenaService.restablecerContrasena(request.identificador(), request.codigo(), request.nuevaContrasena());
+        return ResponseEntity.ok(Map.of("mensaje", "Contraseña restablecida exitosamente"));
+    }
+
+    @PatchMapping("/2fa")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<UsuarioResponse> actualizar2fa(
+            @Valid @RequestBody Actualizar2faRequest request,
+            Authentication auth) {
+        Usuario usuario = usuarioService.obtenerPorNombreUsuarioOFallar(auth.getName());
+        Usuario actualizado = dosFactoresService.actualizarConfiguracion(usuario, request.activo(), request.canal());
+        return ResponseEntity.ok(UsuarioMapper.aResponse(actualizado));
     }
 
     // ============================================================== privados
@@ -227,8 +272,6 @@ public class UsuarioController {
 
     /**
      * IP del cliente para el límite de intentos.
-     * Se respeta X-Forwarded-For por si hay un proxy delante; si no, la IP de
-     * la conexión.
      */
     private String ipDe(HttpServletRequest peticion) {
         String reenviada = peticion.getHeader("X-Forwarded-For");

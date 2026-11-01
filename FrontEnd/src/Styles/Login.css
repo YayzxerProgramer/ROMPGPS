@@ -431,13 +431,25 @@
     /* 16px exactos: por debajo, iOS Safari hace zoom al enfocar */
     font-size: 16px;
     font-family: inherit;
-    outline: none;
+    outline: none !important;
     transition: border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
-.caja-entrada__input:focus {
-    border-color: #b2cea8;
-    box-shadow: 0 0 0 3px rgba(178, 206, 168, 0.12);
+.caja-entrada__input:focus,
+.caja-entrada__input:focus-visible {
+    outline: none !important;
+    border-color: #b2cea8 !important;
+    box-shadow: 0 0 0 3px rgba(178, 206, 168, 0.15) !important;
+}
+
+.caja-entrada__input:-webkit-autofill,
+.caja-entrada__input:-webkit-autofill:hover,
+.caja-entrada__input:-webkit-autofill:focus,
+.caja-entrada__input:-webkit-autofill:active {
+    -webkit-box-shadow: 0 0 0 1000px #212722 inset !important;
+    -webkit-text-fill-color: #f2f5f0 !important;
+    caret-color: #b2cea8 !important;
+    transition: background-color 5000s ease-in-out 0s;
 }
 
 .caja-entrada__input:focus + .caja-entrada__icono,
@@ -844,3 +856,408 @@
 .caja-entrada__input::-ms-clear {
     display: none;
 }
+
+
+/* ── Desafío 2FA en Login ──────────────────────────────────── */
+
+.bloque-2fa-card {
+    display: flex;
+    flex-direction: column;
+    animation: fadeUp 0.35s ease forwards;
+}
+
+.insignia-2fa {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    color: #10b981;
+    background: rgba(16, 185, 129, 0.12);
+    border: 1px solid rgba(16, 185, 129, 0.3);
+    padding: 4px 12px;
+    border-radius: 100px;
+    width: fit-content;
+    margin-bottom: 12px;
+}
+
+.insignia-2fa .material-symbols-outlined {
+    font-size: 14px;
+}
+
+.titulo-2fa {
+    font-size: 22px;
+    font-weight: 800;
+    color: #f3fff0;
+    letter-spacing: -0.5px;
+    margin: 0 0 8px;
+}
+
+.desc-2fa {
+    font-size: 14px;
+    color: #a4bfa0;
+    line-height: 1.5;
+    margin: 0 0 20px;
+}
+
+.desc-2fa strong {
+    color: #e2f1e0;
+}
+
+.opciones-canal-2fa {
+    margin-top: 24px;
+    padding-top: 18px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.texto-ayuda-canal {
+    font-size: 12px;
+    color: #7d9678;
+    margin: 0 0 10px;
+    font-weight: 600;
+}
+
+.botones-canales-alternos {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.btn-canal-alt {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 7px 12px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: #c7dec4;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-canal-alt:hover:not(:disabled) {
+    background: rgba(178, 206, 168, 0.15);
+    border-color: rgba(178, 206, 168, 0.35);
+    color: #ffffff;
+}
+
+.btn-canal-alt.activo {
+    background: rgba(16, 185, 129, 0.15);
+    border-color: #10b981;
+    color: #6ee7b7;
+    pointer-events: none;
+}
+
+.btn-canal-alt:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.icono-btn-canal {
+    font-size: 15px;
+}
+
+.btn-volver-login {
+    background: none;
+    border: none;
+    color: #7d9678;
+    font-size: 13px;
+    margin-top: 18px;
+    cursor: pointer;
+    text-align: center;
+    transition: color 0.2s;
+}
+
+.btn-volver-login:hover {
+    color: #b2cea8;
+}
+
+/* ── Identificador Actual (Chip) ───────────────────────────── */
+
+.tarjeta-identificador-actual {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 10px 14px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+}
+
+.tarjeta-identificador-actual__info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+}
+
+.tarjeta-identificador-actual__icono {
+    width: 16px;
+    height: 16px;
+    color: #b2cea8;
+    flex-shrink: 0;
+}
+
+.tarjeta-identificador-actual__texto {
+    font-size: 13px;
+    font-weight: 600;
+    color: #e2f1e0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.tarjeta-identificador-actual__cambiar {
+    background: none;
+    border: none;
+    color: #b2cea8;
+    font-family: inherit;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    cursor: pointer;
+    padding: 2px 6px;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+}
+
+.tarjeta-identificador-actual__cambiar:hover {
+    color: #dffbde;
+    background: rgba(178, 206, 168, 0.1);
+}
+
+/* ── Otras Formas de Iniciar Sesión ───────────────────────── */
+
+.bloque-otras-formas {
+    display: flex;
+    justify-content: center;
+    margin-top: -6px;
+    margin-bottom: 2px;
+}
+
+.boton-otras-formas {
+    width: 100%;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(178, 206, 168, 0.22);
+    border-radius: 14px;
+    padding: 12px 18px;
+    color: #b2cea8;
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.25s ease;
+}
+
+.boton-otras-formas:hover {
+    background: rgba(178, 206, 168, 0.08);
+    border-color: rgba(178, 206, 168, 0.45);
+    color: #dffbde;
+    transform: translateY(-1px);
+}
+
+.encabezado-otras-formas {
+    display: flex;
+    flex-direction: column;
+    text-align: left;
+    margin-top: 4px;
+}
+
+.titulo-otras-formas {
+    font-size: 18px;
+    font-weight: 800;
+    color: #f3fff0;
+    margin: 0 0 6px 0;
+    letter-spacing: -0.01em;
+}
+
+.desc-otras-formas {
+    font-size: 13px;
+    color: #98a098;
+    line-height: 1.5;
+    margin: 0 0 12px 0;
+}
+
+.desc-otras-formas strong {
+    color: #dffbde;
+}
+
+.menu-metodos-login {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.opcion-metodo-card {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 16px;
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    cursor: pointer;
+    text-align: left;
+    font-family: inherit;
+    transition: all 0.25s ease;
+    width: 100%;
+}
+
+.opcion-metodo-card:hover:not(:disabled) {
+    background: rgba(178, 206, 168, 0.08);
+    border-color: rgba(178, 206, 168, 0.3);
+    transform: translateY(-1px);
+}
+
+.opcion-metodo-card:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.opcion-metodo-card__icono {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    background: rgba(178, 206, 168, 0.1);
+    color: #b2cea8;
+    flex-shrink: 0;
+}
+
+.opcion-metodo-svg {
+    width: 18px;
+    height: 18px;
+}
+
+.opcion-metodo-card__info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    flex: 1;
+    min-width: 0;
+}
+
+.opcion-metodo-card__titulo {
+    font-size: 13px;
+    font-weight: 700;
+    color: #f3fff0;
+}
+
+.opcion-metodo-card__desc {
+    font-size: 11px;
+    color: #8f968f;
+    line-height: 1.4;
+}
+
+.opcion-metodo-card__flecha {
+    font-size: 20px;
+    color: #7f867f;
+    line-height: 1;
+    transition: transform 0.2s ease, color 0.2s ease;
+}
+
+.opcion-metodo-card:hover:not(:disabled) .opcion-metodo-card__flecha {
+    color: #b2cea8;
+    transform: translateX(3px);
+}
+
+.btn-volver-opciones {
+    background: none;
+    border: none;
+    color: #7d9678;
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 600;
+    margin-top: 14px;
+    cursor: pointer;
+    text-align: center;
+    transition: color 0.2s;
+}
+
+.btn-volver-opciones:hover {
+    color: #b2cea8;
+}
+
+/* ── Insignia e Interfaz OTP ──────────────────────────────── */
+
+.insignia-metodo-otp {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: #b2cea8;
+    background: rgba(178, 206, 168, 0.1);
+    border: 1px solid rgba(178, 206, 168, 0.25);
+    padding: 4px 10px;
+    border-radius: 20px;
+    width: fit-content;
+    margin-bottom: 10px;
+}
+
+.insignia-metodo-otp__icono {
+    width: 14px;
+    height: 14px;
+}
+
+.enlaces-pie-otp {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    margin-top: 6px;
+}
+
+.btn-reenlace-otp {
+    background: none;
+    border: none;
+    color: #b2cea8;
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.btn-reenlace-otp:hover:not(:disabled) {
+    color: #dffbde;
+    text-decoration: underline;
+}
+
+.btn-reenlace-otp:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.btn-cambiar-metodo-otp {
+    background: none;
+    border: none;
+    color: #7d9678;
+    font-family: inherit;
+    font-size: 12px;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.btn-cambiar-metodo-otp:hover {
+    color: #b2cea8;
+    text-decoration: underline;
+}
+

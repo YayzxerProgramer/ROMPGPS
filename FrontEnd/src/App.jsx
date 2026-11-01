@@ -12,6 +12,7 @@ import PanelUsuario from './Components/PerfilUsuario'
 import Registro from './Components/Registro'
 import AuthCallback from './Components/AuthCallback'
 import CambiarContrasena from './Components/CambiarContrasena'
+import RecuperarContrasena from './Components/RecuperarContrasena'
 import Dashboard from './Components/Dashboard'
 import RutaProtegida from './Components/RutaProtegida'
 import './Styles/Base.css'
@@ -34,6 +35,7 @@ function App() {
       } />
       <Route path="/login" element={<Login />} />
       <Route path="/registro" element={<Registro />} />
+      <Route path="/recuperar-contrasena" element={<RecuperarContrasena />} />
       <Route path="/auth/callback" element={<AuthCallback />} />
 
       {/* ── Panel administrativo: solo ADMIN ── */}

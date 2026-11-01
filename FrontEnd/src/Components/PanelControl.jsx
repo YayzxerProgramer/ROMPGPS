@@ -29,22 +29,6 @@ function haceCuanto(fecha) {
     return `Hace ${Math.round(min / 1440)} d`;
 }
 
-function leerSim(imei) {
-    try {
-        return localStorage.getItem(`romp:sim:${imei}`) || "";
-    } catch {
-        return "";
-    }
-}
-
-function guardarSim(imei, telefono) {
-    try {
-        localStorage.setItem(`romp:sim:${imei}`, telefono);
-    } catch {
-        // Sin almacenamiento: se pedirá de nuevo la próxima vez.
-    }
-}
-
 export default function PanelControl() {
     const navigate = useNavigate();
 
@@ -65,7 +49,6 @@ export default function PanelControl() {
     const [muestras, setMuestras] = useState([]);
     const [toast, setToast] = useState("");
     const [dialogo, setDialogo] = useState(null); // null | "corte" | "restablecer"
-    const [telefonoSim, setTelefonoSim] = useState("");
     const [enviando, setEnviando] = useState(false);
     const [errorDialogo, setErrorDialogo] = useState(null);
     const toastRef = useRef(null);
@@ -179,7 +162,6 @@ export default function PanelControl() {
     };
 
     const abrirDialogo = () => {
-        setTelefonoSim(leerSim(imei));
         setErrorDialogo(null);
         setDialogo(inmovilizado ? "restablecer" : "corte");
     };
@@ -197,20 +179,13 @@ export default function PanelControl() {
 
     const enviarComando = async (e) => {
         e.preventDefault();
-        const telefono = telefonoSim.trim();
-        if (!telefono) {
-            setErrorDialogo("Escribe el número de la SIM del GPS.");
-            return;
-        }
         setEnviando(true);
         setErrorDialogo(null);
         try {
             const res = await post("/gps/comando-sms", {
                 imei,
                 comando: dialogo === "corte" ? "CORTE_MOTOR" : "RESTAURAR_MOTOR",
-                telefonoSim: telefono,
             });
-            guardarSim(imei, telefono);
             setDialogo(null);
             avisar(res?.mensaje || (dialogo === "corte" ? `Orden de corte enviada a ${placa}` : `Orden de restablecer enviada a ${placa}`));
         } catch (err) {
@@ -520,19 +495,9 @@ export default function PanelControl() {
                         </h2>
                         <p>
                             {dialogo === "corte"
-                                ? `La unidad va a ${velocidad} km/h. La orden se envía por SMS a la SIM del GPS y el vehículo quedará inmovilizado hasta que restablezcas el motor.`
-                                : "La orden se envía por SMS a la SIM del GPS y el motor volverá a encender con normalidad."}
+                                ? `La unidad va a ${velocidad} km/h. La orden se enviará de forma segura y directa al dispositivo GPS, y el vehículo quedará inmovilizado hasta que restablezcas el motor.`
+                                : "La orden se enviará de forma segura y directa al dispositivo GPS, y el motor volverá a encender con normalidad."}
                         </p>
-                        <label className="pc-campo">
-                            <span>Número de la SIM del GPS</span>
-                            <input
-                                type="tel"
-                                value={telefonoSim}
-                                onChange={(e) => setTelefonoSim(e.target.value)}
-                                placeholder="+57 300 000 0000"
-                                autoFocus
-                            />
-                        </label>
                         {errorDialogo && <div className="pc-dialogo-error">{errorDialogo}</div>}
                         <div className="pc-dialogo-acciones">
                             <button type="button" className="pc-boton-secundario" onClick={cerrarDialogo} disabled={enviando}>Cancelar</button>

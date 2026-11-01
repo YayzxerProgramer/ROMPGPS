@@ -182,6 +182,7 @@ export function FormVehiculo({ vehiculo, onCerrar, onGuardado }) {
   const [datos, setDatos] = useState({
     placa: vehiculo?.placa || "",
     imei: vehiculo?.imei || "",
+    numeroSim: vehiculo?.numeroSim || "",
     modelo: vehiculo?.modelo || "",
     tipo: vehiculo?.tipo || "MOTO",
     activo: vehiculo?.activo ?? true,
@@ -198,10 +199,32 @@ export function FormVehiculo({ vehiculo, onCerrar, onGuardado }) {
     setEnviando(true);
     setErrores({ general: null, campos: {} });
     try {
-      const cuerpo = { placa: datos.placa.trim(), imei: datos.imei.trim(), modelo: datos.modelo, tipo: datos.tipo };
+      const imeiLimpio = datos.imei.trim();
+      const cuerpo = {
+        placa: datos.placa.trim(),
+        imei: imeiLimpio || null,
+        modelo: datos.modelo.trim(),
+        tipo: datos.tipo
+      };
+
       const resultado = editando
         ? await put(`/vehiculo/${vehiculo.id}`, cuerpo)
         : await post("/vehiculo", { ...cuerpo, activo: datos.activo, id_usuario: propietario?.id || null });
+
+      // Si hay un IMEI y el admin configuró o editó el número SIM, sincronizar con MongoDB
+      if (imeiLimpio && (datos.numeroSim || vehiculo?.numeroSim)) {
+        try {
+          await put(`/admin/gps/dispositivos/${imeiLimpio}`, {
+            imei: imeiLimpio,
+            numeroSim: datos.numeroSim.trim() || null,
+            modelo: "GT06",
+            activo: true,
+          });
+        } catch (simErr) {
+          console.warn("No se pudo actualizar el registro de SIM en MongoDB:", simErr);
+        }
+      }
+
       onGuardado(resultado, editando ? "Vehículo actualizado" : `Equipo ${resultado.placa} registrado`);
       onCerrar();
     } catch (err) {
@@ -230,6 +253,9 @@ export function FormVehiculo({ vehiculo, onCerrar, onGuardado }) {
         </Campo>
         <Campo etiqueta="IMEI del equipo GPS" error={c.imei} ayuda="15 o 16 dígitos. Déjalo vacío si aún no tiene equipo." ancho>
           <input className="adm-entrada adm-entrada--mono" value={datos.imei} onChange={cambiar("imei", (v) => v.replace(/\D/g, ""))} inputMode="numeric" maxLength={16} />
+        </Campo>
+        <Campo etiqueta="Línea SIM Card del GPS" error={c.numeroSim} ayuda="Número telefónico de la SIM (+57...). Guardado de forma segura en MongoDB." ancho>
+          <input className="adm-entrada adm-entrada--mono" value={datos.numeroSim} onChange={cambiar("numeroSim")} placeholder="+57 300 000 0000" />
         </Campo>
         <Campo etiqueta="Tipo" error={c.tipo} ancho>
           <Segmentos

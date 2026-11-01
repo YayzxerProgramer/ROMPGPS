@@ -1,6 +1,7 @@
 package com.gpsromp.vehiculo.service;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -9,8 +10,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.gpsromp.common.exception.OperacionNoPermitidaException;
 import com.gpsromp.common.exception.RecursoDuplicadoException;
 import com.gpsromp.common.exception.RecursoNoEncontradoException;
+import com.gpsromp.config.SeguridadService;
 import com.gpsromp.usuario.repository.UsuarioRepository;
 import com.gpsromp.vehiculo.dto.ActualizarVehiculoRequest;
 import com.gpsromp.vehiculo.dto.CrearVehiculoRequest;
@@ -40,6 +43,7 @@ public class VehiculoService {
 
     private final VehiculoRepository vehiculoRepository;
     private final UsuarioRepository usuarioRepository;
+    private final SeguridadService seguridadService;
 
     // ---------------------------------------------------------------- consultas
 
@@ -107,6 +111,11 @@ public class VehiculoService {
         String placa = peticion.placa().trim().toUpperCase();
         String imei = vacioANull(peticion.imei());
 
+        // Regla de seguridad: solo un administrador puede asignar el IMEI de un GPS
+        if (imei != null && !seguridadService.esAdminActual()) {
+            throw new OperacionNoPermitidaException("Solo un administrador puede asignar o vincular el IMEI de un GPS a un vehículo");
+        }
+
         if (vehiculoRepository.existsByPlaca(placa)) {
             throw new RecursoDuplicadoException("Ya existe un vehículo con la placa " + placa);
         }
@@ -149,6 +158,10 @@ public class VehiculoService {
         }
         if (peticion.imei() != null) {
             String imei = vacioANull(peticion.imei());
+            // Regla de seguridad: solo un administrador puede alterar el IMEI
+            if (!Objects.equals(imei, vehiculo.getImei()) && !seguridadService.esAdminActual()) {
+                throw new OperacionNoPermitidaException("Solo un administrador puede modificar el IMEI del GPS");
+            }
             if (imei != null && !imei.equals(vehiculo.getImei())
                     && vehiculoRepository.existsByImeiAndIdNot(imei, id)) {
                 throw new RecursoDuplicadoException("Ya existe un vehículo con el IMEI " + imei);

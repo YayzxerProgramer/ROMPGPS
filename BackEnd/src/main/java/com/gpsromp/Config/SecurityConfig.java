@@ -68,8 +68,12 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
                         // Autenticación y registro público
-                        .requestMatchers(HttpMethod.POST, "/usuario/login").permitAll()
+                                                .requestMatchers(HttpMethod.POST, "/usuario/login").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/usuario/login/verificar-2fa").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/usuario/login/cambiar-canal-2fa").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/usuario/recuperar-contrasena/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/usuario/sms/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/usuario/email/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/usuario/google").permitAll()
                         .requestMatchers(HttpMethod.POST, "/usuario/github").permitAll()
                         .requestMatchers(HttpMethod.POST, "/usuario/github/callback").permitAll()
@@ -140,3 +144,4 @@ public class SecurityConfig {
         return config.getAuthenticationManager();
     }
 }
+

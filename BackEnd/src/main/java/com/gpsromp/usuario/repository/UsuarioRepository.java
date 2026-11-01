@@ -18,7 +18,11 @@ public interface UsuarioRepository extends JpaRepository<Usuario, UUID> {
 
     Optional<Usuario> findByUsuario(String usuario);
 
+    Optional<Usuario> findByUsuarioIgnoreCase(String usuario);
+
     Optional<Usuario> findByCorreo(String correo);
+
+    Optional<Usuario> findByCorreoIgnoreCase(String correo);
 
     Optional<Usuario> findByTelefono(String telefono);
 

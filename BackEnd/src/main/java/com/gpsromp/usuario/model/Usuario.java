@@ -45,6 +45,13 @@ public class Usuario implements Serializable {
     @Column(nullable = false)
     private Boolean activo = true;
 
+    @Column(nullable = false)
+    private Boolean dosFactoresActivo = false;
+
+    @Enumerated(EnumType.STRING)
+    @Column(length = 20)
+    private Canal2fa canal2fa = Canal2fa.CORREO;
+
     private String imagenUrl;
 
     @CreationTimestamp

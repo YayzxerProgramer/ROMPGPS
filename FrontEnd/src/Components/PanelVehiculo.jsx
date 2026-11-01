@@ -2,7 +2,6 @@ import { useState, useEffect, useRef } from "react";
 import "../Styles/PanelVehiculo.css";
 import { API_URL } from "../Service/api";
 
-
 function TarjetaVehiculo({ vehiculo, onDelete }) {
     return (
         <article className="tarjeta-vehiculo-configuracion" role="row">
@@ -15,7 +14,7 @@ function TarjetaVehiculo({ vehiculo, onDelete }) {
             </div>
             <div className="tarjeta-vehiculo__celda-modelo">
                 <h3 className="tarjeta-vehiculo__nombre">{vehiculo.modelo}</h3>
-                <p className="tarjeta-vehiculo__serie">IMEI: {vehiculo.imei}</p>
+                <p className="tarjeta-vehiculo__serie">IMEI: {vehiculo.imei || "Sin GPS asignado"}</p>
             </div>
             <div className="tarjeta-vehiculo__celda-tipo">
                 <span className="tarjeta-vehiculo__tipo-etiqueta">
@@ -50,7 +49,6 @@ function ModalRegistro({ visible, onCerrar, onRegistrado, usuarioId, token }) {
         modelo: "",
         placa: "",
         tipo: "MOTO",
-        imei: "",
     });
     const [error, setError] = useState("");
     const [cargando, setCargando] = useState(false);
@@ -66,13 +64,10 @@ function ModalRegistro({ visible, onCerrar, onRegistrado, usuarioId, token }) {
         return () => { document.body.style.overflow = ""; };
     }, [visible]);
 
-    // Limpiar al abrir. Es sincronización deliberada con una prop: al abrir el
-    // modal el formulario debe quedar vacío, no conservar lo del intento anterior.
+    // Limpiar al abrir.
     useEffect(() => {
         if (!visible) return;
-        // eslint-disable-next-line react-hooks/set-state-in-effect
-        setFormulario({ modelo: "", placa: "", tipo: "MOTO", imei: "" });
-        // eslint-disable-next-line react-hooks/set-state-in-effect
+        setFormulario({ modelo: "", placa: "", tipo: "MOTO" });
         setError("");
     }, [visible]);
 
@@ -85,14 +80,12 @@ function ModalRegistro({ visible, onCerrar, onRegistrado, usuarioId, token }) {
         if (!formulario.modelo.trim()) return setError("El modelo es obligatorio.");
         if (!formulario.placa.trim()) return setError("La placa es obligatoria.");
 
-
         setCargando(true);
         try {
             const payload = {
                 modelo: formulario.modelo.trim(),
                 placa: formulario.placa.trim().toUpperCase(),
                 tipo: formulario.tipo,
-                imei: formulario.imei.trim() || null,
                 id_usuario: usuarioId,
                 activo: true,
             };
@@ -123,74 +116,69 @@ function ModalRegistro({ visible, onCerrar, onRegistrado, usuarioId, token }) {
 
     if (!visible) return null;
 
-
-
     return (
-        <div className="modal-fondo modal-fondo--visible" role="dialog" aria-modal="true"
-            aria-labelledby="modal-titulo-heading"
-            onClick={(e) => { if (e.target === e.currentTarget) onCerrar(); }}>
-            <div className="modal-contenido">
-                <div className="modal-cabecera">
-                    <div>
-                        <h2 className="modal-titulo" id="modal-titulo-heading">Nuevo Vehículo</h2>
-                        <p className="modal-subtitulo">Registra una nueva unidad en tu flota.</p>
-                    </div>
-                    <button className="modal-boton-cerrar" type="button" onClick={onCerrar} aria-label="Cerrar modal">
+        <div className="formulario__capa" role="dialog" aria-modal="true" aria-labelledby="modal-titulo">
+            <div className="formulario__contenedor" style={{ maxWidth: "480px" }}>
+                <div className="formulario__cabecera">
+                    <h2 className="formulario__titulo" id="modal-titulo">
+                        Registrar Vehículo
+                    </h2>
+                    <button className="formulario__boton-cerrar" type="button" aria-label="Cerrar modal" onClick={onCerrar}>
                         <span className="material-symbols-outlined">close</span>
                     </button>
                 </div>
 
-                <div className="formulario">
-
+                <div className="formulario__cuerpo">
                     {/* Modelo */}
                     <div className="formulario__grupo">
                         <label className="formulario__etiqueta" htmlFor="campo-modelo">
-                            Modelo del Vehículo
+                            Modelo
                         </label>
                         <input
                             className="formulario__campo"
                             id="campo-modelo"
                             name="modelo"
                             type="text"
-                            placeholder="Ej: Toyota Hilux 2022"
+                            placeholder="Ej: Yamaha MT-03"
                             autoComplete="off"
                             value={formulario.modelo}
+                            onChange={manejarCambio}
+                            autoFocus
+                        />
+                    </div>
+
+                    {/* Placa */}
+                    <div className="formulario__grupo">
+                        <label className="formulario__etiqueta" htmlFor="campo-placa">
+                            Placa
+                        </label>
+                        <input
+                            className="formulario__campo"
+                            id="campo-placa"
+                            name="placa"
+                            type="text"
+                            placeholder="ABC123"
+                            autoComplete="off"
+                            value={formulario.placa}
                             onChange={manejarCambio}
                         />
                     </div>
 
-                    {/* Placa e IMEI */}
-                    <div className="formulario__fila">
-                        <div className="formulario__grupo">
-                            <label className="formulario__etiqueta" htmlFor="campo-placa">
-                                Placa
-                            </label>
-                            <input
-                                className="formulario__campo"
-                                id="campo-placa"
-                                name="placa"
-                                type="text"
-                                placeholder="ABC123"
-                                autoComplete="off"
-                                value={formulario.placa}
-                                onChange={manejarCambio}
-                            />
-                        </div>
-
-                        <div className="formulario__grupo">
-                            <label className="formulario__etiqueta" htmlFor="campo-imei">
-                                IMEI del GPS (Opcional)
-                            </label>
-                            <input
-                                className="formulario__campo"
-                                id="campo-imei"
-                                name="imei"
-                                type="text"
-                                placeholder="Ej: 123456789012345"
-                                autoComplete="off"
-                                value={formulario.imei}
-                                onChange={manejarCambio}
-                            />
+                    {/* Nota informativa sobre IMEI */}
+                    <div className="formulario__grupo">
+                        <div style={{
+                            fontSize: "0.82rem",
+                            color: "#94a3b8",
+                            background: "rgba(15, 23, 42, 0.6)",
+                            border: "1px solid rgba(56, 189, 248, 0.25)",
+                            borderRadius: "8px",
+                            padding: "10px 12px",
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "8px"
+                        }}>
+                            <span className="material-symbols-outlined" style={{ fontSize: "1.2rem", color: "#38bdf8" }}>info</span>
+                            <span>El <strong>IMEI</strong> del rastreador GPS es asignado y configurado por el administrador.</span>
                         </div>
                     </div>
 
@@ -241,7 +229,6 @@ export default function PanelVehiculo() {
     const usuario = localStorage.getItem("usuario");
     const token = localStorage.getItem("token");
     const [modalVisible, setModalVisible] = useState(false);
-    const [vehiculoEditando, setVehiculoEditando] = useState(null);
     const orbePrimarioRef = useRef(null);
     const orbeSecundarioRef = useRef(null);
 
@@ -259,7 +246,6 @@ export default function PanelVehiculo() {
                 setCargando(false);
             });
     };
-
 
     const eliminarVehiculo = async (id) => {
         try {

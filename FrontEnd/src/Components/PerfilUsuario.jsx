@@ -8,6 +8,7 @@ import { API_URL } from "../Service/api";
 
 const ENLACES_NAV = [
     { icono: "person", etiqueta: "Perfil" },
+    { icono: "security", etiqueta: "Seguridad" },
     { icono: "directions_car", etiqueta: "Vehículos" },
 ];
 
@@ -237,8 +238,126 @@ function ModalGuardar({ modalGuardar, setModalGuardar, actualizarUsuario }) {
     );
 }
 
-function SeccionFormulario({ usuarioData, setUsuarioData, tipo, setTipo, nuevaContrasena, setNuevaContrasena, setModalGuardar }) {
-    const navigate = useNavigate();
+function TarjetaSeguridad2FA({ usuarioData, setUsuarioData }) {
+    const [cargando2FA, setCargando2FA] = useState(false);
+    const [mensajeFeedback, setMensajeFeedback] = useState("");
+
+    const toggle2fa = async (nuevoEstado, nuevoCanal) => {
+        setCargando2FA(true);
+        setMensajeFeedback("");
+        try {
+            const canalFinal = nuevoCanal || usuarioData?.canal2fa || "CORREO";
+
+            if (nuevoEstado && (canalFinal === "SMS" || canalFinal === "WHATSAPP") && !usuarioData?.telefono) {
+                throw new Error("Debes registrar un número de teléfono en tu perfil para usar 2FA por " + canalFinal);
+            }
+
+            const res = await fetch(`${API_URL}/usuario/2fa`, {
+                method: "PATCH",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${localStorage.getItem("token")}`,
+                },
+                body: JSON.stringify({
+                    activo: nuevoEstado,
+                    canal: canalFinal,
+                }),
+            });
+
+            if (!res.ok) {
+                const err = await res.json().catch(() => null);
+                throw new Error(err?.error || err?.mensaje || "Error al actualizar 2FA");
+            }
+
+            const actualizado = await res.json();
+            setUsuarioData((prev) => ({
+                ...prev,
+                dosFactoresActivo: actualizado.dosFactoresActivo,
+                canal2fa: actualizado.canal2fa,
+            }));
+            setMensajeFeedback(nuevoEstado ? "2FA activado con éxito" : "2FA desactivado");
+            setTimeout(() => setMensajeFeedback(""), 4000);
+        } catch (err) {
+            alert(err.message || "Error al actualizar configuración de 2FA");
+        } finally {
+            setCargando2FA(false);
+        }
+    };
+
+    const canalActual = usuarioData?.canal2fa || "CORREO";
+    const activo = !!usuarioData?.dosFactoresActivo;
+
+    return (
+        <div className="panel-vidrio panel-2fa-perfil">
+            <div className="encabezado-2fa-perfil">
+                <div className="info-2fa-perfil">
+                    <div className="icono-2fa-perfil">
+                        <span className="material-symbols-outlined">security</span>
+                    </div>
+                    <div>
+                        <h4 className="titulo-2fa-perfil">Autenticación en Dos Pasos (2FA)</h4>
+                        <p className="desc-2fa-perfil">
+                            Exige un código de un solo uso cada vez que inicies sesión en RompGPS.
+                        </p>
+                    </div>
+                </div>
+
+                <div className="toggle-2fa-box">
+                    <span className={`badge-2fa-estado ${activo ? "badge-2fa-activo" : "badge-2fa-inactivo"}`}>
+                        {activo ? "ACTIVADO" : "DESACTIVADO"}
+                    </span>
+                    <button
+                        type="button"
+                        className={`btn-toggle-2fa ${activo ? "btn-toggle-2fa--on" : "btn-toggle-2fa--off"}`}
+                        onClick={() => toggle2fa(!activo, canalActual)}
+                        disabled={cargando2FA}
+                    >
+                        {activo ? "Desactivar" : "Activar 2FA"}
+                    </button>
+                </div>
+            </div>
+
+            {activo && (
+                <div className="selector-canales-perfil">
+                    <span className="etiqueta-canales-perfil">Canal de entrega preferido:</span>
+                    <div className="grid-canales-perfil">
+                        {[
+                            { id: "CORREO", etiqueta: "Correo Electrónico", icono: "mail", desc: usuarioData?.correo || "Tu correo" },
+                            { id: "SMS", etiqueta: "Mensaje SMS", icono: "sms", desc: usuarioData?.telefono || "Registra un celular" },
+                            { id: "WHATSAPP", etiqueta: "WhatsApp", icono: "chat", desc: usuarioData?.telefono || "Registra un celular" },
+                        ].map((c) => (
+                            <button
+                                key={c.id}
+                                type="button"
+                                className={`opcion-canal-card ${canalActual === c.id ? "seleccionada" : ""}`}
+                                onClick={() => toggle2fa(true, c.id)}
+                                disabled={cargando2FA}
+                            >
+                                <span className="material-symbols-outlined icono-canal-card">{c.icono}</span>
+                                <div className="texto-canal-card">
+                                    <strong>{c.etiqueta}</strong>
+                                    <small>{c.desc}</small>
+                                </div>
+                                {canalActual === c.id && (
+                                    <span className="material-symbols-outlined check-canal">check_circle</span>
+                                )}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+            )}
+
+            {mensajeFeedback && (
+                <div className="feedback-2fa-perfil">
+                    <span className="material-symbols-outlined">verified</span>
+                    {mensajeFeedback}
+                </div>
+            )}
+        </div>
+    );
+}
+
+function SeccionFormulario({ usuarioData, setUsuarioData, setModalGuardar, setEnlaceActivo }) {
     return (
         <div className="seccion-formulario">
             <div className="panel-vidrio panel-formulario">
@@ -259,13 +378,12 @@ function SeccionFormulario({ usuarioData, setUsuarioData, tipo, setTipo, nuevaCo
                     <button
                         className="boton-contrasena"
                         type="button"
-                        onClick={() => navigate("/cambiar-contrasena")}
+                        onClick={() => setEnlaceActivo("Seguridad")}
                     >
                         <span className="material-symbols-outlined">
-                            lock_reset
+                            security
                         </span>
-
-                        Cambiar Contraseña
+                        Seguridad y Contraseña
                     </button>
                     <div className="grupo-botones-accion">
                         <button className="boton-guardar" onClick={() => setModalGuardar(true)}>
@@ -278,8 +396,299 @@ function SeccionFormulario({ usuarioData, setUsuarioData, tipo, setTipo, nuevaCo
     );
 }
 
+
+function calcularFortaleza(contrasena) {
+    if (!contrasena) return 0;
+    let puntos = 0;
+    if (contrasena.length >= 8) puntos++;
+    if (contrasena.length >= 12) puntos++;
+    if (/[A-Z]/.test(contrasena) && /[0-9]/.test(contrasena)) puntos++;
+    if (/[^A-Za-z0-9]/.test(contrasena)) puntos++;
+    return Math.min(puntos, 4);
+}
+
+function IndicadorFortaleza({ nivel }) {
+    const etiquetas = ["", "Débil", "Medio", "Fuerte", "Muy fuerte"];
+    return (
+        <div className="indicador-fortaleza-perfil">
+            <div className="indicador-fortaleza-perfil__barras">
+                {[0, 1, 2, 3].map((i) => (
+                    <div
+                        key={i}
+                        className={`indicador-fortaleza-perfil__barra ${
+                            i < nivel ? `indicador-fortaleza-perfil__barra--activa-${nivel}` : ""
+                        }`}
+                    />
+                ))}
+            </div>
+            {nivel > 0 && (
+                <span className="indicador-fortaleza-perfil__etiqueta">{etiquetas[nivel]}</span>
+            )}
+        </div>
+    );
+}
+
+function TarjetaResumenSeguridad({ usuarioData }) {
+    const dosFactores = !!usuarioData?.dosFactoresActivo;
+    return (
+        <div className="panel-vidrio tarjeta-resumen-seguridad">
+            <div className="icono-escudo-wrapper">
+                <span className="material-symbols-outlined icono-escudo-principal">verified_user</span>
+            </div>
+            <h3 className="titulo-resumen-seguridad">Nivel de Seguridad</h3>
+            <span className={`badge-nivel-seguridad ${dosFactores ? "badge-seguridad-alto" : "badge-seguridad-medio"}`}>
+                {dosFactores ? "ALTA PROTECCIÓN (2FA ACTIVO)" : "PROTECCIÓN ESTÁNDAR"}
+            </span>
+
+            <p className="desc-resumen-seguridad">
+                {dosFactores
+                    ? "Tu cuenta cuenta con doble capa de autenticación para proteger tus vehículos y accesos críticos."
+                    : "Te recomendamos activar la autenticación en dos pasos (2FA) para proteger tus comandos y accesos."}
+            </p>
+
+            <div className="separador-seguridad" />
+
+            <div className="lista-metricas-seguridad">
+                <div className="metrica-seguridad-item">
+                    <span className="material-symbols-outlined icono-metrica">lock</span>
+                    <div className="texto-metrica">
+                        <span>Cifrado de Clave</span>
+                        <strong>BCrypt + Salt (Costo 12)</strong>
+                    </div>
+                </div>
+                <div className="metrica-seguridad-item">
+                    <span className="material-symbols-outlined icono-metrica">speed</span>
+                    <div className="texto-metrica">
+                        <span>Anti Fuerza Bruta</span>
+                        <strong>Redis Rate-Limiter Activo</strong>
+                    </div>
+                </div>
+                <div className="metrica-seguridad-item">
+                    <span className="material-symbols-outlined icono-metrica">token</span>
+                    <div className="texto-metrica">
+                        <span>Sesión Segura</span>
+                        <strong>JWT Rotativo</strong>
+                    </div>
+                </div>
+                <div className="metrica-seguridad-item">
+                    <span className="material-symbols-outlined icono-metrica">phonelink_lock</span>
+                    <div className="texto-metrica">
+                        <span>Doble Factor (2FA)</span>
+                        <strong style={{ color: dosFactores ? "#10b981" : "#eab308" }}>
+                            {dosFactores ? `Activo (${usuarioData?.canal2fa || "CORREO"})` : "Inactivo"}
+                        </strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+}
+
+function TarjetaCambiarContrasena({ usuarioData }) {
+    const [claveActual, setClaveActual] = useState("");
+    const [nuevaClave, setNuevaClave] = useState("");
+    const [confirmarClave, setConfirmarClave] = useState("");
+    const [mostrarActual, setMostrarActual] = useState(false);
+    const [mostrarNueva, setMostrarNueva] = useState(false);
+    const [mostrarConfirmar, setMostrarConfirmar] = useState(false);
+    const [cargando, setCargando] = useState(false);
+    const [mensajeFeedback, setMensajeFeedback] = useState("");
+    const [error, setError] = useState("");
+
+    const nivelFortaleza = calcularFortaleza(nuevaClave);
+
+    const manejarEnvio = async (e) => {
+        e.preventDefault();
+        setError("");
+        setMensajeFeedback("");
+
+        if (!claveActual) {
+            setError("Debes ingresar tu contraseña actual.");
+            return;
+        }
+        if (nuevaClave !== confirmarClave) {
+            setError("Las nuevas contraseñas no coinciden.");
+            return;
+        }
+        if (nuevaClave.length < 8) {
+            setError("La nueva contraseña debe tener al menos 8 caracteres.");
+            return;
+        }
+
+        setCargando(true);
+        try {
+            const res = await fetch(`${API_URL}/usuario/contrasena/${usuarioData.id}`, {
+                method: "PATCH",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${localStorage.getItem("token")}`,
+                },
+                body: JSON.stringify({
+                    contrasenaActual: claveActual,
+                    nuevaContrasena: nuevaClave,
+                }),
+            });
+
+            if (!res.ok) {
+                const detalle = await res.json().catch(() => null);
+                throw new Error(detalle?.error || "Error al actualizar contraseña");
+            }
+
+            setClaveActual("");
+            setNuevaClave("");
+            setConfirmarClave("");
+            setMensajeFeedback("Contraseña actualizada exitosamente.");
+            setTimeout(() => setMensajeFeedback(""), 5000);
+        } catch (err) {
+            setError(err.message || "No se pudo actualizar la contraseña");
+        } finally {
+            setCargando(false);
+        }
+    };
+
+    return (
+        <div className="panel-vidrio panel-cambiar-contrasena">
+            <div className="encabezado-cambiar-clave">
+                <div className="icono-cambiar-clave">
+                    <span className="material-symbols-outlined">lock_reset</span>
+                </div>
+                <div>
+                    <h4 className="titulo-cambiar-clave">Cambiar Contraseña</h4>
+                    <p className="desc-cambiar-clave">
+                        Actualiza tus credenciales para mantener tu cuenta segura.
+                    </p>
+                </div>
+            </div>
+
+            <form className="form-cambiar-clave" onSubmit={manejarEnvio}>
+                <div className="grupo-campo-clave">
+                    <label className="label-campo-clave" htmlFor="claveActual">Contraseña Actual</label>
+                    <div className="envoltorio-input-clave">
+                        <input
+                            id="claveActual"
+                            type={mostrarActual ? "text" : "password"}
+                            className="input-clave-perfil"
+                            placeholder="Ingresa tu contraseña actual"
+                            value={claveActual}
+                            onChange={(e) => setClaveActual(e.target.value)}
+                        />
+                        <button
+                            type="button"
+                            className="btn-toggle-ver-clave"
+                            onClick={() => setMostrarActual(!mostrarActual)}
+                            tabIndex={-1}
+                        >
+                            <span className="material-symbols-outlined">
+                                {mostrarActual ? "visibility_off" : "visibility"}
+                            </span>
+                        </button>
+                    </div>
+                </div>
+
+                <div className="grupo-campo-clave">
+                    <label className="label-campo-clave" htmlFor="nuevaClave">Nueva Contraseña</label>
+                    <div className="envoltorio-input-clave">
+                        <input
+                            id="nuevaClave"
+                            type={mostrarNueva ? "text" : "password"}
+                            className="input-clave-perfil"
+                            placeholder="Mínimo 8 caracteres, números y símbolos"
+                            value={nuevaClave}
+                            onChange={(e) => setNuevaClave(e.target.value)}
+                        />
+                        <button
+                            type="button"
+                            className="btn-toggle-ver-clave"
+                            onClick={() => setMostrarNueva(!mostrarNueva)}
+                            tabIndex={-1}
+                        >
+                            <span className="material-symbols-outlined">
+                                {mostrarNueva ? "visibility_off" : "visibility"}
+                            </span>
+                        </button>
+                    </div>
+                    {nuevaClave.length > 0 && <IndicadorFortaleza nivel={nivelFortaleza} />}
+                </div>
+
+                <div className="grupo-campo-clave">
+                    <label className="label-campo-clave" htmlFor="confirmarClave">Confirmar Nueva Contraseña</label>
+                    <div className="envoltorio-input-clave">
+                        <input
+                            id="confirmarClave"
+                            type={mostrarConfirmar ? "text" : "password"}
+                            className="input-clave-perfil"
+                            placeholder="Repite tu nueva contraseña"
+                            value={confirmarClave}
+                            onChange={(e) => setConfirmarClave(e.target.value)}
+                        />
+                        <button
+                            type="button"
+                            className="btn-toggle-ver-clave"
+                            onClick={() => setMostrarConfirmar(!mostrarConfirmar)}
+                            tabIndex={-1}
+                        >
+                            <span className="material-symbols-outlined">
+                                {mostrarConfirmar ? "visibility_off" : "visibility"}
+                            </span>
+                        </button>
+                    </div>
+                </div>
+
+                {error && <div className="error-cambio-clave">{error}</div>}
+                {mensajeFeedback && (
+                    <div className="feedback-2fa-perfil">
+                        <span className="material-symbols-outlined">verified</span>
+                        {mensajeFeedback}
+                    </div>
+                )}
+
+                <button
+                    type="submit"
+                    className="boton-actualizar-clave"
+                    disabled={cargando}
+                >
+                    <span className="material-symbols-outlined">check_circle</span>
+                    {cargando ? "Actualizando..." : "Actualizar Contraseña"}
+                </button>
+            </form>
+        </div>
+    );
+}
+
+function ContenidoSeguridad({ usuarioData, setUsuarioData }) {
+    return (
+        <main className="contenido-principal">
+            <div className="contenedor-interior">
+                <div className="encabezado-telemetria-usuario">
+                    <div className="bloque-titulo">
+                        <span className="etiqueta-sistema">Sistema // Seguridad & Protección</span>
+                        <h1 className="titulo-pagina">Seguridad de la Cuenta</h1>
+                    </div>
+                    <div className="bloque-fecha">
+                        <p className="etiqueta-fecha">Estado de Protección</p>
+                        <p className="valor-fecha">
+                            {usuarioData?.dosFactoresActivo ? "Blindado (2FA Activo)" : "Estándar"}
+                        </p>
+                    </div>
+                </div>
+
+                <div className="cuadricula-contenido">
+                    <TarjetaResumenSeguridad usuarioData={usuarioData} />
+                    <div className="columna-seguridad-derecha">
+                        <TarjetaSeguridad2FA
+                            usuarioData={usuarioData}
+                            setUsuarioData={setUsuarioData}
+                        />
+                        <TarjetaCambiarContrasena usuarioData={usuarioData} />
+                    </div>
+                </div>
+            </div>
+        </main>
+    );
+}
+
 function ContenidoPrincipal(props) {
-    const { usuarioData, setUsuarioData, setModalGuardar, onSubirFoto, subiendoFoto } = props;
+    const { usuarioData, setUsuarioData, setModalGuardar, onSubirFoto, subiendoFoto, setEnlaceActivo } = props;
     return (
         <main className="contenido-principal">
             <div className="contenedor-interior">
@@ -302,6 +711,7 @@ function ContenidoPrincipal(props) {
                     <SeccionFormulario
                         usuarioData={usuarioData} setUsuarioData={setUsuarioData}
                         setModalGuardar={setModalGuardar}
+                        setEnlaceActivo={setEnlaceActivo}
                     />
                 </div>
             </div>
@@ -502,6 +912,12 @@ export default function PerfilUsuario() {
                             onSubirFoto={manejarSubidaFoto}
                             subiendoFoto={subiendoFoto}
                             navigate={navigate}
+                            setEnlaceActivo={setEnlaceActivo}
+                        />
+                    ) : enlaceActivo === "Seguridad" ? (
+                        <ContenidoSeguridad
+                            usuarioData={usuarioData}
+                            setUsuarioData={setUsuarioData}
                         />
                     ) : (
                         <PanelVehiculo />

@@ -1,13 +1,11 @@
 package com.gpsromp.usuario.dto;
 
+import com.gpsromp.usuario.model.Canal2fa;
+import com.gpsromp.usuario.model.PlanTipo;
 import com.gpsromp.usuario.model.Usuario;
 
 /**
  * Mapeo entidad ↔ DTO, a mano y sin dependencias.
- *
- * Se descarta MapStruct a propósito: añade procesamiento de anotaciones a un
- * módulo que ya tuvo problemas de compilación entre Lombok y la versión del JDK.
- * El mapeo manual es más verboso pero no puede romper el build.
  */
 public final class UsuarioMapper {
 
@@ -26,8 +24,10 @@ public final class UsuarioMapper {
                 u.getCorreo(),
                 u.getTelefono(),
                 u.getRol(),
-                u.getPlan() != null ? u.getPlan() : com.gpsromp.usuario.model.PlanTipo.PERSONAL,
+                u.getPlan() != null ? u.getPlan() : PlanTipo.PERSONAL,
                 u.getActivo(),
+                u.getDosFactoresActivo() != null ? u.getDosFactoresActivo() : false,
+                u.getCanal2fa() != null ? u.getCanal2fa() : Canal2fa.CORREO,
                 u.getImagenUrl(),
                 u.getCreadoEn(),
                 u.getActualizadoEn());

@@ -14,7 +14,9 @@ import com.gpsromp.admin.dto.PosicionResumenResponse;
 import com.gpsromp.admin.dto.PropietarioResumenResponse;
 import com.gpsromp.admin.dto.VehiculoAdminResponse;
 import com.gpsromp.common.exception.RecursoNoEncontradoException;
+import com.gpsromp.gps.model.DispositivoGps;
 import com.gpsromp.gps.model.GPSData;
+import com.gpsromp.gps.repository.DispositivoGpsRepository;
 import com.gpsromp.gps.service.GPSDataService;
 import com.gpsromp.usuario.model.Usuario;
 import com.gpsromp.usuario.repository.UsuarioRepository;
@@ -31,7 +33,8 @@ import lombok.extern.slf4j.Slf4j;
  * 1. Búsqueda y paginación de vehículos (PostgreSQL).
  * 2. Carga en lote de propietarios en 1 sola consulta SQL (WHERE id IN ...).
  * 3. Carga en lote de telemetría GPS (Redis / MongoDB).
- * 4. Cálculo logístico de estado de rastreo ("marcha", "detenido", "sin", "nogps", "off").
+ * 4. Carga en lote de metadata de dispositivos GPS (SIM Card, operador) desde MongoDB.
+ * 5. Cálculo logístico de estado de rastreo ("marcha", "detenido", "sin", "nogps", "off").
  */
 @Service
 @RequiredArgsConstructor
@@ -42,6 +45,7 @@ public class AdminVehiculoService {
     private final VehiculoRepository vehiculoRepository;
     private final UsuarioRepository usuarioRepository;
     private final GPSDataService gpsDataService;
+    private final DispositivoGpsRepository dispositivoGpsRepository;
 
     /** Umbral de 5 minutos: si no reporta en este tiempo con velocidad > 0 deja de estar en marcha. */
     public static final long MS_EN_MARCHA = 5 * 60 * 1000L;
@@ -74,13 +78,20 @@ public class AdminVehiculoService {
 
         Map<String, GPSData> mapaGps = gpsDataService.getLastPositions(imeis);
 
-        // 3. Resolver logística y cálculos para cada unidad
+        // 3. Obtener dispositivos GPS (con SIM Card) desde MongoDB
+        Map<String, DispositivoGps> mapaDispositivos = imeis.isEmpty()
+                ? Map.of()
+                : dispositivoGpsRepository.findAllByImeiIn(imeis).stream()
+                        .collect(Collectors.toMap(DispositivoGps::getImei, d -> d, (existente, reemplazo) -> existente));
+
+        // 4. Resolver logística y cálculos para cada unidad
         Instant ahora = Instant.now();
         List<VehiculoAdminResponse> respuestas = vehiculos.stream()
                 .map(v -> {
                     Usuario duennio = v.getId_usuario() != null ? mapaUsuarios.get(v.getId_usuario()) : null;
                     GPSData pos = v.getImei() != null ? mapaGps.get(v.getImei()) : null;
-                    return mapearVehiculoAdmin(v, duennio, pos, ahora);
+                    DispositivoGps disp = v.getImei() != null ? mapaDispositivos.get(v.getImei()) : null;
+                    return mapearVehiculoAdmin(v, duennio, pos, disp, ahora);
                 })
                 .toList();
 
@@ -99,7 +110,11 @@ public class AdminVehiculoService {
                 ? gpsDataService.getLastPosition(v.getImei()).orElse(null)
                 : null;
 
-        return mapearVehiculoAdmin(v, duennio, pos, Instant.now());
+        DispositivoGps disp = (v.getImei() != null && !v.getImei().isBlank())
+                ? dispositivoGpsRepository.findByImei(v.getImei()).orElse(null)
+                : null;
+
+        return mapearVehiculoAdmin(v, duennio, pos, disp, Instant.now());
     }
 
     /**
@@ -144,16 +159,18 @@ public class AdminVehiculoService {
         return u.getUsuario() != null ? u.getUsuario() : "Sin asignar";
     }
 
-    public VehiculoAdminResponse mapearVehiculoAdmin(Vehiculo v, Usuario u, GPSData pos, Instant ahora) {
+    public VehiculoAdminResponse mapearVehiculoAdmin(Vehiculo v, Usuario u, GPSData pos, DispositivoGps disp, Instant ahora) {
         String estado = calcularEstado(v, pos, ahora);
         String nombrePropietario = resolverNombrePropietario(v.getId_usuario(), u);
         PropietarioResumenResponse prop = PropietarioResumenResponse.de(u);
         PosicionResumenResponse ultPos = PosicionResumenResponse.de(pos, ahora);
+        String numeroSim = disp != null ? disp.getNumeroSim() : null;
 
         return new VehiculoAdminResponse(
                 v.getId(),
                 v.getPlaca(),
                 v.getImei(),
+                numeroSim,
                 v.getModelo(),
                 v.getTipo(),
                 v.getActivo(),

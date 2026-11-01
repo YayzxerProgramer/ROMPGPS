@@ -1022,3 +1022,500 @@
 .navegacion-lateral {
     overflow-y: auto;
 }
+
+
+/* ── Panel 2FA en Perfil ──────────────────────────────────── */
+
+.panel-2fa-perfil {
+    margin-top: 24px;
+    padding: 24px;
+    border-radius: 16px;
+    background: rgba(14, 20, 16, 0.6);
+    border: 1px solid rgba(178, 206, 168, 0.2);
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.encabezado-2fa-perfil {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.info-2fa-perfil {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.icono-2fa-perfil {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    background: rgba(178, 206, 168, 0.12);
+    border: 1px solid rgba(178, 206, 168, 0.25);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #b2cea8;
+}
+
+.titulo-2fa-perfil {
+    font-size: 16px;
+    font-weight: 700;
+    color: #f3fff0;
+    margin: 0 0 4px;
+}
+
+.desc-2fa-perfil {
+    font-size: 13px;
+    color: #a4bfa0;
+    margin: 0;
+}
+
+.toggle-2fa-box {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.badge-2fa-estado {
+    font-size: 11px;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 100px;
+    letter-spacing: 0.8px;
+}
+
+.badge-2fa-activo {
+    background: rgba(16, 185, 129, 0.15);
+    color: #10b981;
+    border: 1px solid rgba(16, 185, 129, 0.35);
+}
+
+.badge-2fa-inactivo {
+    background: rgba(255, 255, 255, 0.08);
+    color: #94a3b8;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.btn-toggle-2fa {
+    padding: 8px 18px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: none;
+}
+
+.btn-toggle-2fa--off {
+    background: linear-gradient(135deg, #b2cea8 0%, #87ad7b 100%);
+    color: #0b120c;
+}
+
+.btn-toggle-2fa--off:hover {
+    filter: brightness(1.1);
+    transform: translateY(-1px);
+}
+
+.btn-toggle-2fa--on {
+    background: rgba(239, 68, 68, 0.15);
+    color: #f87171;
+    border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.btn-toggle-2fa--on:hover {
+    background: rgba(239, 68, 68, 0.25);
+}
+
+.selector-canales-perfil {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding-top: 14px;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.etiqueta-canales-perfil {
+    font-size: 12px;
+    font-weight: 600;
+    color: #7d9678;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.grid-canales-perfil {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 12px;
+}
+
+.opcion-canal-card {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    border-radius: 10px;
+    background: rgba(8, 12, 10, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #c7dec4;
+    cursor: pointer;
+    text-align: left;
+    transition: all 0.2s ease;
+}
+
+.opcion-canal-card:hover:not(:disabled) {
+    background: rgba(178, 206, 168, 0.08);
+    border-color: rgba(178, 206, 168, 0.3);
+}
+
+.opcion-canal-card.seleccionada {
+    background: rgba(16, 185, 129, 0.12);
+    border-color: #10b981;
+    color: #ffffff;
+}
+
+.icono-canal-card {
+    font-size: 22px;
+    color: #b2cea8;
+}
+
+.opcion-canal-card.seleccionada .icono-canal-card {
+    color: #10b981;
+}
+
+.texto-canal-card {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+}
+
+.texto-canal-card strong {
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.texto-canal-card small {
+    font-size: 11px;
+    color: #8fa88c;
+    margin-top: 2px;
+}
+
+.check-canal {
+    font-size: 18px;
+    color: #10b981;
+}
+
+.feedback-2fa-perfil {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: #10b981;
+    background: rgba(16, 185, 129, 0.1);
+    border: 1px solid rgba(16, 185, 129, 0.25);
+    padding: 8px 14px;
+    border-radius: 8px;
+    animation: fadeIn 0.3s ease;
+}
+
+
+/* ── Sección de Seguridad Dedicada ──────────────────────────────── */
+.columna-seguridad-derecha {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.tarjeta-resumen-seguridad {
+    padding: 28px 24px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    height: fit-content;
+}
+
+.icono-escudo-wrapper {
+    width: 68px;
+    height: 68px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(178, 206, 168, 0.25) 0%, rgba(178, 206, 168, 0.05) 70%);
+    border: 1px solid rgba(178, 206, 168, 0.35);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 16px;
+    box-shadow: 0 0 25px rgba(178, 206, 168, 0.2);
+}
+
+.icono-escudo-principal {
+    font-size: 34px;
+    color: #b2cea8;
+}
+
+.titulo-resumen-seguridad {
+    font-family: var(--fuente-titular);
+    font-size: 1.25rem;
+    color: var(--color-en-superficie);
+    margin-bottom: 8px;
+}
+
+.badge-nivel-seguridad {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.8px;
+    padding: 4px 12px;
+    border-radius: 100px;
+    margin-bottom: 14px;
+}
+
+.badge-seguridad-alto {
+    background: rgba(16, 185, 129, 0.15);
+    color: #10b981;
+    border: 1px solid rgba(16, 185, 129, 0.35);
+}
+
+.badge-seguridad-medio {
+    background: rgba(234, 179, 8, 0.15);
+    color: #eab308;
+    border: 1px solid rgba(234, 179, 8, 0.35);
+}
+
+.desc-resumen-seguridad {
+    font-size: 0.85rem;
+    color: var(--color-en-superficie-variante);
+    line-height: 1.5;
+    margin-bottom: 20px;
+}
+
+.separador-seguridad {
+    width: 100%;
+    height: 1px;
+    background: rgba(178, 206, 168, 0.12);
+    margin-bottom: 20px;
+}
+
+.lista-metricas-seguridad {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    text-align: left;
+}
+
+.metrica-seguridad-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 12px;
+    border-radius: 8px;
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.icono-metrica {
+    font-size: 20px;
+    color: #b2cea8;
+}
+
+.texto-metrica {
+    display: flex;
+    flex-direction: column;
+}
+
+.texto-metrica span {
+    font-size: 11px;
+    color: #8fa88c;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.texto-metrica strong {
+    font-size: 12px;
+    color: #f1f5f9;
+}
+
+/* ── Panel Cambiar Contraseña en Perfil ──────────────────────────── */
+.panel-cambiar-contrasena {
+    padding: 28px;
+}
+
+.encabezado-cambiar-clave {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 24px;
+}
+
+.icono-cambiar-clave {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    background: rgba(178, 206, 168, 0.12);
+    border: 1px solid rgba(178, 206, 168, 0.25);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #b2cea8;
+}
+
+.titulo-cambiar-clave {
+    font-family: var(--fuente-titular);
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: #f3fff0;
+    margin: 0 0 4px;
+}
+
+.desc-cambiar-clave {
+    font-size: 13px;
+    color: #a4bfa0;
+    margin: 0;
+}
+
+.form-cambiar-clave {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.grupo-campo-clave {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.label-campo-clave {
+    font-size: 12px;
+    font-weight: 600;
+    color: #c7dec4;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+}
+
+.envoltorio-input-clave {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.input-clave-perfil {
+    width: 100%;
+    padding: 12px 42px 12px 14px;
+    background: rgba(13, 23, 17, 0.7);
+    border: 1px solid rgba(178, 206, 168, 0.2);
+    border-radius: 8px;
+    color: #f1f5f9;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.input-clave-perfil:focus {
+    border-color: #b2cea8;
+    box-shadow: 0 0 0 3px rgba(178, 206, 168, 0.15);
+}
+
+.btn-toggle-ver-clave {
+    position: absolute;
+    right: 12px;
+    background: none;
+    border: none;
+    color: #8fa88c;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    transition: color 0.2s ease;
+}
+
+.btn-toggle-ver-clave:hover {
+    color: #b2cea8;
+}
+
+.indicador-fortaleza-perfil {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 4px;
+}
+
+.indicador-fortaleza-perfil__barras {
+    display: flex;
+    gap: 6px;
+    flex: 1;
+}
+
+.indicador-fortaleza-perfil__barra {
+    height: 4px;
+    flex: 1;
+    border-radius: 2px;
+    background: rgba(255, 255, 255, 0.1);
+    transition: background 0.3s ease;
+}
+
+.indicador-fortaleza-perfil__barra--activa-1 {
+    background: #ef4444 !important;
+}
+
+.indicador-fortaleza-perfil__barra--activa-2 {
+    background: #f97316 !important;
+}
+
+.indicador-fortaleza-perfil__barra--activa-3 {
+    background: #eab308 !important;
+}
+
+.indicador-fortaleza-perfil__barra--activa-4 {
+    background: #10b981 !important;
+}
+
+.indicador-fortaleza-perfil__etiqueta {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.boton-actualizar-clave {
+    padding: 12px 24px;
+    border-radius: 8px;
+    background: linear-gradient(135deg, #b2cea8 0%, #87ad7b 100%);
+    color: #0b120c;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    align-self: flex-start;
+    transition: filter 0.2s ease, transform 0.2s ease;
+    margin-top: 8px;
+}
+
+.boton-actualizar-clave:hover:not(:disabled) {
+    filter: brightness(1.1);
+    transform: translateY(-1px);
+}
+
+.boton-actualizar-clave:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.error-cambio-clave {
+    font-size: 13px;
+    color: #f87171;
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.25);
+    padding: 8px 14px;
+    border-radius: 8px;
+}
