@@ -265,15 +265,15 @@
 }
 
 .fortaleza-barra.activa--1 {
-    background: #ef4444;
+    background: #c9826c;
 }
 
 .fortaleza-barra.activa--2 {
-    background: #f59e0b;
+    background: #e0b97a;
 }
 
 .fortaleza-barra.activa--3 {
-    background: #10b981;
+    background: #b2cea8;
 }
 
 .fortaleza-barra.activa--4 {
@@ -357,15 +357,15 @@
 }
 
 .recuperar-alerta--error {
-    background: rgba(239, 68, 68, 0.12);
-    border: 1px solid rgba(239, 68, 68, 0.3);
-    color: #fca5a5;
+    background: rgba(224, 163, 145, 0.12);
+    border: 1px solid rgba(224, 163, 145, 0.3);
+    color: #f0c9bd;
 }
 
 .recuperar-alerta--exito {
-    background: rgba(16, 185, 129, 0.12);
-    border: 1px solid rgba(16, 185, 129, 0.3);
-    color: #6ee7b7;
+    background: rgba(178, 206, 168, 0.12);
+    border: 1px solid rgba(178, 206, 168, 0.3);
+    color: #c4dcba;
 }
 
 /* ── Pantalla de Éxito ────────────────────────────────────── */

@@ -15,7 +15,7 @@ const OPCIONES_MAPA = {
   disableDefaultUI: true,
   gestureHandling: "cooperative",
   clickableIcons: false,
-  backgroundColor: "#0b1a14",
+  backgroundColor: "#111411",
 };
 
 function htmlMarcador(estado, placa, activo) {

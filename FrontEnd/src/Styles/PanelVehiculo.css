@@ -872,3 +872,70 @@ input {
         left: calc(16rem + 2rem);
     }
 }
+
+/* ── Ventana "Registrar vehículo" ── */
+.formulario__aviso {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 12px 14px;
+    border-radius: 12px;
+    background: rgba(178, 206, 168, 0.06);
+    border: 1px solid rgba(178, 206, 168, 0.18);
+    color: var(--color-sobre-superficie-variante);
+    font-size: 0.8125rem;
+    line-height: 1.5;
+}
+
+.formulario__aviso .material-symbols-outlined {
+    color: var(--color-primario);
+    font-size: 20px;
+    flex-shrink: 0;
+}
+
+.formulario__aviso strong {
+    color: var(--color-sobre-superficie);
+}
+
+.formulario__error {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+    padding: 10px 12px;
+    border-radius: 12px;
+    background: rgba(224, 163, 145, 0.08);
+    border: 1px solid rgba(224, 163, 145, 0.25);
+    color: #e0a391;
+    font-size: 0.8125rem;
+}
+
+.formulario__error .material-symbols-outlined {
+    font-size: 18px;
+}
+
+.formulario__error-campo {
+    margin: 0 0 0 0.25rem;
+    color: #e0a391;
+    font-size: 0.75rem;
+}
+
+.formulario__campo[aria-invalid="true"] {
+    border-color: rgba(224, 163, 145, 0.6);
+}
+
+.formulario__campo--placa {
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+}
+
+.formulario__boton-confirmar:disabled {
+    opacity: 0.6;
+    cursor: wait;
+}
+
+@media (max-width: 480px) {
+    .modal-titulo {
+        font-size: 1.5rem;
+    }
+}

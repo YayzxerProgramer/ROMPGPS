@@ -466,8 +466,8 @@
    concéntricos (el rojo de fuera y el gris del input dentro). */
 .caja-entrada__input--error,
 .caja-entrada__input--error:focus {
-    border-color: #ff6b6b;
-    box-shadow: 0 0 0 3px rgba(255, 107, 107, 0.14);
+    border-color: #e0a391;
+    box-shadow: 0 0 0 3px rgba(224, 163, 145, 0.14);
 }
 
 .alerta-error {
@@ -476,9 +476,9 @@
     gap: 10px;
     padding: 12px 14px;
     border-radius: 12px;
-    background: rgba(255, 77, 77, 0.1);
-    border: 1px solid rgba(255, 77, 77, 0.28);
-    color: #ffb3b3;
+    background: rgba(224, 163, 145, 0.1);
+    border: 1px solid rgba(224, 163, 145, 0.28);
+    color: #f0c9bd;
     font-size: 13px;
     line-height: 1.5;
 }
@@ -488,7 +488,7 @@
     width: 16px;
     height: 16px;
     margin-top: 2px;
-    color: #ff6b6b;
+    color: #e0a391;
 }
 
 /* ── Botón principal ──────────────────────────────────────── */
@@ -605,9 +605,9 @@
 }
 
 .boton-social--google:hover:not(:disabled) {
-    background: rgba(66, 133, 244, 0.1);
-    border-color: rgba(66, 133, 244, 0.3);
-    color: #dce8ff;
+    background: rgba(178, 206, 168, 0.1);
+    border-color: rgba(178, 206, 168, 0.3);
+    color: #e8f0e4;
     transform: translateY(-2px);
 }
 
@@ -724,20 +724,20 @@
 @media (max-width: 1100px) {
     .contenedor-sesion {
         grid-template-columns: minmax(0, 1fr);
-        gap: 3rem;
+        gap: 2rem;
         max-width: 520px;
     }
 
-    /* La tarjeta primero: el usuario vino a entrar.
-       Antes `.info-sesion` hacía display:none y se perdía
-       entero el mensaje de marca en tablet y móvil. */
-    .tarjeta-sesion {
+    /* El mensaje de marca con la animación va arriba y la tarjeta
+       debajo. La animación no desplaza la tarjeta mientras escribe:
+       el título mantiene su altura en todas las palabras. */
+    .info-sesion {
         order: 1;
+        text-align: center;
     }
 
-    .info-sesion {
+    .tarjeta-sesion {
         order: 2;
-        text-align: center;
     }
 
     .info-sesion__descripcion {
@@ -755,6 +755,22 @@
 
     .estadisticas-sesion {
         justify-content: center;
+    }
+}
+
+/* Móviles bajos (iPhone SE y más pequeños): sin las estadísticas,
+   para que el campo de usuario quede a la vista sin desplazarse. */
+@media (max-width: 1100px) and (max-height: 700px) {
+    .contenedor-sesion {
+        gap: 1.25rem;
+    }
+
+    .info-sesion h1 {
+        margin-bottom: 0;
+    }
+
+    .estadisticas-sesion {
+        display: none;
     }
 }
 
@@ -874,9 +890,9 @@
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 1.2px;
-    color: #10b981;
-    background: rgba(16, 185, 129, 0.12);
-    border: 1px solid rgba(16, 185, 129, 0.3);
+    color: #b2cea8;
+    background: rgba(178, 206, 168, 0.12);
+    border: 1px solid rgba(178, 206, 168, 0.3);
     padding: 4px 12px;
     border-radius: 100px;
     width: fit-content;
@@ -947,9 +963,9 @@
 }
 
 .btn-canal-alt.activo {
-    background: rgba(16, 185, 129, 0.15);
-    border-color: #10b981;
-    color: #6ee7b7;
+    background: rgba(178, 206, 168, 0.15);
+    border-color: #b2cea8;
+    color: #c4dcba;
     pointer-events: none;
 }
 

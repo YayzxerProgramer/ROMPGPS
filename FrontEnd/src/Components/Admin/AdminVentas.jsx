@@ -327,7 +327,7 @@ export default function AdminVentas({ busqueda }) {
         </div>
 
         <div className="adm-tabla-scroll">
-          <div className="adm-tabla">
+          <div className="adm-tabla adm-tabla--ventas">
             <div className="adm-tabla-fila adm-tabla-fila--cab">
               <span>REFERENCIA / FECHA</span>
               <span>CLIENTE</span>

@@ -46,12 +46,15 @@ function TarjetaVehiculo({ vehiculo, onDelete }) {
     );
 }
 
+const PLACA_VALIDA = /^[A-Z0-9-]{5,6}$/;
+
 function ModalRegistro({ visible, onCerrar, onRegistrado, usuarioId, token }) {
     const [formulario, setFormulario] = useState({
         modelo: "",
         placa: "",
         tipo: "MOTO",
     });
+    const [errores, setErrores] = useState({});
     const [error, setError] = useState("");
     const [cargando, setCargando] = useState(false);
 
@@ -69,48 +72,63 @@ function ModalRegistro({ visible, onCerrar, onRegistrado, usuarioId, token }) {
     // Limpiar al abrir.
     useEffect(() => {
         if (!visible) return;
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setFormulario({ modelo: "", placa: "", tipo: "MOTO" });
+        setErrores({});
         setError("");
     }, [visible]);
 
-    const manejarCambio = (e) =>
-        setFormulario((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+    const manejarCambio = (e) => {
+        const { name, value } = e.target;
+        setFormulario((prev) => ({ ...prev, [name]: name === "placa" ? value.toUpperCase() : value }));
+        setErrores((prev) => ({ ...prev, [name]: undefined }));
+    };
 
-    const manejarConfirmar = async () => {
+    const validar = () => {
+        const encontrados = {};
+        if (!formulario.modelo.trim()) encontrados.modelo = "El modelo es obligatorio.";
+        const placa = formulario.placa.trim();
+        if (!placa) encontrados.placa = "La placa es obligatoria.";
+        else if (!PLACA_VALIDA.test(placa)) encontrados.placa = "La placa debe tener 5 o 6 letras, números o guion.";
+        return encontrados;
+    };
+
+    const manejarConfirmar = async (e) => {
+        e.preventDefault();
         setError("");
 
-        if (!formulario.modelo.trim()) return setError("El modelo es obligatorio.");
-        if (!formulario.placa.trim()) return setError("La placa es obligatoria.");
+        const encontrados = validar();
+        setErrores(encontrados);
+        if (Object.keys(encontrados).length) return;
 
         setCargando(true);
         try {
-            const payload = {
-                modelo: formulario.modelo.trim(),
-                placa: formulario.placa.trim().toUpperCase(),
-                tipo: formulario.tipo,
-                id_usuario: usuarioId,
-                activo: true,
-            };
-
             const res = await fetch(`${API_URL}/vehiculo`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
                     Authorization: `Bearer ${token}`,
                 },
-                body: JSON.stringify(payload),
+                body: JSON.stringify({
+                    modelo: formulario.modelo.trim(),
+                    placa: formulario.placa.trim(),
+                    tipo: formulario.tipo,
+                    id_usuario: usuarioId,
+                    activo: true,
+                }),
             });
 
             if (!res.ok) {
-                const data = await res.json();
-                setError(data.error || "Error al registrar el vehículo.");
+                const data = await res.json().catch(() => ({}));
+                if (data.campos) setErrores(data.campos);
+                setError(data.campos ? "Revisa los campos marcados." : data.error || "No se pudo registrar el vehículo.");
                 return;
             }
 
             onRegistrado();
             onCerrar();
-        } catch (e) {
-            setError("Error de conexión con el servidor.");
+        } catch {
+            setError("No pudimos conectar con el servidor. Revisa tu conexión.");
         } finally {
             setCargando(false);
         }
@@ -119,23 +137,23 @@ function ModalRegistro({ visible, onCerrar, onRegistrado, usuarioId, token }) {
     if (!visible) return null;
 
     return (
-        <div className="formulario__capa" role="dialog" aria-modal="true" aria-labelledby="modal-titulo">
-            <div className="formulario__contenedor" style={{ maxWidth: "480px" }}>
-                <div className="formulario__cabecera">
-                    <h2 className="formulario__titulo" id="modal-titulo">
-                        Registrar Vehículo
-                    </h2>
-                    <button className="formulario__boton-cerrar" type="button" aria-label="Cerrar modal" onClick={onCerrar}>
+        <div className="modal-fondo modal-fondo--visible" role="dialog" aria-modal="true"
+            aria-labelledby="modal-registro-titulo"
+            onClick={(e) => { if (e.target === e.currentTarget) onCerrar(); }}>
+            <div className="modal-contenido">
+                <div className="modal-cabecera">
+                    <div>
+                        <h2 className="modal-titulo" id="modal-registro-titulo">Registrar vehículo</h2>
+                        <p className="modal-subtitulo">Agrega una unidad a tu cuenta.</p>
+                    </div>
+                    <button className="modal-boton-cerrar" type="button" onClick={onCerrar} aria-label="Cerrar">
                         <span className="material-symbols-outlined">close</span>
                     </button>
                 </div>
 
-                <div className="formulario__cuerpo">
-                    {/* Modelo */}
+                <form className="formulario" onSubmit={manejarConfirmar} noValidate>
                     <div className="formulario__grupo">
-                        <label className="formulario__etiqueta" htmlFor="campo-modelo">
-                            Modelo
-                        </label>
+                        <label className="formulario__etiqueta" htmlFor="campo-modelo">Modelo</label>
                         <input
                             className="formulario__campo"
                             id="campo-modelo"
@@ -143,52 +161,37 @@ function ModalRegistro({ visible, onCerrar, onRegistrado, usuarioId, token }) {
                             type="text"
                             placeholder="Ej: Yamaha MT-03"
                             autoComplete="off"
+                            maxLength={60}
                             value={formulario.modelo}
                             onChange={manejarCambio}
+                            aria-invalid={Boolean(errores.modelo)}
+                            aria-describedby={errores.modelo ? "error-modelo" : undefined}
                             autoFocus
                         />
+                        {errores.modelo && <p className="formulario__error-campo" id="error-modelo">{errores.modelo}</p>}
                     </div>
 
-                    {/* Placa */}
                     <div className="formulario__grupo">
-                        <label className="formulario__etiqueta" htmlFor="campo-placa">
-                            Placa
-                        </label>
+                        <label className="formulario__etiqueta" htmlFor="campo-placa">Placa</label>
                         <input
-                            className="formulario__campo"
+                            className="formulario__campo formulario__campo--placa"
                             id="campo-placa"
                             name="placa"
                             type="text"
                             placeholder="ABC123"
                             autoComplete="off"
+                            autoCapitalize="characters"
+                            maxLength={6}
                             value={formulario.placa}
                             onChange={manejarCambio}
+                            aria-invalid={Boolean(errores.placa)}
+                            aria-describedby={errores.placa ? "error-placa" : undefined}
                         />
+                        {errores.placa && <p className="formulario__error-campo" id="error-placa">{errores.placa}</p>}
                     </div>
 
-                    {/* Nota informativa sobre IMEI */}
                     <div className="formulario__grupo">
-                        <div style={{
-                            fontSize: "0.82rem",
-                            color: "#94a3b8",
-                            background: "rgba(15, 23, 42, 0.6)",
-                            border: "1px solid rgba(56, 189, 248, 0.25)",
-                            borderRadius: "8px",
-                            padding: "10px 12px",
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "8px"
-                        }}>
-                            <span className="material-symbols-outlined" style={{ fontSize: "1.2rem", color: "#38bdf8" }}>info</span>
-                            <span>El <strong>IMEI</strong> del rastreador GPS es asignado y configurado por el administrador.</span>
-                        </div>
-                    </div>
-
-                    {/* Tipo */}
-                    <div className="formulario__grupo">
-                        <label className="formulario__etiqueta" htmlFor="campo-tipo">
-                            Tipo de Vehículo
-                        </label>
+                        <label className="formulario__etiqueta" htmlFor="campo-tipo">Tipo de vehículo</label>
                         <select
                             className="formulario__campo formulario__select"
                             id="campo-tipo"
@@ -196,29 +199,32 @@ function ModalRegistro({ visible, onCerrar, onRegistrado, usuarioId, token }) {
                             value={formulario.tipo}
                             onChange={manejarCambio}
                         >
-                            <option value="CARRO">🚗 Carro</option>
-                            <option value="MOTO">🏍️ Moto</option>
+                            <option value="MOTO">Moto</option>
+                            <option value="CARRO">Carro</option>
                         </select>
                     </div>
 
-                    {/* Error */}
+                    <div className="formulario__aviso">
+                        <span className="material-symbols-outlined" aria-hidden="true">info</span>
+                        <span>
+                            El <strong>equipo GPS</strong> lo asigna un administrador. Mientras tanto, tu vehículo
+                            aparecerá como «GPS pendiente».
+                        </span>
+                    </div>
+
                     {error && (
-                        <p style={{ color: "#f87171", fontSize: "0.85rem", margin: "0" }}>
-                            ⚠️ {error}
+                        <p className="formulario__error" role="alert">
+                            <span className="material-symbols-outlined" aria-hidden="true">error</span>
+                            {error}
                         </p>
                     )}
 
                     <div className="formulario__pie">
-                        <button
-                            className="formulario__boton-confirmar"
-                            type="button"
-                            onClick={manejarConfirmar}
-                            disabled={cargando}
-                        >
-                            {cargando ? "Registrando..." : "Confirmar Registro"}
+                        <button className="formulario__boton-confirmar" type="submit" disabled={cargando}>
+                            {cargando ? "Registrando…" : "Registrar vehículo"}
                         </button>
                     </div>
-                </div>
+                </form>
             </div>
         </div>
     );
@@ -281,7 +287,7 @@ export default function PanelVehiculo() {
                 console.error("Error obteniendo usuario:", error);
                 setCargando(false);
             });
-    }, []);
+    },);
 
     useEffect(() => {
         const manejarMouse = (e) => {

@@ -147,7 +147,7 @@ function TarjetaIdentidad({ usuarioData, onSubirFoto, subiendoFoto }) {
             <div className="contenedor-avatar-perfil">
                 <div className="anillo-avatar">
                     {usuarioData?.imagenUrl ? (
-                        <img className="avatar-perfil-user" src={usuarioData.imagenUrl} alt="Foto de perfil" />
+                        <img className="avatar-perfil-user" src={usuarioData.imagenUrl} alt="Foto de perfil" referrerPolicy="no-referrer" />
                     ) : (
                         <div className="avatar-placeholder">
                             {usuarioData?.usuario?.charAt(0).toUpperCase() || "?"}
@@ -200,10 +200,10 @@ function TarjetaIdentidad({ usuarioData, onSubirFoto, subiendoFoto }) {
     );
 }
 
-function CampoFormulario({ etiqueta, tipo = "text", valor, onChange, prefijo, style }) {
+function CampoFormulario({ etiqueta, tipo = "text", valor, onChange, prefijo, ancho }) {
     const [enfocado, setEnfocado] = useState(false);
     return (
-        <div className="grupo-campo-perfil" style={style}>
+        <div className={`grupo-campo-perfil ${ancho ? "grupo-campo-perfil--ancho" : ""}`}>
             <label className={`etiqueta-campo-perfil ${enfocado ? "etiqueta-campo-perfil--activa" : ""}`}>
                 {etiqueta}
             </label>
@@ -372,7 +372,7 @@ function SeccionFormulario({ usuarioData, setUsuarioData, setModalGuardar, setEn
                         onChange={(e) => setUsuarioData((prev) => ({ ...prev, telefono: e.target.value }))} />
                     <CampoFormulario etiqueta="Correo Electrónico" tipo="email" valor={usuarioData?.correo || ""}
                         onChange={(e) => setUsuarioData((prev) => ({ ...prev, correo: e.target.value }))}
-                        style={{ gridColumn: "span 2" }} />
+                        ancho />
                 </div>
                 <div className="barra-acciones">
                     <button
@@ -474,7 +474,7 @@ function TarjetaResumenSeguridad({ usuarioData }) {
                     <span className="material-symbols-outlined icono-metrica">phonelink_lock</span>
                     <div className="texto-metrica">
                         <span>Doble Factor (2FA)</span>
-                        <strong style={{ color: dosFactores ? "#10b981" : "#eab308" }}>
+                        <strong style={{ color: dosFactores ? "#b2cea8" : "#e0b97a" }}>
                             {dosFactores ? `Activo (${usuarioData?.canal2fa || "CORREO"})` : "Inactivo"}
                         </strong>
                     </div>

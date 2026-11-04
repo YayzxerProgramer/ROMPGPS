@@ -143,7 +143,7 @@ export default function AdminUnidades({ busqueda, dialogoInicial, onDialogoAbier
                     <div className="adm-placa">{v.placa}</div>
                     <div className={`adm-imei ${v.imei ? "" : "adm-tono--nogps"}`}>{v.imei || "SIN GPS"}</div>
                     {v.numeroSim && (
-                      <div style={{ fontSize: "0.72rem", color: "#38bdf8", marginTop: "2px", fontWeight: "500" }}>
+                      <div style={{ fontSize: "0.72rem", color: "#b2cea8", marginTop: "2px", fontWeight: "500" }}>
                         SIM: {v.numeroSim}
                       </div>
                     )}

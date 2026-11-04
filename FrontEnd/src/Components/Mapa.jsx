@@ -179,7 +179,8 @@ function MapaGPS({ position, connected, siguiendo = true, atenuado = false, onAr
         options={{
           styles: darkMapStyle,
           disableDefaultUI: true,
-          zoomControl: true,
+          // El zoom lo manejan los botones propios del panel (.pc-zoom)
+          zoomControl: false,
           streetViewControl: false, 
           mapTypeControl: false,
           fullscreenControl: false,

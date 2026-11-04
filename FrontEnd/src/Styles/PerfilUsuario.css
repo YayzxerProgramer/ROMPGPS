@@ -368,7 +368,7 @@
 /* ── Panel vidrio (reutilizable) ── */
 /* Mismo vidrio que las tarjetas de /admin, sobre la aurora compartida. */
 .panel-vidrio {
-    background: rgba(10, 26, 20, 0.58);
+    background: rgba(23, 27, 23, 0.58);
     backdrop-filter: blur(18px) saturate(140%);
     -webkit-backdrop-filter: blur(18px) saturate(140%);
     border: 1px solid rgba(178, 206, 168, 0.12);
@@ -719,7 +719,7 @@
     width: 100%;
     padding: 1.5rem 3rem;
     border-top: 1px solid rgba(178, 206, 168, 0.12);
-    background: rgba(4, 13, 10, 0.55);
+    background: rgba(10, 12, 10, 0.55);
     backdrop-filter: blur(18px);
     -webkit-backdrop-filter: blur(18px);
     display: flex;
@@ -910,7 +910,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: linear-gradient(135deg, #2a4a2e, #132a21);
+    background: linear-gradient(135deg, #2a4a2e, #1c211d);
     color: var(--color-primario, #b2cea8);
     font-family: var(--fuente-titular, 'Space Grotesk', sans-serif);
     font-size: 3rem;
@@ -930,7 +930,7 @@
     width: 44px;
     height: 44px;
     border-radius: 0.6rem;
-    background: rgba(5, 16, 12, 0.8);
+    background: rgba(10, 12, 10, 0.8);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     border: 1px solid rgba(178, 206, 168, 0.2);
@@ -1091,14 +1091,14 @@
 }
 
 .badge-2fa-activo {
-    background: rgba(16, 185, 129, 0.15);
-    color: #10b981;
-    border: 1px solid rgba(16, 185, 129, 0.35);
+    background: rgba(178, 206, 168, 0.15);
+    color: #b2cea8;
+    border: 1px solid rgba(178, 206, 168, 0.35);
 }
 
 .badge-2fa-inactivo {
     background: rgba(255, 255, 255, 0.08);
-    color: #94a3b8;
+    color: #8f968f;
     border: 1px solid rgba(255, 255, 255, 0.15);
 }
 
@@ -1123,13 +1123,13 @@
 }
 
 .btn-toggle-2fa--on {
-    background: rgba(239, 68, 68, 0.15);
-    color: #f87171;
-    border: 1px solid rgba(239, 68, 68, 0.3);
+    background: rgba(224, 163, 145, 0.15);
+    color: #e0a391;
+    border: 1px solid rgba(224, 163, 145, 0.3);
 }
 
 .btn-toggle-2fa--on:hover {
-    background: rgba(239, 68, 68, 0.25);
+    background: rgba(224, 163, 145, 0.25);
 }
 
 .selector-canales-perfil {
@@ -1174,8 +1174,8 @@
 }
 
 .opcion-canal-card.seleccionada {
-    background: rgba(16, 185, 129, 0.12);
-    border-color: #10b981;
+    background: rgba(178, 206, 168, 0.12);
+    border-color: #b2cea8;
     color: #ffffff;
 }
 
@@ -1185,7 +1185,7 @@
 }
 
 .opcion-canal-card.seleccionada .icono-canal-card {
-    color: #10b981;
+    color: #b2cea8;
 }
 
 .texto-canal-card {
@@ -1207,7 +1207,7 @@
 
 .check-canal {
     font-size: 18px;
-    color: #10b981;
+    color: #b2cea8;
 }
 
 .feedback-2fa-perfil {
@@ -1215,9 +1215,9 @@
     align-items: center;
     gap: 8px;
     font-size: 13px;
-    color: #10b981;
-    background: rgba(16, 185, 129, 0.1);
-    border: 1px solid rgba(16, 185, 129, 0.25);
+    color: #b2cea8;
+    background: rgba(178, 206, 168, 0.1);
+    border: 1px solid rgba(178, 206, 168, 0.25);
     padding: 8px 14px;
     border-radius: 8px;
     animation: fadeIn 0.3s ease;
@@ -1275,15 +1275,15 @@
 }
 
 .badge-seguridad-alto {
-    background: rgba(16, 185, 129, 0.15);
-    color: #10b981;
-    border: 1px solid rgba(16, 185, 129, 0.35);
+    background: rgba(178, 206, 168, 0.15);
+    color: #b2cea8;
+    border: 1px solid rgba(178, 206, 168, 0.35);
 }
 
 .badge-seguridad-medio {
-    background: rgba(234, 179, 8, 0.15);
-    color: #eab308;
-    border: 1px solid rgba(234, 179, 8, 0.35);
+    background: rgba(224, 185, 122, 0.15);
+    color: #e0b97a;
+    border: 1px solid rgba(224, 185, 122, 0.35);
 }
 
 .desc-resumen-seguridad {
@@ -1337,7 +1337,7 @@
 
 .texto-metrica strong {
     font-size: 12px;
-    color: #f1f5f9;
+    color: #f2f5f0;
 }
 
 /* ── Panel Cambiar Contraseña en Perfil ──────────────────────────── */
@@ -1410,7 +1410,7 @@
     background: rgba(13, 23, 17, 0.7);
     border: 1px solid rgba(178, 206, 168, 0.2);
     border-radius: 8px;
-    color: #f1f5f9;
+    color: #f2f5f0;
     font-size: 14px;
     outline: none;
     transition: border-color 0.2s ease, box-shadow 0.2s ease;
@@ -1461,19 +1461,19 @@
 }
 
 .indicador-fortaleza-perfil__barra--activa-1 {
-    background: #ef4444 !important;
+    background: #c9826c !important;
 }
 
 .indicador-fortaleza-perfil__barra--activa-2 {
-    background: #f97316 !important;
+    background: #e0a391 !important;
 }
 
 .indicador-fortaleza-perfil__barra--activa-3 {
-    background: #eab308 !important;
+    background: #e0b97a !important;
 }
 
 .indicador-fortaleza-perfil__barra--activa-4 {
-    background: #10b981 !important;
+    background: #b2cea8 !important;
 }
 
 .indicador-fortaleza-perfil__etiqueta {
@@ -1513,9 +1513,14 @@
 
 .error-cambio-clave {
     font-size: 13px;
-    color: #f87171;
-    background: rgba(239, 68, 68, 0.1);
-    border: 1px solid rgba(239, 68, 68, 0.25);
+    color: #e0a391;
+    background: rgba(224, 163, 145, 0.1);
+    border: 1px solid rgba(224, 163, 145, 0.25);
     padding: 8px 14px;
     border-radius: 8px;
+}
+
+/* Ocupa todas las columnas que tenga la cuadrícula, sin crear una nueva en móvil */
+.grupo-campo-perfil--ancho {
+    grid-column: 1 / -1;
 }

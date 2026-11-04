@@ -251,10 +251,10 @@ export default function PanelControl() {
                     fontSize: "13px",
                     fontWeight: "600",
                     backdropFilter: "blur(12px)",
-                    border: "1px solid rgba(239, 68, 68, 0.4)",
+                    border: "1px solid rgba(224, 163, 145, 0.4)",
                     pointerEvents: "none"
                 }}>
-                    <span className="material-symbols-outlined" style={{ color: "#EF4444", fontSize: "20px" }}>wifi_off</span>
+                    <span className="material-symbols-outlined" style={{ color: "#c9826c", fontSize: "20px" }}>wifi_off</span>
                     <span>Dispositivo desconectado — Mostrando última posición vista <strong>({haceCuanto(position.registradoEn)})</strong></span>
                 </div>
             )}
@@ -279,7 +279,7 @@ export default function PanelControl() {
                         <span className="material-symbols-outlined">settings</span>
                     </Link>
                     <div className="pc-separador" />
-                    <img className="pc-avatar" alt="Perfil" src={usuarioData?.imagenUrl || AVATAR_RESPALDO} />
+                    <img className="pc-avatar" alt="Perfil" src={usuarioData?.imagenUrl || AVATAR_RESPALDO} referrerPolicy="no-referrer" />
                     <div className="pc-usuario">
                         <span>{usuarioData?.nombre || usuarioData?.usuario || "Usuario"}</span>
                         <small>{activas} {activas === 1 ? "unidad activa" : "unidades activas"}</small>

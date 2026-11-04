@@ -1849,3 +1849,27 @@
 .pc-campo input {
     font-size: 16px;
 }
+
+/* Métricas de la unidad: con 11px y .18em, "VELOCIDAD" no cabía en 3 columnas */
+.pc-metricas-3 .pc-metrica {
+    padding: 10px 8px;
+}
+
+.pc-metricas-3 .pc-metrica-etiqueta {
+    letter-spacing: .06em;
+}
+
+.pc-metricas-3 .pc-metrica-texto {
+    font-size: 12px;
+}
+
+@media (max-width: 360px) {
+    .pc-metricas-3 .pc-metrica {
+        padding: 9px 6px;
+    }
+
+    .pc-metricas-3 .pc-metrica-etiqueta {
+        font-size: 10px;
+        letter-spacing: .03em;
+    }
+}

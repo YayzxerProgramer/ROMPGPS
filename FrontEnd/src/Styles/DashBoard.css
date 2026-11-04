@@ -255,7 +255,7 @@ body {
 
 .adm-nav-item.activo,
 .adm-lateral-link.activo {
-    background: linear-gradient(90deg, rgba(159, 211, 166, .2), rgba(108, 195, 160, .06));
+    background: linear-gradient(90deg, rgba(159, 211, 166, .2), rgba(178, 206, 168, .06));
     color: var(--adm-texto);
     box-shadow: inset 0 0 0 1px rgba(178, 206, 168, .14);
 }
@@ -362,7 +362,7 @@ body {
     gap: 16px;
     padding: 0 24px;
     border-bottom: 1px solid var(--adm-borde);
-    background: rgba(4, 13, 10, .35);
+    background: rgba(10, 12, 10, .35);
     backdrop-filter: var(--adm-vidrio);
     -webkit-backdrop-filter: var(--adm-vidrio);
     position: relative;
@@ -460,7 +460,7 @@ body {
     font-size: 10px;
     font-weight: 800;
     line-height: 1;
-    box-shadow: 0 0 0 2px #071611;
+    box-shadow: 0 0 0 2px #0d0f0d;
 }
 
 .adm-separador {
@@ -619,7 +619,7 @@ body {
     flex-shrink: 0;
     border-radius: 10px;
     border: 1px solid rgba(178, 206, 168, .2);
-    background: rgba(10, 26, 20, .45);
+    background: rgba(23, 27, 23, .45);
     backdrop-filter: var(--adm-vidrio);
     -webkit-backdrop-filter: var(--adm-vidrio);
     color: var(--adm-salvia) !important;
@@ -711,7 +711,7 @@ body {
 .adm-stat:hover {
     transform: translateY(-2px);
     border-color: rgba(178, 206, 168, .3);
-    background: rgba(14, 34, 26, .66);
+    background: rgba(28, 33, 29, .66);
 }
 
 .adm-stat:hover .adm-stat-cab .material-symbols-outlined {
@@ -812,7 +812,7 @@ body {
     border-radius: 18px;
     overflow: hidden;
     border: 1px solid var(--adm-borde-2);
-    background: #0b1a14;
+    background: #111411;
     box-shadow: var(--adm-sombra);
 }
 
@@ -1304,7 +1304,7 @@ body {
 
 .adm-tabla-fila--cab {
     padding: 10px 20px;
-    background: rgba(3, 12, 9, .4);
+    background: rgba(10, 12, 10, .4);
     border-top: 1px solid rgba(178, 206, 168, .06);
     border-bottom: 1px solid rgba(178, 206, 168, .06);
     font-size: 10px;
@@ -1315,7 +1315,7 @@ body {
 }
 
 .adm-tabla-fila--cab:hover {
-    background: rgba(3, 12, 9, .4);
+    background: rgba(10, 12, 10, .4);
 }
 
 .adm-tabla .der {
@@ -1621,7 +1621,7 @@ body {
     width: min(370px, calc(100vw - 32px));
     padding: 8px;
     border-radius: 16px;
-    background: rgba(10, 28, 21, .96);
+    background: rgba(23, 27, 23, .96);
     border: 1px solid var(--adm-borde-2);
     box-shadow: 0 24px 60px rgba(0, 0, 0, .5);
     backdrop-filter: var(--adm-vidrio);
@@ -2028,7 +2028,7 @@ body {
     display: grid;
     place-items: center;
     padding: 20px;
-    background: rgba(2, 8, 6, .6);
+    background: rgba(5, 6, 5, .6);
     backdrop-filter: blur(6px);
     -webkit-backdrop-filter: blur(6px);
     font-size: 14px;
@@ -2042,7 +2042,7 @@ body {
     display: flex;
     flex-direction: column;
     border-radius: 20px;
-    background: linear-gradient(160deg, rgba(16, 40, 30, .97), rgba(7, 21, 16, .98));
+    background: linear-gradient(160deg, rgba(28, 33, 29, .97), rgba(17, 20, 17, .98));
     border: 1px solid var(--adm-borde-2);
     box-shadow: 0 30px 80px rgba(0, 0, 0, .55), inset 0 1px 0 rgba(255, 255, 255, .05);
     animation: adm-entrar .25s ease both;
@@ -2124,7 +2124,7 @@ body {
     gap: 10px;
     padding: 12px 16px;
     border-radius: 12px;
-    background: rgba(12, 32, 24, .95);
+    background: rgba(28, 33, 29, .95);
     border: 1px solid rgba(159, 211, 166, .3);
     box-shadow: 0 16px 40px rgba(0, 0, 0, .45);
     backdrop-filter: blur(12px);
@@ -2237,9 +2237,9 @@ body {
 
 .adm-rol--ADMIN,
 .adm-rol--ADMINISTRADOR {
-    background: rgba(108, 195, 160, .16);
-    box-shadow: inset 0 0 0 1px rgba(108, 195, 160, .3);
-    color: #a6e3c6;
+    background: rgba(178, 206, 168, .16);
+    box-shadow: inset 0 0 0 1px rgba(178, 206, 168, .3);
+    color: #c4dcba;
 }
 
 .adm-rol--USER,
@@ -2312,6 +2312,16 @@ body {
 
 .adm-tabla--unidades .adm-tabla-fila {
     grid-template-columns: 1.1fr 1.5fr 1.3fr 1.1fr .8fr 140px;
+}
+
+/* Ventas tiene 8 columnas: con la cuadrícula general de 6,
+   "Estado" y "Acciones" pasaban a una segunda línea. */
+.adm-tabla--ventas {
+    min-width: 1080px;
+}
+
+.adm-tabla--ventas .adm-tabla-fila {
+    grid-template-columns: 1.2fr 1.6fr 1.2fr .9fr .8fr .9fr 1fr 150px;
 }
 
 .adm-paginacion {
@@ -2645,7 +2655,7 @@ body {
     gap: 1px;
     padding: 8px 10px;
     border-radius: 10px;
-    background: rgba(4, 14, 10, .95);
+    background: rgba(10, 12, 10, .95);
     border: 1px solid var(--adm-borde-2);
     box-shadow: 0 12px 30px rgba(0, 0, 0, .45);
     transform: translate(12px, -110%);
@@ -2744,7 +2754,7 @@ body {
     align-items: center;
     padding: 28px 20px 20px;
     text-align: center;
-    background: linear-gradient(170deg, rgba(31, 190, 128, .2), rgba(10, 26, 20, .6) 55%);
+    background: linear-gradient(170deg, rgba(178, 206, 168, .2), rgba(23, 27, 23, .6) 55%);
 }
 
 .adm-identidad-avatar {
