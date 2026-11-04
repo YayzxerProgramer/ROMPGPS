@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import LogoRomp from "./LogoRomp";
 import MapaGPS from "./Mapa";
 import HistorialRecorridos from "./HistorialRecorridos";
 import RecomendadorRutas from "./RecomendadorRutas";
@@ -202,8 +203,15 @@ export default function PanelControl() {
 
     // ── Valores derivados para la vista ─────────────────────
     const enLinea = connected && Boolean(posSocket);
-    const etiquetaVivo = !connected ? "Sin conexión" : navegando ? "Navegando" : inmovilizado ? "Inmovilizado" : "En vivo";
-    const colorVivo = connected && !inmovilizado ? "#b2cea8" : "#c9826c";
+    const sinUnidades = !vehiculoSel;
+    const sinGps = Boolean(vehiculoSel) && !imei;
+    const etiquetaVivo = sinUnidades ? "Sin unidades"
+        : sinGps ? "GPS pendiente"
+        : !connected ? "Sin conexión"
+        : navegando ? "Navegando"
+        : inmovilizado ? "Inmovilizado"
+        : "En vivo";
+    const colorVivo = sinUnidades || sinGps ? "#8f968f" : connected && !inmovilizado ? "#b2cea8" : "#c9826c";
 
     const estado = inmovilizado
         ? { texto: "INMOVILIZADO", clase: "peligro" }
@@ -263,7 +271,7 @@ export default function PanelControl() {
             <header className="pc-cabecera">
                 <div className="pc-vidrio pc-cabecera-marca">
                     <div className="pc-logo">
-                        <span className="material-symbols-outlined icono-relleno">explore</span>
+                        <LogoRomp tamano={22} />
                         ROMP GPS
                     </div>
                     <div className="pc-separador" />
@@ -318,7 +326,16 @@ export default function PanelControl() {
                         </div>
 
                         <div className="pc-cuerpo pc-cuerpo-flota">
-                            {!vehiculoSel && <div className="pc-estado">Aún no tienes unidades registradas.</div>}
+                            {!vehiculoSel && (
+                                <div className="pc-vacio">
+                                    <span className="material-symbols-outlined" aria-hidden="true">two_wheeler</span>
+                                    <strong>Registra tu primer vehículo</strong>
+                                    <p>Agrégalo a tu cuenta. Cuando un administrador le asigne el equipo GPS, lo verás aquí en tiempo real.</p>
+                                    <Link to="/configuracion?seccion=vehiculos" className="pc-vacio-boton">Registrar vehículo</Link>
+                                </div>
+                            )}
+
+                            {sinGps && <div className="pc-estado">Esta unidad está pendiente de que un administrador le asigne el equipo GPS.</div>}
 
                             {vehiculoSel && (
                                 <div className="pc-unidad">

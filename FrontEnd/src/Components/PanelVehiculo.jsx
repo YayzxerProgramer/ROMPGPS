@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import "../Styles/PanelVehiculo.css";
-import { API_URL } from "../Service/api";
+import { del, get, post } from "../Service/api";
 import MantenimientoVehiculo from "./Mantenimiento/MantenimientoVehiculo";
 
 function TarjetaVehiculo({ vehiculo, onDelete }) {
@@ -48,7 +48,7 @@ function TarjetaVehiculo({ vehiculo, onDelete }) {
 
 const PLACA_VALIDA = /^[A-Z0-9-]{5,6}$/;
 
-function ModalRegistro({ visible, onCerrar, onRegistrado, usuarioId, token }) {
+function ModalRegistro({ visible, onCerrar, onRegistrado, usuarioId }) {
     const [formulario, setFormulario] = useState({
         modelo: "",
         placa: "",
@@ -101,34 +101,29 @@ function ModalRegistro({ visible, onCerrar, onRegistrado, usuarioId, token }) {
         setErrores(encontrados);
         if (Object.keys(encontrados).length) return;
 
+        if (!usuarioId) {
+            setError("No pudimos cargar tu cuenta. Recarga la página e inténtalo de nuevo.");
+            return;
+        }
+
         setCargando(true);
         try {
-            const res = await fetch(`${API_URL}/vehiculo`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${token}`,
-                },
-                body: JSON.stringify({
-                    modelo: formulario.modelo.trim(),
-                    placa: formulario.placa.trim(),
-                    tipo: formulario.tipo,
-                    id_usuario: usuarioId,
-                    activo: true,
-                }),
+            await post("/vehiculo", {
+                modelo: formulario.modelo.trim(),
+                placa: formulario.placa.trim(),
+                tipo: formulario.tipo,
+                id_usuario: usuarioId,
+                activo: true,
             });
-
-            if (!res.ok) {
-                const data = await res.json().catch(() => ({}));
-                if (data.campos) setErrores(data.campos);
-                setError(data.campos ? "Revisa los campos marcados." : data.error || "No se pudo registrar el vehículo.");
-                return;
-            }
-
             onRegistrado();
             onCerrar();
-        } catch {
-            setError("No pudimos conectar con el servidor. Revisa tu conexión.");
+        } catch (err) {
+            if (err.campos) setErrores(err.campos);
+            setError(
+                err.campos ? "Revisa los campos marcados."
+                    : err instanceof TypeError ? "No pudimos conectar con el servidor. Revisa tu conexión."
+                        : err.message || "No se pudo registrar el vehículo."
+            );
         } finally {
             setCargando(false);
         }
@@ -235,36 +230,19 @@ export default function PanelVehiculo() {
     const [usuarioId, setUsuarioId] = useState(null);
     const [cargando, setCargando] = useState(true);
     const usuario = localStorage.getItem("usuario");
-    const token = localStorage.getItem("token");
     const [modalVisible, setModalVisible] = useState(false);
     const orbePrimarioRef = useRef(null);
     const orbeSecundarioRef = useRef(null);
 
-    const cargarVehiculos = (id) => {
-        fetch(`${API_URL}/usuario/vehiculos/${id}`, {
-            headers: { Authorization: `Bearer ${token}` },
-        })
-            .then((res) => res.json())
-            .then((data) => {
-                setVehiculos(data);
-                setCargando(false);
-            })
-            .catch((error) => {
-                console.error("Error cargando vehículos:", error);
-                setCargando(false);
-            });
-    };
+    const cargarVehiculos = (id) =>
+        get(`/usuario/vehiculos/${id}`)
+            .then((data) => setVehiculos(data || []))
+            .catch((error) => console.error("Error cargando vehículos:", error))
+            .finally(() => setCargando(false));
 
     const eliminarVehiculo = async (id) => {
         try {
-            const res = await fetch(`${API_URL}/vehiculo/${id}`, {
-                method: "DELETE",
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            });
-
-            if (!res.ok) throw new Error("Error eliminando");
+            await del(`/vehiculo/${id}`);
             cargarVehiculos(usuarioId);
 
         } catch (e) {
@@ -273,15 +251,12 @@ export default function PanelVehiculo() {
     };
 
     useEffect(() => {
-        if (!usuario || !token) return;
+        if (!usuario) return;
 
-        fetch(`${API_URL}/usuario/usuario/${usuario}`, {
-            headers: { Authorization: `Bearer ${token}` },
-        })
-            .then((res) => res.json())
+        get(`/usuario/usuario/${usuario}`)
             .then((data) => {
                 setUsuarioId(data.id);
-                cargarVehiculos(data.id);
+                return cargarVehiculos(data.id);
             })
             .catch((error) => {
                 console.error("Error obteniendo usuario:", error);
@@ -312,8 +287,8 @@ export default function PanelVehiculo() {
                             Gestión de <span className="encabezado-dashboard__titulo--acento">Unidades</span>
                         </h1>
                         <p className="encabezado-dashboard__descripcion">
-                            Supervise y registre dispositivos GPS de alta precisión en su flota.
-                            Visualice el estado en tiempo real de cada activo configurado.
+                            Registra y supervisa los vehículos de tu flota.
+                            Consulta el estado de cada uno en tiempo real.
                         </p>
                     </div>
                     <div className="encabezado-dashboard__acciones">
@@ -368,7 +343,6 @@ export default function PanelVehiculo() {
                 onCerrar={() => setModalVisible(false)}
                 onRegistrado={() => cargarVehiculos(usuarioId)}
                 usuarioId={usuarioId}
-                token={token}
             />
 
             <div className="telemetria-decorativa" aria-hidden="true">

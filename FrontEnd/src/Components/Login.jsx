@@ -3,6 +3,8 @@ import { useState } from "react";
 import { useNavigate } from 'react-router-dom';
 import { TypeAnimation } from 'react-type-animation';
 import { Link } from "react-router-dom";
+import EnlacesLegales from "./EnlacesLegales";
+import LogoRomp from "./LogoRomp";
 import { useGoogleLogin } from "@react-oauth/google";
 import { iniciarLoginGithub } from "../Service/GithubService";
 import { guardarSesion, rutaInicial } from "../Service/sesion";
@@ -121,12 +123,12 @@ function CajaEstadistica({ valor, etiqueta }) {
 function InfoSesion() {
     return (
         <div className="info-sesion">
-            <span className="info-sesion__etiqueta">Security Protocol</span>
+            <span className="info-sesion__etiqueta">Acceso seguro</span>
 
             <h1>
-                Precision en cada <br />
+                Precisión en cada <br />
                 <TypeAnimation
-                    sequence={['Coordenada', 2000, 'Kilometro', 2000, 'Ruta', 2000, 'Viaje', 2000]}
+                    sequence={['Coordenada', 2000, 'Kilómetro', 2000, 'Ruta', 2000, 'Viaje', 2000]}
                     wrapper="span"
                     /* speed 1 era la MÁS LENTA de la escala 1–99 */
                     speed={50}
@@ -137,15 +139,15 @@ function InfoSesion() {
             </h1>
 
             <p className="info-sesion__descripcion">
-                Acceda a su centro de mando de ROMP GPS. Gestione flotas,
-                monitoree activos en tiempo real y analice telemetria con
+                Accede a tu centro de mando de ROMP GPS. Gestiona flotas,
+                monitorea activos en tiempo real y analiza la telemetría con
                 exactitud milimétrica.
             </p>
 
             <div className="estadisticas-sesion">
                 <CajaEstadistica valor="12ms" etiqueta="Latencia" />
                 <div className="estadisticas-sesion__divisor" />
-                <CajaEstadistica valor="99.9%" etiqueta="Uptime" />
+                <CajaEstadistica valor="99.9%" etiqueta="Disponibilidad" />
             </div>
         </div>
     );
@@ -312,7 +314,9 @@ function FormularioSesion() {
 
             if (!res.ok) {
                 const errorData = await res.json().catch(() => null);
-                throw new Error(errorData?.error || errorData?.mensaje || "Usuario o contraseña incorrectos");
+                throw new Error(res.status === 401
+                    ? "Usuario o contraseña incorrectos"
+                    : (errorData?.error || errorData?.mensaje || "No pudimos iniciar sesión"));
             }
 
             const data = await res.json();
@@ -1030,7 +1034,7 @@ function SeparadorOAuth() {
     return (
         <div className="separador-oauth">
             <span className="separador-oauth__linea" />
-            <span className="separador-oauth__texto">O continua con</span>
+            <span className="separador-oauth__texto">O continúa con</span>
             <span className="separador-oauth__linea" />
         </div>
     );
@@ -1044,15 +1048,15 @@ function TarjetaSesion() {
             <div className="ancla-hud">LAT: 10.4236° N | LON: 75.5478° W</div>
 
             <div className="encabezado-tarjeta">
-                <h2>Area de Clientes</h2>
-                <p>Ingrese sus credenciales para acceder al terminal.</p>
+                <h2>Área de Clientes</h2>
+                <p>Ingresa tus datos para entrar a tu cuenta.</p>
             </div>
 
             <FormularioSesion />
 
             <div className="pie-tarjeta">
                 <p>
-                    ¿Aun no tienes cuenta?{" "}
+                    ¿Aún no tienes cuenta?{" "}
                     <Link to="/registro">Regístrate aquí</Link>
                 </p>
             </div>
@@ -1060,18 +1064,22 @@ function TarjetaSesion() {
     );
 }
 
+/* Solo "Seguridad de Datos" tiene una página propia; los otros dos son
+   informativos y se muestran como texto en vez de enlaces a "#". */
 const ENLACES_INFERIORES = [
-    { texto: "Soporte 24/7", href: "#" },
-    { texto: "Seguridad de Datos", href: "#" },
-    { texto: "Estado del Sistema", href: "#" },
+    { texto: "Soporte 24/7" },
+    { texto: "Seguridad de Datos", to: "/privacidad" },
+    { texto: "Estado del Sistema" },
 ];
 
 function EnlacesInferiores() {
     return (
         <div className="enlaces-inferiores">
-            {ENLACES_INFERIORES.map(({ texto, href }, i) => (
+            {ENLACES_INFERIORES.map(({ texto, to }, i) => (
                 <span key={texto} className="enlaces-inferiores__grupo">
-                    <a href={href} className="enlaces-inferiores__item">{texto}</a>
+                    {to
+                        ? <Link to={to} className="enlaces-inferiores__item">{texto}</Link>
+                        : <span className="enlaces-inferiores__item">{texto}</span>}
                     {i < ENLACES_INFERIORES.length - 1 && (
                         <span className="enlaces-inferiores__separador">•</span>
                     )}
@@ -1101,7 +1109,7 @@ function EncabezadoSesion() {
     return (
         <header className="barra-encabezado-sesion">
             <div className="marca-sesion">
-                <span className="icono-marca">⌖</span>
+                <LogoRomp tamano={26} className="icono-marca" />
                 <span className="texto-marca">ROMP GPS</span>
             </div>
 
@@ -1113,21 +1121,13 @@ function EncabezadoSesion() {
     );
 }
 
-const ENLACES_PIE = [
-    { texto: "Política de Privacidad", href: "#" },
-    { texto: "Términos de Servicio", href: "#" },
-    { texto: "Docs API", href: "#" },
-];
-
 function PiePagina() {
     return (
         <footer className="barra-pie-sesion">
             <div className="marca-pie">ROMP GPS</div>
-            <p className="derechos-pie">© 2024 ROMP GPS. Precision Navigation.</p>
+            <p className="derechos-pie">© {new Date().getFullYear()} ROMP GPS. Navegación de precisión.</p>
             <nav className="navegacion-pie">
-                {ENLACES_PIE.map(({ texto, href }) => (
-                    <a key={texto} href={href}>{texto}</a>
-                ))}
+                <EnlacesLegales />
             </nav>
         </footer>
     );

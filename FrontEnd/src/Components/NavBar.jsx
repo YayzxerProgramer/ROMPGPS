@@ -1,3 +1,4 @@
+import LogoRomp from "./LogoRomp";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "../Styles/NavBar.css";
@@ -35,7 +36,7 @@ function Navbar() {
             <div className="contenedor-barra">
 
                 <div className="logo" onClick={() => navigate("/")}>
-                    <span className="logo-icono">⌖</span>
+                    <LogoRomp tamano={26} className="logo-icono" />
                     <span className="logo-texto">ROMP GPS</span>
                 </div>
 
@@ -50,7 +51,7 @@ function Navbar() {
                         type="button"
                         className="boton-nav"
                         onClick={() => navigate("/login")}>
-                        Area de Clientes
+                        Área de Clientes
                     </button>
 
                     <button
@@ -83,7 +84,7 @@ function Navbar() {
                     type="button"
                     className="boton-nav boton-nav--movil"
                     onClick={() => { setMenuAbierto(false); navigate("/login"); }}>
-                    Area de Clientes
+                    Área de Clientes
                 </button>
             </div>
 

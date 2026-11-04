@@ -16,6 +16,7 @@ import RecuperarContrasena from './Components/RecuperarContrasena'
 import Dashboard from './Components/Dashboard'
 import RutaProtegida from './Components/RutaProtegida'
 import './Styles/Base.css'
+import Legal from './Components/Legal'
 import './Styles/App.css'
 
 function App() {
@@ -36,6 +37,8 @@ function App() {
       <Route path="/login" element={<Login />} />
       <Route path="/registro" element={<Registro />} />
       <Route path="/recuperar-contrasena" element={<RecuperarContrasena />} />
+      <Route path="/privacidad" element={<Legal tipo="privacidad" />} />
+      <Route path="/terminos" element={<Legal tipo="terminos" />} />
       <Route path="/auth/callback" element={<AuthCallback />} />
 
       {/* ── Panel administrativo: solo ADMIN ── */}

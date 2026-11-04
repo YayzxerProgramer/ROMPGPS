@@ -1,0 +1,138 @@
+.legal {
+    position: relative;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background: var(--romp-fondo);
+    color: var(--romp-texto);
+    font-family: "Manrope", sans-serif;
+}
+
+.legal-cabecera,
+.legal-contenido,
+.legal-pie {
+    position: relative;
+    z-index: 1;
+}
+
+.legal-cabecera {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 24px clamp(16px, 4vw, 48px);
+}
+
+.legal-marca {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--romp-texto);
+    font-family: "Space Grotesk", sans-serif;
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: -.03em;
+    text-decoration: none;
+}
+
+.legal-marca svg {
+    color: var(--romp-acento);
+}
+
+.legal-volver {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 44px;
+    color: var(--romp-texto-2);
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.legal-volver:hover {
+    color: var(--romp-acento);
+}
+
+.legal-volver .material-symbols-outlined {
+    font-size: 18px;
+}
+
+.legal-contenido {
+    flex: 1;
+    width: min(100%, 760px);
+    margin: 0 auto;
+    padding: 24px 16px 56px;
+}
+
+.legal-contenido h1 {
+    margin: 0 0 8px;
+    font-family: "Space Grotesk", sans-serif;
+    font-size: clamp(32px, 6vw, 44px);
+    line-height: 1.1;
+    letter-spacing: -.03em;
+}
+
+.legal-fecha {
+    margin: 0 0 24px;
+    color: var(--romp-texto-3);
+    font-size: 13px;
+}
+
+.legal-intro {
+    margin: 0 0 32px;
+    color: var(--romp-texto);
+    font-size: 17px;
+    line-height: 1.6;
+}
+
+.legal-contenido section {
+    padding: 20px 0;
+    border-top: 1px solid var(--romp-borde);
+}
+
+.legal-contenido h2 {
+    margin: 0 0 10px;
+    color: var(--romp-acento);
+    font-family: "Space Grotesk", sans-serif;
+    font-size: 18px;
+}
+
+.legal-contenido section p,
+.legal-contenido li {
+    color: var(--romp-texto-2);
+    font-size: 15px;
+    line-height: 1.7;
+}
+
+.legal-contenido section p {
+    margin: 0;
+}
+
+.legal-contenido ul {
+    margin: 0;
+    padding-left: 20px;
+}
+
+.legal-contenido li + li {
+    margin-top: 6px;
+}
+
+.legal-pie {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px 24px;
+    padding: 20px 16px 28px;
+    border-top: 1px solid var(--romp-borde);
+}
+
+.legal-pie a {
+    color: var(--romp-texto-3);
+    font-size: 13px;
+    text-decoration: none;
+}
+
+.legal-pie a:hover {
+    color: var(--romp-acento);
+}

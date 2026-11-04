@@ -44,7 +44,7 @@ function Producto() {
 
                         <li>
                             <span className="punto"></span>
-                            Bateria de larga duracion (365 días)
+                            Batería de larga duración (365 días)
                         </li>
 
                         <li>
@@ -59,10 +59,15 @@ function Producto() {
 
                     </ul>
 
-                    <button className="boton-especificaciones">
-                        Explorar Especificaciones Tecnicas
-                        <span>→</span>
-                    </button>
+                    <a
+                        className="boton-especificaciones"
+                        href="/docs/especificaciones-gnxis.pdf"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                    >
+                        Explorar Especificaciones Técnicas
+                        <span aria-hidden="true">→</span>
+                    </a>
 
                 </div>
 

@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import "../Styles/CambiarContrasena.css";
 import FondoAurora from "./FondoAurora";
 import { useNavigate } from "react-router-dom";
-import { API_URL } from "../Service/api";
+import { API_URL, fetchConSesion } from "../Service/api";
 
 function RadarDecorativo() {
     return (
@@ -132,7 +132,7 @@ export default function ConfiguracionSeguridad() {
     const [modalExito, setModalExito] = useState(false);
 
     useEffect(() => {
-        fetch(`${API_URL}/usuario/usuario/${usuario}`, {
+        fetchConSesion(`${API_URL}/usuario/usuario/${usuario}`, {
             method: "GET",
             headers: {
                 "Content-Type": "application/json",
@@ -146,7 +146,7 @@ export default function ConfiguracionSeguridad() {
 
     async function actualizarContrasena(claveActual, nuevaClave) {
         try {
-            const res = await fetch(
+            const res = await fetchConSesion(
                 `${API_URL}/usuario/contrasena/${usuarioData.id}`,
                 {
                     method: "PATCH",
@@ -254,7 +254,7 @@ export default function ConfiguracionSeguridad() {
                                         etiqueta="Contraseña actual"
                                         valor={formulario.claveActual}
                                         onChange={manejarCambio}
-                                        placeholder="Ingrese su contraseña actual"
+                                        placeholder="Ingresa tu contraseña actual"
                                         mostrarFortaleza={false}
                                         nivelFortaleza={0}
                                     />
@@ -263,7 +263,7 @@ export default function ConfiguracionSeguridad() {
                                         etiqueta="Nueva contraseña"
                                         valor={formulario.nuevaClave}
                                         onChange={manejarCambio}
-                                        placeholder="Ingrese la nueva contraseña"
+                                        placeholder="Ingresa la nueva contraseña"
                                         mostrarFortaleza={true}
                                         nivelFortaleza={nivelFortaleza}
                                     />

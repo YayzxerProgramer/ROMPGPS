@@ -82,6 +82,7 @@ export default function AdminAnalitica({ resumen, conteoEstados, totalMonitoriza
 
   const r = resumen || {};
   const cobertura = pct(r.vehiculosConImei, r.totalVehiculos);
+  const conPosicion = (conteoEstados.marcha || 0) + (conteoEstados.detenido || 0);
 
   const filasRoles = Object.entries(ROLES).map(([rol, etiqueta]) => ({
     etiqueta,
@@ -113,10 +114,10 @@ export default function AdminAnalitica({ resumen, conteoEstados, totalMonitoriza
 
       <div className="adm-analitica">
         <div className="adm-tarjeta adm-heroe">
-          <div className="adm-etiqueta adm-etiqueta--acento">COBERTURA GPS</div>
+          <div className="adm-etiqueta adm-etiqueta--acento">EQUIPOS ASIGNADOS</div>
           <div className="adm-heroe-valor">{cobertura}<small>%</small></div>
           <p className="adm-heroe-texto">
-            {numero(r.vehiculosConImei)} de {numero(r.totalVehiculos)} vehículos tienen un equipo GT06 instalado y pueden reportar posición.
+            {numero(r.vehiculosConImei)} de {numero(r.totalVehiculos)} vehículos tienen un equipo GT06 asignado. Revisa en «Estado de las unidades» cuáles están reportando.
           </p>
           <div className="adm-medidor-pista adm-medidor-pista--heroe"><div style={{ width: `${cobertura}%` }} /></div>
         </div>
@@ -131,7 +132,7 @@ export default function AdminAnalitica({ resumen, conteoEstados, totalMonitoriza
           </div>
           <div className="adm-medidores">
             <Medidor etiqueta="Con propietario" parte={(r.totalVehiculos || 0) - (r.vehiculosSinDuenno || 0)} total={r.totalVehiculos} aviso="sin asignar" />
-            <Medidor etiqueta="Rastreo activo" parte={r.vehiculosActivos} total={r.totalVehiculos} aviso="inactivos" />
+            <Medidor etiqueta="Vehículos habilitados" parte={r.vehiculosActivos} total={r.totalVehiculos} aviso="deshabilitados" />
           </div>
         </div>
 
@@ -150,7 +151,7 @@ export default function AdminAnalitica({ resumen, conteoEstados, totalMonitoriza
           <div className="adm-tarjeta-cab">
             <div>
               <div className="adm-tarjeta-titulo">Estado de las unidades</div>
-              <div className="adm-tarjeta-sub">Las {numero(totalMonitorizadas)} unidades más recientes del monitor</div>
+              <div className="adm-tarjeta-sub">{numero(conPosicion)} de {numero(totalMonitorizadas)} han reportado posición · unidades más recientes</div>
             </div>
             <span className="material-symbols-outlined adm-tarjeta-icono">radar</span>
           </div>

@@ -289,6 +289,7 @@ export default function HistorialRecorridos({ imei, placa, mapa, google }) {
                 ))}
             </div>
 
+            {!imei && <div className="pc-estado">Tus recorridos aparecerán aquí cuando tu vehículo tenga un equipo GPS.</div>}
             {cargando && <div className="pc-estado">Cargando recorridos…</div>}
             {!cargando && error && <div className="pc-estado">{error}</div>}
 

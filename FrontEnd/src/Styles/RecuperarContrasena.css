@@ -7,7 +7,7 @@
     min-height: 100vh;
     display: flex;
     flex-direction: column;
-    background: #090c0b;
+    background: #0d0f0d;
     color: #e2f1e0;
     overflow-x: hidden;
     font-family: inherit;
@@ -35,7 +35,7 @@
     justify-content: space-between;
     align-items: center;
     padding: 20px clamp(16px, 4vw, 40px);
-    background: linear-gradient(to bottom, rgba(9, 12, 11, 0.85), transparent);
+    background: linear-gradient(to bottom, rgba(13, 15, 13, 0.85), transparent);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
 }
@@ -203,7 +203,7 @@
 .recuperar-campo__input-box input:-webkit-autofill:hover, 
 .recuperar-campo__input-box input:-webkit-autofill:focus, 
 .recuperar-campo__input-box input:-webkit-autofill:active {
-    -webkit-box-shadow: 0 0 0 1000px #090c0b inset !important;
+    -webkit-box-shadow: 0 0 0 1000px #0d0f0d inset !important;
     -webkit-text-fill-color: #ffffff !important;
     caret-color: #ffffff !important;
     transition: background-color 5000s ease-in-out 0s;

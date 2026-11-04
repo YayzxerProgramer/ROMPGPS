@@ -26,7 +26,7 @@ function Nosotros() {
                     <div className="derecha-nosotros">
 
                         <p>
-                            ROMP GPS nacio de la necesidad de
+                            ROMP GPS nació de la necesidad de
                             fiabilidad absoluta en entornos críticos.
                             Nuestra tecnología combina hardware
                             de grado militar con software de análisis predictivo.
@@ -44,7 +44,7 @@ function Nosotros() {
                         <h3>I+D Constante</h3>
 
                         <p>
-                            Innovacion continua en micro-geolocalizacion
+                            Innovación continua en microgeolocalización
                             y eficiencia energetica.
                         </p>
                     </div>

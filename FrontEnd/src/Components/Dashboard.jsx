@@ -1,3 +1,4 @@
+import LogoRomp from "./LogoRomp";
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Client } from "@stomp/stompjs";
@@ -296,7 +297,7 @@ function PanelAdmin() {
 
       <aside className={`adm-lateral ${menuAbierto ? "abierto" : ""}`}>
         <button className="adm-marca" onClick={() => ir("dashboard")}>
-          <span className="adm-marca-icono"><span className="material-symbols-outlined">explore</span></span>ROMP GPS
+          <span className="adm-marca-icono"><LogoRomp tamano={20} /></span>ROMP GPS
         </button>
         <div className="adm-lateral-titulo">Administración</div>
         <nav className="adm-nav">

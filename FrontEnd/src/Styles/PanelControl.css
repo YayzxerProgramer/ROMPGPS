@@ -1873,3 +1873,45 @@
         letter-spacing: .03em;
     }
 }
+.pc-logo svg {
+    color: var(--pc-acento);
+}
+
+.pc-vacio {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 24px 14px;
+    text-align: center;
+}
+
+.pc-vacio .material-symbols-outlined {
+    color: var(--pc-acento);
+    font-size: 32px;
+}
+
+.pc-vacio strong {
+    font-size: 14px;
+}
+
+.pc-vacio p {
+    margin: 0 0 8px;
+    color: var(--pc-texto-3);
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+.pc-vacio a.pc-vacio-boton {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
+    padding: 0 20px;
+    border-radius: 12px;
+    background: var(--romp-boton-grad);
+    color: var(--romp-sobre-boton);
+    font-size: 13px;
+    font-weight: 700;
+    text-decoration: none;
+}

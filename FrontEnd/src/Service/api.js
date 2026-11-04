@@ -74,6 +74,33 @@ async function refrescarSesion() {
 }
 
 /**
+ * Como fetch(url, opciones), pero con la sesión al día: renueva el token si
+ * está por caducar y reintenta una vez si llega un 401. Devuelve la Response
+ * cruda, para el código que ya comprueba res.ok por su cuenta.
+ */
+export async function fetchConSesion(url, opciones = {}) {
+    const token = obtenerToken();
+    if (token && haCaducado(token, MARGEN_RENOVACION_SEGUNDOS)) {
+        await refrescarSesion();
+    }
+
+    const conToken = () => ({
+        ...opciones,
+        headers: { ...opciones.headers, Authorization: `Bearer ${obtenerToken()}` },
+    });
+
+    let respuesta = await fetch(url, conToken());
+    if (respuesta.status === 401) {
+        if (await refrescarSesion()) {
+            respuesta = await fetch(url, conToken());
+        } else {
+            anunciarSesionCaducada();
+        }
+    }
+    return respuesta;
+}
+
+/**
  * Petición autenticada.
  *
  * @param {string} ruta      ruta relativa, p. ej. "/usuario/login"

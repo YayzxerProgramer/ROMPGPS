@@ -2,9 +2,11 @@ import { useEffect, useRef, useState } from "react";
 import "../Styles/PerfilUsuario.css";
 import PanelVehiculo from "../Components/PanelVehiculo";
 import FondoAurora from "./FondoAurora";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import EnlacesLegales from "./EnlacesLegales";
+import LogoRomp from "./LogoRomp";
 import { cerrarSesion, esAdmin } from "../Service/sesion";
-import { API_URL } from "../Service/api";
+import { API_URL, fetchConSesion } from "../Service/api";
 
 const ENLACES_NAV = [
     { icono: "person", etiqueta: "Perfil" },
@@ -69,11 +71,11 @@ function NavegacionLateral({ enlaceActivo, setEnlaceActivo }) {
             >
                 <div className="bloque-usuario">
                     <div className="contenedor-avatar-mini">
-                        <span className="material-symbols-outlined">person</span>
+                        <LogoRomp tamano={20} />
                     </div>
                     <div>
                         <p className="nombre-usuario-mini">ROMP GPS</p>
-                        <p className="unidades-usuario">Precision Navigation Core</p>
+                        <p className="unidades-usuario">Navegación de precisión</p>
                     </div>
                 </div>
 
@@ -252,7 +254,7 @@ function TarjetaSeguridad2FA({ usuarioData, setUsuarioData }) {
                 throw new Error("Debes registrar un número de teléfono en tu perfil para usar 2FA por " + canalFinal);
             }
 
-            const res = await fetch(`${API_URL}/usuario/2fa`, {
+            const res = await fetchConSesion(`${API_URL}/usuario/2fa`, {
                 method: "PATCH",
                 headers: {
                     "Content-Type": "application/json",
@@ -453,21 +455,21 @@ function TarjetaResumenSeguridad({ usuarioData }) {
                     <span className="material-symbols-outlined icono-metrica">lock</span>
                     <div className="texto-metrica">
                         <span>Cifrado de Clave</span>
-                        <strong>BCrypt + Salt (Costo 12)</strong>
+                        <strong>Contraseña cifrada</strong>
                     </div>
                 </div>
                 <div className="metrica-seguridad-item">
                     <span className="material-symbols-outlined icono-metrica">speed</span>
                     <div className="texto-metrica">
                         <span>Anti Fuerza Bruta</span>
-                        <strong>Redis Rate-Limiter Activo</strong>
+                        <strong>Bloqueo de intentos repetidos</strong>
                     </div>
                 </div>
                 <div className="metrica-seguridad-item">
                     <span className="material-symbols-outlined icono-metrica">token</span>
                     <div className="texto-metrica">
                         <span>Sesión Segura</span>
-                        <strong>JWT Rotativo</strong>
+                        <strong>Sesión renovada automáticamente</strong>
                     </div>
                 </div>
                 <div className="metrica-seguridad-item">
@@ -517,7 +519,7 @@ function TarjetaCambiarContrasena({ usuarioData }) {
 
         setCargando(true);
         try {
-            const res = await fetch(`${API_URL}/usuario/contrasena/${usuarioData.id}`, {
+            const res = await fetchConSesion(`${API_URL}/usuario/contrasena/${usuarioData.id}`, {
                 method: "PATCH",
                 headers: {
                     "Content-Type": "application/json",
@@ -699,7 +701,7 @@ function ContenidoPrincipal(props) {
                     </div>
                     <div className="bloque-fecha">
                         <p className="etiqueta-fecha">Estado</p>
-                        <p className="valor-fecha">En linea</p>
+                        <p className="valor-fecha">En línea</p>
                     </div>
                 </div>
                 <div className="cuadricula-contenido">
@@ -727,11 +729,9 @@ function PiePagina() {
                 ROMP GPS
             </div>
             <div className="enlaces-pie">
-                {["Privacy Policy", "Terms of Service", "API Docs"].map((item) => (
-                    <a key={item} className="enlace-pie" href="#">{item}</a>
-                ))}
+                <EnlacesLegales claseEnlace="enlace-pie" />
             </div>
-            <p className="copyright-pie">© 2024 ROMP GPS.</p>
+            <p className="copyright-pie">© {new Date().getFullYear()} ROMP GPS.</p>
         </footer>
     );
 }
@@ -742,7 +742,10 @@ export default function PerfilUsuario() {
     const [tipo, setTipo] = useState("password");
     const [modalGuardar, setModalGuardar] = useState(false);
     const [nuevaContrasena, setNuevaContrasena] = useState("");
-    const [enlaceActivo, setEnlaceActivo] = useState("Perfil");
+    const [parametros] = useSearchParams();
+    const [enlaceActivo, setEnlaceActivo] = useState(
+        parametros.get("seccion") === "vehiculos" ? "Vehículos" : "Perfil"
+    );
     const [modalExito, setModalExito] = useState(false);
     const [subiendoFoto, setSubiendoFoto] = useState(false);
     // ← estado compartido
@@ -751,7 +754,7 @@ export default function PerfilUsuario() {
     const usuario = localStorage.getItem("usuario");
 
     useEffect(() => {
-        fetch(`${API_URL}/usuario/usuario/${usuario}`, {
+        fetchConSesion(`${API_URL}/usuario/usuario/${usuario}`, {
             method: "GET",
             headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         })
@@ -824,7 +827,7 @@ export default function PerfilUsuario() {
                 imagenUrl: urlSegura,
             };
 
-            const resBackend = await fetch(`${API_URL}/usuario/${usuarioData.id}`, {
+            const resBackend = await fetchConSesion(`${API_URL}/usuario/${usuarioData.id}`, {
                 method: "PUT",
                 headers: {
                     "Content-Type": "application/json",
@@ -859,7 +862,7 @@ export default function PerfilUsuario() {
             imagenUrl: usuarioData?.imagenUrl,
         };
 
-        fetch(`${API_URL}/usuario/${usuarioData.id}`, {
+        fetchConSesion(`${API_URL}/usuario/${usuarioData.id}`, {
             method: "PUT",
             headers: {
                 "Content-Type": "application/json",

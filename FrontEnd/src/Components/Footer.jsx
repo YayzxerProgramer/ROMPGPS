@@ -1,10 +1,5 @@
 import "../Styles/Footer.css";
-
-const ENLACES = [
-    { texto: "Política de Privacidad", href: "#" },
-    { texto: "Términos de Servicio", href: "#" },
-    { texto: "Documentación API", href: "#" },
-];
+import EnlacesLegales from "./EnlacesLegales";
 
 function Footer() {
     return (
@@ -14,9 +9,7 @@ function Footer() {
                 <div className="logo-pie">ROMP GPS</div>
 
                 <nav className="enlaces-pie" aria-label="Enlaces legales">
-                    {ENLACES.map(({ texto, href }) => (
-                        <a key={texto} href={href}>{texto}</a>
-                    ))}
+                    <EnlacesLegales />
                 </nav>
 
                 <div className="derechos-pie">

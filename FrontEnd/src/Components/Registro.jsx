@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import "../Styles/Registro.css";
 import { useNavigate, Link } from "react-router-dom";
+import LogoRomp from "./LogoRomp";
 import { useGoogleLogin } from "@react-oauth/google";
 import { guardarSesion, rutaInicial } from "../Service/sesion";
 import { API_URL } from "../Service/api";
@@ -57,12 +58,7 @@ function ColumnaEditorial() {
     return (
         <section className="columna-editorial">
             <div className="logotipo">
-                <span
-                    className="material-symbols-outlined icono-explorar"
-                    style={{ fontVariationSettings: "'FILL' 1" }}
-                >
-                    explore
-                </span>
+                <LogoRomp tamano={36} className="icono-explorar" />
                 <span className="nombre-marca">ROMP GPS</span>
             </div>
 
@@ -154,7 +150,11 @@ function CheckboxTerminos({ checked, onChange }) {
                 )}
             </div>
             <span>
-                Acepto los términos de servicio y protocolos de seguridad de la red ROMP.
+                Acepto los{" "}
+                <Link to="/terminos" target="_blank" rel="noopener noreferrer">términos de servicio</Link>
+                {" "}y la{" "}
+                <Link to="/privacidad" target="_blank" rel="noopener noreferrer">política de privacidad</Link>
+                {" "}de ROMP GPS.
             </span>
         </label>
     );
@@ -202,7 +202,7 @@ function BotonSocialGoogle({ onClick, cargando }) {
                 <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05" />
                 <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335" />
             </svg>
-            <span className="texto-boton-social">{cargando ? "..." : "GOOGLE"}</span>
+            <span className="texto-boton-social">{cargando ? "…" : "Google"}</span>
         </button>
     );
 }
@@ -215,7 +215,7 @@ function BotonSocialGithub() {
             <svg className="icono-social" viewBox="0 0 24 24" fill="currentColor">
                 <path fillRule="evenodd" clipRule="evenodd" d="M12 2C6.477 2 2 6.477 2 12c0 4.418 2.865 8.166 6.839 9.489.5.092.682-.217.682-.482 0-.237-.008-.866-.013-1.7-2.782.604-3.369-1.34-3.369-1.34-.454-1.156-1.11-1.463-1.11-1.463-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.294 2.747-1.025 2.747-1.025.546 1.377.202 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.92.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.577.688.48C19.137 20.161 22 16.415 22 12c0-5.523-4.477-10-10-10z" />
             </svg>
-            <span className="texto-boton-social">GITHUB</span>
+            <span className="texto-boton-social">GitHub</span>
         </button>
     );
 }
@@ -242,7 +242,7 @@ function FormularioRegistro() {
     }
 
     if (!terminos) {
-        setError("Debe aceptar los términos y protocolos de seguridad.");
+        setError("Debes aceptar los términos de servicio y la política de privacidad.");
         return false;
     }
 
@@ -372,7 +372,7 @@ function FormularioRegistro() {
 
                 <div className="divisor">
                     <div className="linea-divisor" />
-                    <span className="texto-divisor">O CONEXIÓN SEGURA</span>
+                    <span className="texto-divisor">O continúa con</span>
                     <div className="linea-divisor" />
                 </div>
 

@@ -1,3 +1,4 @@
+import LogoRomp from "./LogoRomp";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import FondoAurora from "./FondoAurora";
@@ -199,7 +200,7 @@ export default function RecuperarContrasena() {
 
             <header className="recuperar-header">
                 <div className="recuperar-header__brand">
-                    <span className="material-symbols-outlined icono-marca">location_searching</span>
+                    <LogoRomp tamano={26} className="icono-marca" />
                     <span className="texto-marca">ROMP GPS</span>
                 </div>
                 <Link to="/login" className="recuperar-header__volver">
