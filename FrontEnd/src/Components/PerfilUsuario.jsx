@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import "../Styles/PerfilUsuario.css";
 import PanelVehiculo from "../Components/PanelVehiculo";
+import PanelMantenimiento from "./Mantenimiento/PanelMantenimiento";
 import FondoAurora from "./FondoAurora";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import EnlacesLegales from "./EnlacesLegales";
@@ -12,6 +13,7 @@ const ENLACES_NAV = [
     { icono: "person", etiqueta: "Perfil" },
     { icono: "security", etiqueta: "Seguridad" },
     { icono: "directions_car", etiqueta: "Vehículos" },
+    { icono: "precision_manufacturing", etiqueta: "Mantenimiento" },
 ];
 
 const ENLACES_PIE_NAV = [
@@ -743,9 +745,10 @@ export default function PerfilUsuario() {
     const [modalGuardar, setModalGuardar] = useState(false);
     const [nuevaContrasena, setNuevaContrasena] = useState("");
     const [parametros] = useSearchParams();
-    const [enlaceActivo, setEnlaceActivo] = useState(
-        parametros.get("seccion") === "vehiculos" ? "Vehículos" : "Perfil"
-    );
+    const [enlaceActivo, setEnlaceActivo] = useState(() => ({
+        vehiculos: "Vehículos",
+        mantenimiento: "Mantenimiento",
+    }[parametros.get("seccion")] || "Perfil"));
     const [modalExito, setModalExito] = useState(false);
     const [subiendoFoto, setSubiendoFoto] = useState(false);
     // ← estado compartido
@@ -922,8 +925,10 @@ export default function PerfilUsuario() {
                             usuarioData={usuarioData}
                             setUsuarioData={setUsuarioData}
                         />
-                    ) : (
+                    ) : enlaceActivo === "Vehículos" ? (
                         <PanelVehiculo />
+                    ) : (
+                        <PanelMantenimiento usuarioId={usuarioData?.id} />
                     )}
                 </div>
                 <ModalGuardar
