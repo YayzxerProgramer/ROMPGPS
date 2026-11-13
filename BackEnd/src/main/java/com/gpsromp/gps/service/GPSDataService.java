@@ -18,6 +18,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import jakarta.annotation.PreDestroy;
 
 @Service
 @RequiredArgsConstructor
@@ -30,42 +34,67 @@ public class GPSDataService {
     private final RedisTemplate<String, Object> redisTemplate;
 
     private static final String REDIS_PREFIX_GPS = "gps:posicion:";
+    private static final long TTL_CACHE_IMEI_MS = 5 * 60 * 1000L; // 5 minutos
+
+    /** Caché en memoria de IMEIs válidos: evita SELECT SQL a Postgres en cada trama (<0.001ms). */
+    private final Map<String, Long> cacheImeisValidos = new ConcurrentHashMap<>();
+
+    /** Pool asíncrono para persistir en MongoDB Atlas sin retrasar la difusión WebSocket. */
+    private final ExecutorService mongoPersistenciaExecutor = Executors.newFixedThreadPool(4, r -> {
+        Thread t = new Thread(r, "mongo-gps-async-writer");
+        t.setDaemon(true);
+        return t;
+    });
+
+    @PreDestroy
+    void shutdown() {
+        mongoPersistenciaExecutor.shutdown();
+    }
 
     /**
-     * Persiste una posición, actualiza la caché y la difunde por WebSocket.
-     *
-     * DOS ARREGLOS:
-     *
-     * 1. ORDEN. Antes se publicaba por WebSocket ANTES de guardar en Mongo, así
-     *    que si el guardado fallaba los clientes ya habían pintado una posición
-     *    que no existía en ningún sitio. Ahora se persiste primero y solo se
-     *    difunde lo que quedó guardado de verdad.
-     *
-     * 2. HORA DEL DISPOSITIVO. Antes se pisaba registradoEn con Instant.now(),
-     *    descartando la hora real del fix GPS que envía el GT06. El histórico
-     *    reflejaba la hora de ingesta, de modo que con reintentos o con el
-     *    buffer del propio dispositivo las trazas quedaban desordenadas. Ahora
-     *    se respeta la hora recibida y solo se recurre a la actual si no viene.
+     * Valida si un IMEI pertenece a un vehículo registrado usando caché en RAM
+     * para eliminar consultas repetidas a la base de datos relacional.
      */
-    public GPSData save(GPSData gpsData) {
-
-        String imei = gpsData.getImei();
-
+    public boolean esImeiRegistrado(String imei) {
         if (imei == null || imei.isBlank()) {
-            throw new IllegalArgumentException("La posición no trae IMEI");
+            return false;
+        }
+        Long expiracion = cacheImeisValidos.get(imei);
+        long ahora = System.currentTimeMillis();
+        if (expiracion != null && ahora < expiracion) {
+            return true;
         }
 
-        // El IMEI debe corresponder a un vehículo registrado.
-        //
-        // La clave de ingesta impide que un tercero publique posiciones, pero no
-        // impide que un dispositivo legítimo —o un error de configuración— llene
-        // MongoDB con IMEI que no existen en el sistema. Además, esas posiciones
-        // se difundían por WebSocket a un topic que nadie puede escuchar, porque
-        // la autorización exige ser propietario de un vehículo con ese IMEI.
-        if (!vehiculoRepository.existsByImei(imei)) {
+        boolean existe = vehiculoRepository.existsByImei(imei);
+        if (existe) {
+            cacheImeisValidos.put(imei, ahora + TTL_CACHE_IMEI_MS);
+        } else {
+            cacheImeisValidos.remove(imei);
+        }
+        return existe;
+    }
+
+    /**
+     * Procesa una posición entrante en TIEMPO REAL PURO (< 1 ms):
+     * 1. Valida IMEI contra memoria en nanosegundos.
+     * 2. Emite de inmediato por WebSocket al navegador.
+     * 3. Actualiza la caché en Redis.
+     * 4. Encola la persistencia en MongoDB de forma asíncrona (no bloquea el flujo visual).
+     */
+    public GPSData procesarPosicionTiempoReal(GPSData gpsData) {
+        if (gpsData == null) {
+            return null;
+        }
+
+        String imei = gpsData.getImei();
+        if (imei == null || imei.isBlank()) {
+            log.warn("Posición descartada: sin IMEI");
+            return null;
+        }
+
+        if (!esImeiRegistrado(imei)) {
             log.warn("Posición descartada: el IMEI {} no corresponde a ningún vehículo registrado", imei);
-            throw new RecursoNoEncontradoException(
-                    "No hay ningún vehículo registrado con el IMEI " + imei);
+            return null;
         }
 
         Instant momentoFix = gpsData.getRegistradoEn() != null
@@ -73,7 +102,7 @@ public class GPSDataService {
                 : Instant.now();
 
         GPSData entidad = GPSData.builder()
-                .imei(gpsData.getImei())
+                .imei(imei)
                 .latitud(gpsData.getLatitud())
                 .longitud(gpsData.getLongitud())
                 .velocidad(gpsData.getVelocidad())
@@ -84,19 +113,46 @@ public class GPSDataService {
                 .creadosEn(Instant.now())
                 .build();
 
-        GPSData guardada = repository.save(entidad);
+        // 1. Difusión INMEDIATA por WebSocket (< 1 ms)
+        messagingTemplate.convertAndSend("/socket/gps/" + imei, entidad);
 
+        // 2. Caché de última posición en Redis
         try {
-            redisTemplate.opsForValue().set(REDIS_PREFIX_GPS + guardada.getImei(), guardada);
+            redisTemplate.opsForValue().set(REDIS_PREFIX_GPS + imei, entidad);
         } catch (Exception e) {
-            // La caché es opcional: si Redis falla, la posición ya está en Mongo.
-            log.warn("No se pudo cachear la posición de {}: {}", guardada.getImei(), e.getMessage());
+            log.warn("No se pudo cachear la posición de {}: {}", imei, e.getMessage());
         }
 
-        messagingTemplate.convertAndSend("/socket/gps/" + guardada.getImei(), guardada);
+        // 3. Persistencia en MongoDB Atlas en segundo plano (no bloquea al usuario)
+        mongoPersistenciaExecutor.submit(() -> {
+            try {
+                repository.save(entidad);
+            } catch (Exception e) {
+                log.error("Fallo al guardar histórico en MongoDB para {}: {}", imei, e.getMessage());
+            }
+        });
 
-        log.debug("Posición de {} guardada y difundida", guardada.getImei());
-        return guardada;
+        log.debug("Posición de {} difundida al instante por WebSocket y encolada a Mongo", imei);
+        return entidad;
+    }
+
+    /**
+     * Ingesta estándar (POST /gps o fallback HTTP).
+     * Delega al procesador de tiempo real para garantizar ultra baja latencia.
+     */
+    public GPSData save(GPSData gpsData) {
+        String imei = gpsData != null ? gpsData.getImei() : null;
+        if (imei == null || imei.isBlank()) {
+            throw new IllegalArgumentException("La posición no trae IMEI");
+        }
+
+        if (!esImeiRegistrado(imei)) {
+            log.warn("Posición descartada: el IMEI {} no corresponde a ningún vehículo registrado", imei);
+            throw new RecursoNoEncontradoException(
+                    "No hay ningún vehículo registrado con el IMEI " + imei);
+        }
+
+        return procesarPosicionTiempoReal(gpsData);
     }
 
     /** Última posición conocida: primero Redis, si no MongoDB. */

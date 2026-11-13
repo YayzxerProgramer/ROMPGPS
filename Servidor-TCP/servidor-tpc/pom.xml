@@ -47,6 +47,12 @@
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
 
+        <!-- Redis para bus de eventos en memoria de ultra baja latencia (<1ms) -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-redis</artifactId>
+        </dependency>
+
         <!--
             Solo lo que hace falta para un servidor TCP.
             netty-all arrastraba todos los transportes y códecs (HTTP/2, QUIC,

@@ -186,6 +186,8 @@ export function FormVehiculo({ vehiculo, onCerrar, onGuardado }) {
     modelo: vehiculo?.modelo || "",
     tipo: vehiculo?.tipo || "MOTO",
     activo: vehiculo?.activo ?? true,
+    fechaVencimientoSoat: vehiculo?.fechaVencimientoSoat || "",
+    fechaVencimientoTecnomecanica: vehiculo?.fechaVencimientoTecnomecanica || "",
   });
   const [propietario, setPropietario] = useState(null);
   const [errores, setErrores] = useState({ general: null, campos: {} });
@@ -204,7 +206,9 @@ export function FormVehiculo({ vehiculo, onCerrar, onGuardado }) {
         placa: datos.placa.trim(),
         imei: imeiLimpio || null,
         modelo: datos.modelo.trim(),
-        tipo: datos.tipo
+        tipo: datos.tipo,
+        fechaVencimientoSoat: datos.fechaVencimientoSoat || null,
+        fechaVencimientoTecnomecanica: datos.fechaVencimientoTecnomecanica || null,
       };
 
       const resultado = editando
@@ -263,6 +267,12 @@ export function FormVehiculo({ vehiculo, onCerrar, onGuardado }) {
             valor={datos.tipo}
             onCambiar={(tipo) => setDatos((d) => ({ ...d, tipo }))}
           />
+        </Campo>
+        <Campo etiqueta="Vencimiento SOAT" error={c.fechaVencimientoSoat} ayuda="Fecha de expiración">
+          <input className="adm-entrada" type="date" value={datos.fechaVencimientoSoat} onChange={cambiar("fechaVencimientoSoat")} />
+        </Campo>
+        <Campo etiqueta="Vencimiento Tecnomecánica" error={c.fechaVencimientoTecnomecanica} ayuda="Fecha de expiración">
+          <input className="adm-entrada" type="date" value={datos.fechaVencimientoTecnomecanica} onChange={cambiar("fechaVencimientoTecnomecanica")} />
         </Campo>
         {!editando && (
           <>

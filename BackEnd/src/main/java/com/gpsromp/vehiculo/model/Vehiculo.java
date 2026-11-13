@@ -1,5 +1,6 @@
 package com.gpsromp.vehiculo.model;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.UUID;
 import java.io.Serializable;
@@ -54,6 +55,14 @@ public class Vehiculo implements Serializable {
      */
     @Column(name = "usuario_id")
     private UUID id_usuario;
+
+    /** Fecha de vencimiento del SOAT (Seguro Obligatorio). */
+    @Column(name = "fecha_vencimiento_soat")
+    private LocalDate fechaVencimientoSoat;
+
+    /** Fecha de vencimiento de la Revisión Técnico-Mecánica (RTM). */
+    @Column(name = "fecha_vencimiento_tecnomecanica")
+    private LocalDate fechaVencimientoTecnomecanica;
 
     @CreationTimestamp
     @Column(updatable = false)

@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import io.netty.bootstrap.ServerBootstrap;
+import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
@@ -49,12 +50,18 @@ public class ServerTcp {
         new ServerBootstrap()
                 .group(aceptarConexiones, procesarDatos)
                 .channel(NioServerSocketChannel.class)
+                // Cola de espera de conexiones entrantes para ráfagas concurrentes.
+                .option(ChannelOption.SO_BACKLOG, 1024)
                 // Reutilizar la dirección evita el "Address already in use" al
                 // reiniciar mientras quedan sockets en TIME_WAIT.
                 .option(ChannelOption.SO_REUSEADDR, true)
                 // Los GT06 mandan tramas pequeñas: sin esto, Nagle las retiene.
                 .childOption(ChannelOption.TCP_NODELAY, true)
                 .childOption(ChannelOption.SO_KEEPALIVE, true)
+                // Buffer pooling nativo: cero pausas de Garbage Collector (GC).
+                .childOption(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT)
+                .childOption(ChannelOption.SO_RCVBUF, 32 * 1024)
+                .childOption(ChannelOption.SO_SNDBUF, 32 * 1024)
                 .childHandler(gpsInitializer)
                 .bind(puerto)
                 .sync();

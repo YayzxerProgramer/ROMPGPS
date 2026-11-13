@@ -939,3 +939,50 @@ input {
         font-size: 1.5rem;
     }
 }
+
+/* ── Badges de SOAT y Tecnomecánica en tarjeta ─────────────── */
+
+.tarjeta-vehiculo__mantenimiento-contenedor {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    margin-top: 6px;
+}
+
+.tarjeta-doc-tag {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 1.2;
+    border: 1px solid;
+    letter-spacing: 0.02em;
+    white-space: nowrap;
+}
+
+.tarjeta-doc-tag--vigente {
+    color: #b2cea8;
+    background: rgba(178, 206, 168, 0.1);
+    border-color: rgba(178, 206, 168, 0.3);
+}
+
+.tarjeta-doc-tag--por_vencer {
+    color: #e0b97a;
+    background: rgba(224, 185, 122, 0.12);
+    border-color: rgba(224, 185, 122, 0.35);
+}
+
+.tarjeta-doc-tag--vencido {
+    color: #e8a592;
+    background: rgba(232, 165, 146, 0.12);
+    border-color: rgba(232, 165, 146, 0.4);
+}
+
+.tarjeta-doc-tag--no_registrado {
+    color: #8f998b;
+    background: rgba(143, 153, 139, 0.08);
+    border-color: rgba(143, 153, 139, 0.2);
+}

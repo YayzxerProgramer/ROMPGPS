@@ -217,3 +217,199 @@
 @media (prefers-reduced-motion: reduce) {
     .mnt-pildora { transition: none; }
 }
+
+/* ── Documentos y Vigencias RUNT ─────────────────────────── */
+
+.mnt-panel--documentos {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.mnt-doc-cabecera {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.mnt-doc-titulos {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    flex: 1;
+    min-width: 200px;
+}
+
+.mnt-panel-subtitulo {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin: 0;
+    font: 700 15px/1.3 'Space Grotesk', system-ui, sans-serif;
+    color: var(--mnt-texto);
+}
+
+.mnt-panel-subtitulo .material-symbols-outlined {
+    font-size: 18px;
+    color: var(--mnt-salvia);
+}
+
+.mnt-doc-descripcion {
+    margin: 0;
+    font-size: 12px;
+    color: var(--mnt-texto-3);
+    line-height: 1.4;
+}
+
+.mnt-btn-editar-doc {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border-radius: 8px;
+    border: 1px solid var(--mnt-borde);
+    background: rgba(255, 255, 255, .05);
+    color: var(--mnt-salvia);
+    font: 600 12px/1 'Manrope', system-ui, sans-serif;
+    cursor: pointer;
+    transition: background .15s, border-color .15s;
+}
+
+.mnt-btn-editar-doc:hover {
+    background: rgba(178, 206, 168, .12);
+    border-color: var(--mnt-salvia);
+}
+
+.mnt-doc-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+    gap: 12px;
+}
+
+.mnt-doc-tarjeta {
+    padding: 12px;
+    border-radius: 10px;
+    background: rgba(0, 0, 0, .25);
+    border: 1px solid var(--mnt-borde);
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.mnt-doc-tarjeta-cab {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+}
+
+.mnt-doc-tipo {
+    font: 700 13px/1 'Space Grotesk', system-ui, sans-serif;
+    color: var(--mnt-texto);
+}
+
+.mnt-doc-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 8px;
+    border-radius: 999px;
+    font: 600 11px/1.2 'Manrope', system-ui, sans-serif;
+    border: 1px solid;
+}
+
+.mnt-doc-badge .material-symbols-outlined {
+    font-size: 13px;
+}
+
+.mnt-doc-badge--vigente {
+    color: var(--mnt-salvia);
+    background: rgba(178, 206, 168, .1);
+    border-color: rgba(178, 206, 168, .3);
+}
+
+.mnt-doc-badge--por-vencer {
+    color: var(--mnt-ambar);
+    background: rgba(224, 185, 122, .1);
+    border-color: rgba(224, 185, 122, .3);
+}
+
+.mnt-doc-badge--vencido {
+    color: var(--mnt-terracota);
+    background: rgba(232, 165, 146, .1);
+    border-color: rgba(232, 165, 146, .35);
+}
+
+.mnt-doc-badge--sin-registro {
+    color: var(--mnt-gris);
+    background: rgba(154, 163, 149, .08);
+    border-color: rgba(154, 163, 149, .2);
+}
+
+.mnt-doc-fecha-valor {
+    font: 700 16px/1.2 'Space Grotesk', monospace, sans-serif;
+    color: var(--mnt-texto-2);
+    letter-spacing: .5px;
+}
+
+.mnt-doc-leyenda {
+    font-size: 11px;
+    color: var(--mnt-texto-3);
+    line-height: 1.3;
+}
+
+.mnt-doc-formulario {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 12px;
+    border-radius: 10px;
+    background: rgba(0, 0, 0, .2);
+    border: 1px dashed var(--mnt-borde);
+}
+
+.mnt-doc-campos-fila {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 12px;
+}
+
+.mnt-doc-acciones {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+}
+
+.mnt-btn-cancelar {
+    padding: 8px 14px;
+    border-radius: 8px;
+    border: 1px solid var(--mnt-borde);
+    background: transparent;
+    color: var(--mnt-texto-3);
+    font: 600 12px/1 'Manrope', system-ui, sans-serif;
+    cursor: pointer;
+}
+
+.mnt-btn-guardar {
+    padding: 8px 14px;
+    border-radius: 8px;
+    border: none;
+    background: var(--mnt-salvia);
+    color: #10210d;
+    font: 700 12px/1 'Manrope', system-ui, sans-serif;
+    cursor: pointer;
+}
+
+.mnt-btn-guardar:disabled {
+    opacity: .6;
+    cursor: progress;
+}
+
+.mnt-aviso--exito {
+    color: var(--mnt-salvia);
+    border-color: rgba(178, 206, 168, .3);
+    background: rgba(178, 206, 168, .08);
+}
+

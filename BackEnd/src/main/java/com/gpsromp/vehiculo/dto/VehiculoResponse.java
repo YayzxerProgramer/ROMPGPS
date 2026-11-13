@@ -2,6 +2,7 @@ package com.gpsromp.vehiculo.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -20,5 +21,11 @@ public record VehiculoResponse(
         Boolean activo,
         @JsonProperty("id_usuario") UUID idUsuario,
         LocalDateTime creadoEn,
-        LocalDateTime actualizadoEn) {
+        LocalDateTime actualizadoEn,
+        LocalDate fechaVencimientoSoat,
+        LocalDate fechaVencimientoTecnomecanica,
+        Long diasParaVencerSoat,
+        Long diasParaVencerTecnomecanica,
+        String estadoSoat,
+        String estadoTecnomecanica) {
 }

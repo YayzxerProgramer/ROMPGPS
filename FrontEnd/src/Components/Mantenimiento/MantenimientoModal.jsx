@@ -4,6 +4,7 @@ import {
     eliminarMantenimiento, listarMantenimientos, registrarMantenimiento,
 } from "../../Service/mantenimientoService";
 import { ESTADOS_SIN_ESTIMACION, NIVELES, fechaCorta, hoyISO, km } from "./presentacion";
+import DocumentosVehiculo from "./DocumentosVehiculo";
 
 /** Ventana de mantenimiento: predicción, historial y formulario de registro. */
 export default function MantenimientoModal({ idVehiculo, etiqueta, resultado, onCambio, onCerrar }) {
@@ -53,6 +54,7 @@ export default function MantenimientoModal({ idVehiculo, etiqueta, resultado, on
                 </header>
 
                 <div className="mnt-cuerpo">
+                    <DocumentosVehiculo idVehiculo={idVehiculo} onDocumentosCambiados={tras} />
                     <PanelPrediccion resultado={resultado} />
                     <FormularioRegistro idVehiculo={idVehiculo} onRegistrado={tras} />
                     <Historial idVehiculo={idVehiculo} historial={historial} error={errorHistorial} onEliminado={tras} />

@@ -3,7 +3,7 @@ import "../Styles/PanelVehiculo.css";
 import { del, get, post } from "../Service/api";
 import MantenimientoVehiculo from "./Mantenimiento/MantenimientoVehiculo";
 
-function TarjetaVehiculo({ vehiculo, onDelete }) {
+function TarjetaVehiculo({ vehiculo, onDelete, onActualizado }) {
     return (
         <article className="tarjeta-vehiculo-configuracion" role="row">
             <div className="tarjeta-vehiculo__celda-imagen tarjeta-vehiculo__imagen-envoltorio">
@@ -16,7 +16,29 @@ function TarjetaVehiculo({ vehiculo, onDelete }) {
             <div className="tarjeta-vehiculo__celda-modelo">
                 <h3 className="tarjeta-vehiculo__nombre">{vehiculo.modelo}</h3>
                 <p className="tarjeta-vehiculo__serie">IMEI: {vehiculo.imei || "Sin GPS asignado"}</p>
-                <MantenimientoVehiculo idVehiculo={vehiculo.id} etiqueta={`${vehiculo.modelo} · ${vehiculo.placa}`} />
+                <div className="tarjeta-vehiculo__mantenimiento-contenedor">
+                    <MantenimientoVehiculo
+                        idVehiculo={vehiculo.id}
+                        etiqueta={`${vehiculo.modelo} · ${vehiculo.placa}`}
+                        onVehiculoActualizado={onActualizado}
+                    />
+                    {vehiculo.estadoSoat && vehiculo.estadoSoat !== "NO_REGISTRADO" && (
+                        <span
+                            className={`tarjeta-doc-tag tarjeta-doc-tag--${vehiculo.estadoSoat.toLowerCase()}`}
+                            title={`SOAT vence: ${vehiculo.fechaVencimientoSoat || "N/A"}`}
+                        >
+                            SOAT: {vehiculo.estadoSoat === "VIGENTE" ? "Vigente" : vehiculo.estadoSoat === "POR_VENCER" ? `${vehiculo.diasParaVencerSoat}d` : "Vencido"}
+                        </span>
+                    )}
+                    {vehiculo.estadoTecnomecanica && vehiculo.estadoTecnomecanica !== "NO_REGISTRADO" && (
+                        <span
+                            className={`tarjeta-doc-tag tarjeta-doc-tag--${vehiculo.estadoTecnomecanica.toLowerCase()}`}
+                            title={`Tecnomecánica vence: ${vehiculo.fechaVencimientoTecnomecanica || "N/A"}`}
+                        >
+                            RTM: {vehiculo.estadoTecnomecanica === "VIGENTE" ? "Vigente" : vehiculo.estadoTecnomecanica === "POR_VENCER" ? `${vehiculo.diasParaVencerTecnomecanica}d` : "Vencida"}
+                        </span>
+                    )}
+                </div>
             </div>
             <div className="tarjeta-vehiculo__celda-tipo">
                 <span className="tarjeta-vehiculo__tipo-etiqueta">
@@ -53,6 +75,8 @@ function ModalRegistro({ visible, onCerrar, onRegistrado, usuarioId }) {
         modelo: "",
         placa: "",
         tipo: "MOTO",
+        fechaVencimientoSoat: "",
+        fechaVencimientoTecnomecanica: "",
     });
     const [errores, setErrores] = useState({});
     const [error, setError] = useState("");
@@ -73,7 +97,13 @@ function ModalRegistro({ visible, onCerrar, onRegistrado, usuarioId }) {
     useEffect(() => {
         if (!visible) return;
         // eslint-disable-next-line react-hooks/set-state-in-effect
-        setFormulario({ modelo: "", placa: "", tipo: "MOTO" });
+        setFormulario({
+            modelo: "",
+            placa: "",
+            tipo: "MOTO",
+            fechaVencimientoSoat: "",
+            fechaVencimientoTecnomecanica: "",
+        });
         setErrores({});
         setError("");
     }, [visible]);
@@ -114,6 +144,8 @@ function ModalRegistro({ visible, onCerrar, onRegistrado, usuarioId }) {
                 tipo: formulario.tipo,
                 id_usuario: usuarioId,
                 activo: true,
+                fechaVencimientoSoat: formulario.fechaVencimientoSoat || null,
+                fechaVencimientoTecnomecanica: formulario.fechaVencimientoTecnomecanica || null,
             });
             onRegistrado();
             onCerrar();
@@ -197,6 +229,34 @@ function ModalRegistro({ visible, onCerrar, onRegistrado, usuarioId }) {
                             <option value="MOTO">Moto</option>
                             <option value="CARRO">Carro</option>
                         </select>
+                    </div>
+
+                    <div className="formulario__grupo">
+                        <label className="formulario__etiqueta" htmlFor="campo-soat">
+                            Vencimiento SOAT <span style={{ opacity: 0.6, fontWeight: 400 }}>(opcional)</span>
+                        </label>
+                        <input
+                            className="formulario__campo"
+                            id="campo-soat"
+                            name="fechaVencimientoSoat"
+                            type="date"
+                            value={formulario.fechaVencimientoSoat}
+                            onChange={manejarCambio}
+                        />
+                    </div>
+
+                    <div className="formulario__grupo">
+                        <label className="formulario__etiqueta" htmlFor="campo-tecno">
+                            Vencimiento Tecnomecánica <span style={{ opacity: 0.6, fontWeight: 400 }}>(opcional)</span>
+                        </label>
+                        <input
+                            className="formulario__campo"
+                            id="campo-tecno"
+                            name="fechaVencimientoTecnomecanica"
+                            type="date"
+                            value={formulario.fechaVencimientoTecnomecanica}
+                            onChange={manejarCambio}
+                        />
                     </div>
 
                     <div className="formulario__aviso">
@@ -331,7 +391,12 @@ export default function PanelVehiculo() {
                             </div>
                         ) : (
                             vehiculos.map((v) => (
-                                <TarjetaVehiculo key={v.id} vehiculo={v} onDelete={eliminarVehiculo} />
+                                <TarjetaVehiculo
+                                    key={v.id}
+                                    vehiculo={v}
+                                    onDelete={eliminarVehiculo}
+                                    onActualizado={() => cargarVehiculos(usuarioId)}
+                                />
                             ))
                         )}
                     </div>

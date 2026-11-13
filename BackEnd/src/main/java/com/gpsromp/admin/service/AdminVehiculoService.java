@@ -180,7 +180,13 @@ public class AdminVehiculoService {
                 estado,
                 nombrePropietario,
                 prop,
-                ultPos
+                ultPos,
+                v.getFechaVencimientoSoat(),
+                v.getFechaVencimientoTecnomecanica(),
+                com.gpsromp.vehiculo.dto.VehiculoMapper.calcularDiasRestantes(v.getFechaVencimientoSoat()),
+                com.gpsromp.vehiculo.dto.VehiculoMapper.calcularDiasRestantes(v.getFechaVencimientoTecnomecanica()),
+                com.gpsromp.vehiculo.dto.VehiculoMapper.calcularEstadoDocumento(v.getFechaVencimientoSoat()),
+                com.gpsromp.vehiculo.dto.VehiculoMapper.calcularEstadoDocumento(v.getFechaVencimientoTecnomecanica())
         );
     }
 }

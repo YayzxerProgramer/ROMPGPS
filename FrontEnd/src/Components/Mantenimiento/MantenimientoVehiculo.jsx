@@ -12,13 +12,16 @@ import { usePrediccion } from "./usePrediccion";
  *                     Es la que usa el listado del admin, para no disparar una
  *                     consulta por cada fila.
  */
-export default function MantenimientoVehiculo({ idVehiculo, etiqueta, variante = "pildora", claseBoton = "mnt-icono mnt-icono--tabla" }) {
+export default function MantenimientoVehiculo({ idVehiculo, etiqueta, variante = "pildora", claseBoton = "mnt-icono mnt-icono--tabla", onVehiculoActualizado }) {
     const [abierto, setAbierto] = useState(false);
     const [version, setVersion] = useState(0);
 
     const resultado = usePrediccion(idVehiculo, variante === "pildora" || abierto, version);
     const cerrar = useCallback(() => setAbierto(false), []);
-    const recargar = useCallback(() => setVersion((n) => n + 1), []);
+    const recargar = useCallback(() => {
+        setVersion((n) => n + 1);
+        if (onVehiculoActualizado) onVehiculoActualizado();
+    }, [onVehiculoActualizado]);
 
     return (
         <>
