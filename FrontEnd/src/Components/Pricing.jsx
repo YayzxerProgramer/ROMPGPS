@@ -13,46 +13,45 @@ const MESES_ANIO = 12;
 const PLANES = [
     {
         id: "personal",
-        nombre: "Personal (Moto / Auto)",
-        precioMensual: 24900,
+        nombre: "Plan Básico",
+        precioMensual: 229000,
         unidad: "/mes",
-        descripcion: "Para usuarios particulares que buscan seguridad diaria.",
+        descripcion: "Protección esencial para tu moto o automóvil.",
         destacado: false,
         caracteristicas: [
-            { texto: "1 Dispositivo GPS GT06", incluida: true },
-            { texto: "Ubicación en tiempo real (actualización 15s)", incluida: true },
-            { texto: "Historial de recorridos (7 días)", incluida: true },
-            { texto: "Apagado de motor desde la app", incluida: true },
-            { texto: "Alertas por SMS directos", incluida: false },
+            { texto: "Equipo GPS 4G", incluida: true },
+            { texto: "Ubicación en tiempo real", incluida: true },
+            { texto: "Apagado del vehículo desde la app", incluida: true },
+            { texto: "Historial de recorridos", incluida: true },
+            { texto: "App para iOS y Android", incluida: true },
+            { texto: "Sistema anti jammer", incluida: true },
         ],
     },
     {
         id: "pro",
-        nombre: "Flotas & Negocios Pro",
-        precioMensual: 44900,
+        nombre: "Plan Garantía",
+        precioMensual: 289000,
         unidad: "/mes por vehículo",
-        descripcion: "Para flotas pequeñas y medianas con monitoreo intensivo.",
+        descripcion: "Más respaldo y protección para tu vehículo.",
         destacado: true,
         caracteristicas: [
-            { texto: "Posicionamiento ultrarrápido (5 segundos)", incluida: true },
-            { texto: "Historial extendido (90 días)", incluida: true },
-            { texto: "Recomendador de rutas rápidas (Google Maps)", incluida: true },
-            { texto: "Alertas push y SMS ilimitadas (OTP + corte)", incluida: true },
-            { texto: "Reportes de velocidad y paradas en PDF", incluida: true },
+            { texto: "Garantía extendida por 2 años", incluida: true },
+            { texto: "Incluye todo lo del Plan Básico", incluida: true },
+            { texto: "Equipo GPS 4G", incluida: true },
         ],
     },
     {
         id: "enterprise",
-        nombre: "Empresarial Custom",
-        precioMensual: 79900,
+        nombre: "Plan Premium",
+        precioMensual: 339000,
         unidad: "/mes",
-        descripcion: "Soluciones corporativas con API REST dedicada.",
+        descripcion: "Cobertura integral para máxima tranquilidad.",
         destacado: false,
         caracteristicas: [
-            { texto: "Dispositivos ilimitados", incluida: true },
-            { texto: "Acceso API REST para integraciones ERP", incluida: true },
-            { texto: "Soporte técnico prioritario 24/7", incluida: true },
-            { texto: "Geocercas y subcuentas ilimitadas", incluida: true },
+            { texto: "Rastreador de respaldo inalámbrico", incluida: true },
+            { texto: "Doble protección total", incluida: true },
+            { texto: "Incluye todo lo del Plan Garantía", incluida: true },
+            { texto: "Equipo GPS 4G", incluida: true },
         ],
     },
 ];
@@ -265,7 +264,7 @@ function Pricing() {
                         return (
                             <div
                                 key={plan.id}
-                                className={`tarjeta-precio ${plan.destacado ? "destacado" : ""} ${esPlanActual ? "tarjeta-precio--actual" : ""}`}
+                                className={`tarjeta-precio tarjeta-precio--${plan.id} ${plan.destacado ? "destacado" : ""} ${esPlanActual ? "tarjeta-precio--actual" : ""}`}
                             >
                                 {esPlanActual ? (
                                     <div className="insignia-plan-activo">Tu Plan Actual</div>

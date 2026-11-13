@@ -32,6 +32,11 @@ function Hero() {
                         </a>
                     </div>
 
+                    <a className="indicador-scroll" href="#nosotros" aria-label="Desplazarse para conocer ROMP GPS">
+                        <span className="indicador-scroll-linea" />
+                        <span>Desliza para explorar</span>
+                    </a>
+
                 </div>
 
                 <div className="envoltorio-tarjeta-hero">

@@ -141,6 +141,30 @@
     transition: transform 0.35s ease, border-color 0.35s ease;
 }
 
+.tarjeta-precio::before {
+    content: "";
+    position: absolute;
+    inset: 0 0 auto;
+    height: 5px;
+    border-radius: 20px 20px 0 0;
+    background: linear-gradient(90deg, #718b67, #b2cea8);
+    opacity: .78;
+}
+
+.tarjeta-precio--pro::before { background: linear-gradient(90deg, #789b70, #d0e2c5); }
+.tarjeta-precio--enterprise::before { background: linear-gradient(90deg, #526c4c, #a9c99d); }
+
+.tarjeta-precio--personal { background: linear-gradient(160deg, #1c241c, #171b17 70%); }
+.tarjeta-precio--pro { background: linear-gradient(160deg, #202b20, #171b17 70%); }
+.tarjeta-precio--enterprise { background: linear-gradient(160deg, #1a211b, #151915 70%); }
+
+.tarjeta-precio--personal .precio-plan,
+.tarjeta-precio--personal .caracteristicas-plan .marca { color: #b2cea8; }
+.tarjeta-precio--pro .precio-plan,
+.tarjeta-precio--pro .caracteristicas-plan .marca { color: #c5d9b9; }
+.tarjeta-precio--enterprise .precio-plan,
+.tarjeta-precio--enterprise .caracteristicas-plan .marca { color: #a7c39c; }
+
 .tarjeta-precio:hover {
     transform: translateY(-6px);
     border-color: rgba(178, 206, 168, 0.2);
@@ -492,4 +516,12 @@
 
 .modal-pricing-btn-cancelar:hover {
     color: #f1f4ef;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .scroll-reveal-ready {
+        opacity: 1;
+        transform: none;
+        filter: none;
+    }
 }

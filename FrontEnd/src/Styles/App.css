@@ -23,3 +23,53 @@ h3 {
     text-transform: uppercase;
     letter-spacing: 0.35em;
 }
+
+/* Transición de profundidad al recorrer la landing, inspirada en la
+   narrativa por scroll de la referencia. IntersectionObserver evita
+   animar secciones que aún están fuera del viewport. */
+.scroll-reveal-ready {
+    opacity: 0.42;
+    transform: translate3d(0, 56px, 0) scale(0.985);
+    filter: blur(3px);
+    transition: opacity 700ms ease, transform 850ms cubic-bezier(.2,.7,.2,1), filter 700ms ease;
+    will-change: opacity, transform, filter;
+}
+
+.scroll-reveal-ready.scroll-reveal-visible {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+    filter: blur(0);
+}
+
+.scroll-reveal-ready .etiqueta-seccion,
+.scroll-reveal-ready h2,
+.scroll-reveal-ready .descripcion-precios,
+.scroll-reveal-ready .descripcion-producto,
+.scroll-reveal-ready .encabezado-equipo-derecha {
+    transition: opacity 650ms ease, transform 750ms cubic-bezier(.2,.7,.2,1);
+}
+
+.scroll-reveal-ready:not(.scroll-reveal-visible) h2,
+.scroll-reveal-ready:not(.scroll-reveal-visible) .etiqueta-seccion {
+    transform: translateY(18px);
+}
+
+.scroll-reveal-ready.scroll-reveal-visible h2,
+.scroll-reveal-ready.scroll-reveal-visible .etiqueta-seccion {
+    transform: translateY(0);
+}
+
+.cuadricula-precios .tarjeta-precio,
+.cuadricula-caracteristicas .tarjeta-caracteristica,
+.cuadricula-equipo .tarjeta-miembro {
+    transition-delay: 80ms;
+}
+
+.cuadricula-precios .tarjeta-precio:nth-child(2),
+.cuadricula-caracteristicas .tarjeta-caracteristica:nth-child(2),
+.cuadricula-equipo .tarjeta-miembro:nth-child(2) { transition-delay: 160ms; }
+.cuadricula-precios .tarjeta-precio:nth-child(3),
+.cuadricula-caracteristicas .tarjeta-caracteristica:nth-child(3),
+.cuadricula-equipo .tarjeta-miembro:nth-child(3) { transition-delay: 240ms; }
+.cuadricula-equipo .tarjeta-miembro:nth-child(4) { transition-delay: 320ms; }
+
