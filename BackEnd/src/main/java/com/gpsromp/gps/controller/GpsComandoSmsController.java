@@ -73,13 +73,13 @@ public class GpsComandoSmsController {
         String comandoHex;
         switch (request.getComando().trim().toUpperCase()) {
             case "CORTE_MOTOR":
-                comandoHex = "#RELAY,1#";
+                comandoHex = "RELAY,1#";
                 break;
             case "RESTAURAR_MOTOR":
-                comandoHex = "#RELAY,0#";
+                comandoHex = "RELAY,0#";
                 break;
             case "ESTADO":
-                comandoHex = "#STATUS#";
+                comandoHex = "STATUS#";
                 break;
             default:
                 throw new IllegalArgumentException("Comando desconocido: " + request.getComando());
