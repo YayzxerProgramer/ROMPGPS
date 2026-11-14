@@ -20,6 +20,7 @@ import Legal from './Components/Legal'
 import './Styles/App.css'
 import ScrollReveal from './Components/ScrollReveal'
 import ScrollExperience from './Components/ScrollExperience'
+import Pago from './Components/Pago'
 
 function App() {
   return (
@@ -39,6 +40,7 @@ function App() {
       } />
       <Route path="/login" element={<Login />} />
       <Route path="/registro" element={<Registro />} />
+      <Route path="/pago" element={<Pago />} />
       <Route path="/recuperar-contrasena" element={<RecuperarContrasena />} />
       <Route path="/privacidad" element={<Legal tipo="privacidad" />} />
       <Route path="/terminos" element={<Legal tipo="terminos" />} />

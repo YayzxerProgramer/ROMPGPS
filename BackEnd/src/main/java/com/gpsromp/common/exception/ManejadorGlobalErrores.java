@@ -13,6 +13,7 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import java.util.Arrays;
@@ -47,6 +48,12 @@ public class ManejadorGlobalErrores {
     @ExceptionHandler(OperacionNoPermitidaException.class)
     public ResponseEntity<ErrorResponse> noPermitida(OperacionNoPermitidaException e, HttpServletRequest req) {
         return construir(HttpStatus.CONFLICT, e.getMessage(), req);
+    }
+
+    @ExceptionHandler(ResponseStatusException.class)
+    public ResponseEntity<ErrorResponse> estadoSolicitado(ResponseStatusException e, HttpServletRequest req) {
+        HttpStatus estado = HttpStatus.valueOf(e.getStatusCode().value());
+        return construir(estado, e.getReason() != null ? e.getReason() : "No fue posible procesar la solicitud", req);
     }
 
     /**

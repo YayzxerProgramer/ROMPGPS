@@ -1,12 +1,15 @@
 package com.gpsromp.pago.controller;
 
 import com.gpsromp.pago.dto.ConfirmarCompraRequest;
+import com.gpsromp.pago.dto.PrepararCheckoutRequest;
+import com.gpsromp.pago.dto.PrepararCheckoutResponse;
 import com.gpsromp.pago.service.WompiService;
 import com.gpsromp.venta.dto.VentaResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,10 +23,21 @@ public class WompiController {
 
     private final WompiService wompiService;
 
+    @PostMapping("/checkout")
+    public ResponseEntity<PrepararCheckoutResponse> prepararCheckout(
+            @Valid @RequestBody PrepararCheckoutRequest req) {
+        return ResponseEntity.ok(wompiService.prepararCheckout(req.plan(), req.periodo()));
+    }
+
     @PostMapping("/wompi/webhook")
-    public ResponseEntity<Map<String, Object>> webhook(@RequestBody Map<String, Object> payload) {
+    public ResponseEntity<Map<String, Object>> webhook(
+            @RequestBody Map<String, Object> payload,
+            @RequestHeader(name = "X-Event-Checksum", required = false) String checksum) {
         log.info("Webhook Wompi invocado");
-        boolean procesado = wompiService.procesarWebhook(payload);
+        boolean procesado = wompiService.procesarWebhook(payload, checksum);
+        if (!procesado) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("recibido", false));
+        }
         return ResponseEntity.ok(Map.of("recibido", procesado));
     }
 

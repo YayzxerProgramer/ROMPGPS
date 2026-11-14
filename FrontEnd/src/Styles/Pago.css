@@ -1,0 +1,234 @@
+.pagina-pago {
+    position: relative;
+    isolation: isolate;
+    min-height: 100vh;
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: clamp(1.25rem, 4vw, 2.5rem);
+    overflow: hidden;
+    background:
+        radial-gradient(ellipse at 50% 42%, rgba(46, 65, 46, .28), transparent 55%),
+        #0d0f0d;
+    color: #f2f5f0;
+}
+
+.pago-resplandor {
+    position: absolute;
+    z-index: -1;
+    width: 28rem;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    filter: blur(100px);
+    opacity: .18;
+    pointer-events: none;
+}
+
+.pago-resplandor--uno { top: -18rem; left: -12rem; background: #8fb085; }
+.pago-resplandor--dos { right: -14rem; bottom: -20rem; background: #435d3d; }
+
+.pago-marca,
+.pago-pie {
+    width: min(100%, 1080px);
+    display: flex;
+    align-items: center;
+}
+
+.pago-marca {
+    gap: 12px;
+    padding: 8px 0;
+    color: #f2f5f0;
+    font-size: 1.05rem;
+    font-weight: 800;
+    letter-spacing: -.04em;
+}
+
+.pago-marca b { color: #b2cea8; }
+
+.pago-marca-icono {
+    width: 36px;
+    height: 36px;
+    display: grid;
+    place-items: center;
+    border: 1px solid rgba(178, 206, 168, .45);
+    border-radius: 12px;
+    color: #b2cea8;
+    font-family: 'Space Grotesk', sans-serif;
+}
+
+.pago-seguro {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    margin-left: auto;
+    color: #a7ada5;
+    font-size: .75rem;
+    font-weight: 600;
+    letter-spacing: .04em;
+}
+
+.pago-seguro span {
+    width: 20px;
+    height: 20px;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    background: rgba(178, 206, 168, .12);
+    color: #b2cea8;
+}
+
+.pago-panel {
+    width: min(100%, 540px);
+    margin: auto;
+    padding: clamp(1.5rem, 6vw, 3.5rem);
+    border: 1px solid rgba(178, 206, 168, .16);
+    border-radius: 24px;
+    background: linear-gradient(145deg, rgba(30, 37, 31, .96), rgba(19, 23, 19, .96));
+    box-shadow: 0 30px 100px rgba(0, 0, 0, .4), inset 0 1px rgba(255, 255, 255, .035);
+    animation: aparecer-pago .65s cubic-bezier(.2,.7,.2,1) both;
+}
+
+@keyframes aparecer-pago {
+    from { opacity: 0; transform: translateY(18px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.pago-etiqueta {
+    width: fit-content;
+    margin-bottom: 1rem;
+    padding: 6px 11px;
+    border: 1px solid rgba(178, 206, 168, .2);
+    border-radius: 999px;
+    background: rgba(178, 206, 168, .08);
+    color: #b2cea8;
+    font-size: .68rem;
+    font-weight: 800;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+}
+
+.pago-panel h1 {
+    margin: 0;
+    font-size: clamp(1.8rem, 6vw, 2.5rem);
+    line-height: 1.1;
+    letter-spacing: -.045em;
+}
+
+.pago-intro,
+.pago-invalido p {
+    margin: 12px 0 26px;
+    color: #a7ada5;
+    font-size: .95rem;
+    line-height: 1.65;
+}
+
+.pago-resumen {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 20px;
+    border: 1px solid rgba(255, 255, 255, .07);
+    border-radius: 16px;
+    background: rgba(255, 255, 255, .025);
+}
+
+.pago-resumen-label {
+    color: #929a91;
+    font-size: .7rem;
+    font-weight: 700;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+}
+
+.pago-resumen h2 {
+    margin: 5px 0 0;
+    color: #f2f5f0;
+    font-size: 1.12rem;
+}
+
+.pago-precio { text-align: right; }
+.pago-precio strong { display: block; color: #c4dcba; font-size: clamp(1.2rem, 4vw, 1.55rem); white-space: nowrap; }
+.pago-precio span { color: #929a91; font-size: .75rem; }
+
+.pago-nota {
+    margin: 16px 0 20px;
+    color: #929a91;
+    font-size: .78rem;
+    line-height: 1.65;
+}
+
+.pago-boton {
+    width: 100%;
+    min-height: 52px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 13px 18px;
+    border: 0;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #c4dcba, #8fb085);
+    color: #1d2b19;
+    font-size: .9rem;
+    font-weight: 800;
+    text-decoration: none;
+    cursor: pointer;
+    transition: transform .2s ease, filter .2s ease, box-shadow .2s ease;
+}
+
+.pago-boton:hover:not(:disabled) {
+    transform: translateY(-2px);
+    filter: brightness(1.06);
+    box-shadow: 0 12px 28px rgba(143, 176, 133, .18);
+}
+
+.pago-boton:disabled { cursor: wait; opacity: .75; }
+.pago-boton span { font-size: 1.2rem; }
+
+.pago-ayuda {
+    display: block;
+    margin-top: 20px;
+    color: #a7ada5;
+    font-size: .78rem;
+    text-align: center;
+    text-decoration-color: rgba(178, 206, 168, .4);
+    text-underline-offset: 4px;
+}
+.pago-ayuda:hover { color: #c4dcba; }
+
+.pago-estado {
+    margin: 14px 0 0;
+    padding: 12px 14px;
+    border-radius: 10px;
+    font-size: .82rem;
+    line-height: 1.5;
+}
+.pago-estado--ok { border: 1px solid rgba(178, 206, 168, .25); background: rgba(178, 206, 168, .08); color: #c4dcba; }
+.pago-estado--error { border: 1px solid rgba(224, 147, 127, .25); background: rgba(186, 87, 63, .1); color: #e7a18d; }
+.pago-estado--pendiente { border: 1px solid rgba(255, 255, 255, .1); background: rgba(255, 255, 255, .04); color: #d1d6cf; }
+
+.pago-invalido p { margin-bottom: 22px; }
+
+.pago-pie {
+    justify-content: space-between;
+    gap: 20px;
+    padding: 20px 0 6px;
+    color: #757d74;
+    font-size: .72rem;
+}
+.pago-pie a { color: #a7ada5; text-decoration: none; }
+.pago-pie a:hover { color: #c4dcba; }
+
+@media (max-width: 480px) {
+    .pago-panel { border-radius: 18px; }
+    .pago-resumen { align-items: flex-start; flex-direction: column; }
+    .pago-precio { text-align: left; }
+    .pago-pie { flex-direction: column; align-items: center; text-align: center; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .pago-panel { animation: none; }
+    .pago-boton { transition: none; }
+}

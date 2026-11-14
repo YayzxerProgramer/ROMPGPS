@@ -83,6 +83,7 @@ public class SecurityConfig {
 
                         // Webhook de pagos Wompi
                         .requestMatchers(HttpMethod.POST, "/pagos/wompi/webhook").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/pagos/checkout").permitAll()
 
                         // Comprobación de disponibilidad durante el registro.
                         // Antes exigían token, así que el formulario de registro
