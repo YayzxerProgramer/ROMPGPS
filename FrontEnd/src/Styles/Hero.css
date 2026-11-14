@@ -13,7 +13,7 @@
             rgba(13, 15, 13, 0.95)),
         url("https://images.unsplash.com/photo-1524661135-423995f22d0b?auto=format&fit=crop&w=2070&q=80");
     background-size: cover;
-    background-position: center;
+    background-position: center calc(50% + var(--landing-background-shift, 0px));
 }
 
 /* En móvil pedimos una imagen mucho más liviana */
@@ -42,6 +42,51 @@
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     gap: clamp(2.5rem, 6vw, 5rem);
     align-items: center;
+}
+
+.envoltorio-tarjeta-hero {
+    transform: translate3d(0, var(--landing-card-shift, 0px), 0);
+    will-change: transform;
+}
+
+.indicador-scroll {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    width: fit-content;
+    margin-top: clamp(1rem, 3vw, 2rem);
+    color: rgba(242, 245, 240, .65);
+    text-decoration: none;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+}
+
+.indicador-scroll-linea {
+    position: relative;
+    width: 42px;
+    height: 1px;
+    overflow: hidden;
+    background: rgba(178, 206, 168, .25);
+}
+
+.indicador-scroll-linea::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: #b2cea8;
+    transform: translateX(-100%);
+    animation: linea-scroll 1.8s ease-in-out infinite;
+}
+
+@keyframes linea-scroll {
+    50%, 100% { transform: translateX(100%); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .hero, .envoltorio-tarjeta-hero { background-position: center; transform: none; }
+    .indicador-scroll-linea::after { animation: none; }
 }
 
 .contenido-hero {

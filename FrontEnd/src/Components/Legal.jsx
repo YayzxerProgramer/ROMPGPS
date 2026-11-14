@@ -6,7 +6,7 @@ import FondoAurora from "./FondoAurora";
 import LogoRomp from "./LogoRomp";
 
 
-const CORREO_CONTACTO = "RompGps@gmai.com";
+const CORREO_CONTACTO = "soporte@rompgps.com";
 const ACTUALIZADO = "1 de noviembre de 2026";
 
 const DOCUMENTOS = {

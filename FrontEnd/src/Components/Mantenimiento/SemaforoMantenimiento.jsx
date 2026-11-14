@@ -27,7 +27,7 @@ export default function SemaforoMantenimiento({ resultado, onClick }) {
 
     return (
         <button type="button" className={`mnt-pildora mnt-pildora--${clase}`} onClick={onClick}
-            aria-label={`Mantenimiento: ${texto}. Abrir detalle`}>
+            aria-label={`Mantenimiento: ${texto}. Abrir sección de mantenimiento`}>
             <span className="material-symbols-outlined" aria-hidden="true">{icono}</span>
             {texto}
         </button>
