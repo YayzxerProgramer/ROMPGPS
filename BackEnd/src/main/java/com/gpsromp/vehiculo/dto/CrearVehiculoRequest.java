@@ -5,6 +5,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
+import java.time.LocalDate;
 import java.util.UUID;
 
 /**
@@ -37,5 +38,13 @@ public record CrearVehiculoRequest(
 
         Boolean activo,
 
-        @JsonProperty("id_usuario") UUID idUsuario) {
+        @JsonProperty("id_usuario") UUID idUsuario,
+
+        LocalDate fechaVencimientoSoat,
+
+        LocalDate fechaVencimientoTecnomecanica) {
+
+    public CrearVehiculoRequest(String placa, String imei, String modelo, String tipo, Boolean activo, UUID idUsuario) {
+        this(placa, imei, modelo, tipo, activo, idUsuario, null, null);
+    }
 }

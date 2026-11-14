@@ -1,5 +1,6 @@
 package com.gpsromp.vehiculo.service;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -135,6 +136,8 @@ public class VehiculoService {
                 .tipo(peticion.tipo())
                 .activo(peticion.activo() == null || peticion.activo())
                 .id_usuario(peticion.idUsuario())
+                .fechaVencimientoSoat(peticion.fechaVencimientoSoat())
+                .fechaVencimientoTecnomecanica(peticion.fechaVencimientoTecnomecanica())
                 .build();
 
         return vehiculoRepository.save(vehiculo);
@@ -179,7 +182,25 @@ public class VehiculoService {
         if (peticion.activo() != null) {
             vehiculo.setActivo(peticion.activo());
         }
+        if (peticion.fechaVencimientoSoat() != null) {
+            vehiculo.setFechaVencimientoSoat(peticion.fechaVencimientoSoat());
+        }
+        if (peticion.fechaVencimientoTecnomecanica() != null) {
+            vehiculo.setFechaVencimientoTecnomecanica(peticion.fechaVencimientoTecnomecanica());
+        }
 
+        return vehiculoRepository.save(vehiculo);
+    }
+
+    /**
+     * Actualiza específicamente las fechas de SOAT y Tecnomecánica de un vehículo.
+     * Permite pasar null para limpiar o desregistrar una fecha si el usuario lo desea.
+     */
+    @Transactional
+    public Vehiculo actualizarDocumentos(UUID id, LocalDate fechaSoat, LocalDate fechaTecno) {
+        Vehiculo vehiculo = obtenerPorIdOFallar(id);
+        vehiculo.setFechaVencimientoSoat(fechaSoat);
+        vehiculo.setFechaVencimientoTecnomecanica(fechaTecno);
         return vehiculoRepository.save(vehiculo);
     }
 

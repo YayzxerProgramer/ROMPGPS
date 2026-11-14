@@ -6,6 +6,7 @@ import {
 } from "../../Service/mantenimientoService";
 import { ESTADOS_SIN_ESTIMACION, NIVELES, fechaCorta, hoyISO, km } from "./presentacion";
 import { usePrediccion } from "./usePrediccion";
+import DocumentosVehiculo from "./DocumentosVehiculo";
 import "../../Styles/Mantenimiento.css";
 
 /**
@@ -106,6 +107,8 @@ export default function PanelMantenimiento({ usuarioId }) {
                             <div className="mnt-unidad-cabecera-icono"><span className="material-symbols-outlined" aria-hidden="true">{vehiculoSeleccionado.tipo === "CARRO" ? "directions_car" : "two_wheeler"}</span></div>
                             <div><span>Estimación para</span><h2>{vehiculoSeleccionado.modelo || "Vehículo"} <small>{vehiculoSeleccionado.placa}</small></h2><p>{vehiculoSeleccionado.imei ? `Equipo GPS · ${vehiculoSeleccionado.imei}` : "Equipo GPS pendiente de asignación"}</p></div>
                         </section>
+
+                        <DocumentosVehiculo idVehiculo={vehiculoSeleccionado.id} onDocumentosCambiados={recargar} />
 
                         <PanelPrediccion resultado={resultado} onRecargar={recargar} />
                         <div className="mnt-gestion-grid">

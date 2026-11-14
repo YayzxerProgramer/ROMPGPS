@@ -1,5 +1,6 @@
 package com.gpsromp.admin.dto;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.UUID;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -26,6 +27,12 @@ public record VehiculoAdminResponse(
         String estado,
         String nombrePropietario,
         PropietarioResumenResponse propietario,
-        PosicionResumenResponse ultimaPosicion
+        PosicionResumenResponse ultimaPosicion,
+        LocalDate fechaVencimientoSoat,
+        LocalDate fechaVencimientoTecnomecanica,
+        Long diasParaVencerSoat,
+        Long diasParaVencerTecnomecanica,
+        String estadoSoat,
+        String estadoTecnomecanica
 ) {
 }

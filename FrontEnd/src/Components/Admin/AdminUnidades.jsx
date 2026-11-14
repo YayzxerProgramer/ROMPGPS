@@ -170,7 +170,7 @@ export default function AdminUnidades({ busqueda, dialogoInicial, onDialogoAbier
                         <span className="material-symbols-outlined">my_location</span>
                       </button>
                     )}
-                    <MantenimientoVehiculo idVehiculo={v.id} etiqueta={`${v.modelo} · ${v.placa}`} variante="icono" claseBoton="adm-accion" />
+                    <MantenimientoVehiculo idVehiculo={v.id} etiqueta={`${v.modelo} · ${v.placa}`} variante="icono" claseBoton="adm-accion" onVehiculoActualizado={cargar} />
                     <button className="adm-accion" title="Vincular propietario" onClick={() => setDialogo({ tipo: "vincular", vehiculo: v, propietario: duenno })}>
                       <span className="material-symbols-outlined">link</span>
                     </button>

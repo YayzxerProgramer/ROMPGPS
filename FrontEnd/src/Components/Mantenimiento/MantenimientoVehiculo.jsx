@@ -11,7 +11,7 @@ import { usePrediccion } from "./usePrediccion";
  * breve no desaparece de la lista, pero la explicación y el historial dejan
  * de vivir en una ventana superpuesta.
  */
-export default function MantenimientoVehiculo({ idVehiculo, etiqueta, variante = "pildora", claseBoton = "mnt-icono mnt-icono--tabla" }) {
+export default function MantenimientoVehiculo({ idVehiculo, etiqueta, variante = "pildora", claseBoton = "mnt-icono mnt-icono--tabla", onVehiculoActualizado }) {
     const navigate = useNavigate();
     const resultado = usePrediccion(idVehiculo, variante === "pildora", 0);
 

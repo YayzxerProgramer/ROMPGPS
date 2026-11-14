@@ -1,6 +1,7 @@
 package com.gpsromp.vehiculo.controller;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import org.springframework.http.HttpStatus;
@@ -9,11 +10,13 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import com.gpsromp.common.exception.RecursoNoEncontradoException;
+import com.gpsromp.vehiculo.dto.ActualizarDocumentosRequest;
 import com.gpsromp.vehiculo.dto.ActualizarVehiculoRequest;
 import com.gpsromp.vehiculo.dto.CrearVehiculoRequest;
 import com.gpsromp.vehiculo.dto.VehiculoMapper;
 import com.gpsromp.vehiculo.dto.VehiculoResponse;
 import com.gpsromp.vehiculo.model.Vehiculo;
+import com.gpsromp.vehiculo.service.AlertaDocumentosVehiculoService;
 import com.gpsromp.vehiculo.service.VehiculoService;
 
 import jakarta.validation.Valid;
@@ -35,6 +38,7 @@ import lombok.RequiredArgsConstructor;
 public class VehiculoController {
 
     private final VehiculoService vehiculoService;
+    private final AlertaDocumentosVehiculoService alertaDocumentosVehiculoService;
 
     /** Listado completo. Solo ADMIN; el panel debe usar /admin/vehiculos, que pagina. */
     @GetMapping
@@ -113,5 +117,37 @@ public class VehiculoController {
     public ResponseEntity<VehiculoResponse> cambiarEstadoVehiculo(@PathVariable UUID id) {
         return ResponseEntity.ok(
                 VehiculoMapper.aResponse(vehiculoService.cambiarEstado(id)));
+    }
+
+    /**
+     * Actualiza las fechas de vencimiento de documentos (SOAT y Tecnomecánica).
+     * Accesible para el propietario del vehículo o administradores.
+     */
+    @PatchMapping("/{id}/documentos")
+    @PreAuthorize("hasRole('ADMIN') or @seguridad.esMiVehiculo(#id, authentication)")
+    public ResponseEntity<VehiculoResponse> actualizarDocumentos(
+            @PathVariable UUID id,
+            @RequestBody ActualizarDocumentosRequest peticion) {
+
+        return ResponseEntity.ok(
+                VehiculoMapper.aResponse(
+                        vehiculoService.actualizarDocumentos(
+                                id,
+                                peticion.fechaVencimientoSoat(),
+                                peticion.fechaVencimientoTecnomecanica())));
+    }
+
+    /**
+     * Dispara manualmente la comprobación de alertas de vencimiento.
+     * Restringido a administradores (útil para auditoría y pruebas del webhook n8n).
+     */
+    @PostMapping("/alertas-documentos/ejecutar")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Map<String, Object>> ejecutarRevisionDocumentos() {
+        int enviadas = alertaDocumentosVehiculoService.ejecutarRevisionManual();
+        return ResponseEntity.ok(Map.of(
+                "mensaje", "Revisión manual de documentos ejecutada exitosamente",
+                "alertasDespachadas", enviadas
+        ));
     }
 }

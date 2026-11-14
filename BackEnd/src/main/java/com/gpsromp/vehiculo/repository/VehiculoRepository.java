@@ -73,6 +73,14 @@ public interface VehiculoRepository extends JpaRepository<Vehiculo, UUID> {
     @Query("SELECT CASE WHEN COUNT(v) > 0 THEN true ELSE false END FROM Vehiculo v WHERE v.imei = :imei AND v.id_usuario = :idUsuario")
     boolean existePorImeiYUsuario(@Param("imei") String imei, @Param("idUsuario") UUID idUsuario);
 
+    @Query("""
+            SELECT v FROM Vehiculo v
+            WHERE v.activo = true
+              AND v.id_usuario IS NOT NULL
+              AND (v.fechaVencimientoSoat IS NOT NULL OR v.fechaVencimientoTecnomecanica IS NOT NULL)
+            """)
+    List<Vehiculo> findVehiculosActivosConDocumentos();
+
     /** Listado del panel: búsqueda por placa, IMEI o modelo, con filtros. */
     @Query("""
             SELECT v FROM Vehiculo v

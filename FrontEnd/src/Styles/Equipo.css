@@ -45,7 +45,7 @@
 
 .cuadricula-equipo {
     display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-columns: repeat(5, minmax(0, 1fr));
     gap: 2px;
 }
 
@@ -109,6 +109,13 @@
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
+    .tarjeta-miembro:last-child:nth-child(odd) {
+        grid-column: 1 / -1;
+        max-width: 50%;
+        margin: 0 auto;
+        width: 100%;
+    }
+
     /* En pantalla táctil no hay hover: los nombres deben verse siempre */
     .superposicion-miembro {
         opacity: 1;
@@ -136,6 +143,10 @@
 @media (max-width: 460px) {
     .cuadricula-equipo {
         grid-template-columns: minmax(0, 1fr);
+    }
+
+    .tarjeta-miembro:last-child:nth-child(odd) {
+        max-width: 100%;
     }
 
     .tarjeta-miembro {

@@ -3,6 +3,8 @@ package com.gpsromp.vehiculo.dto;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
+import java.time.LocalDate;
+
 /**
  * Actualización de vehículo (PUT /vehiculo/{id}).
  *
@@ -30,5 +32,13 @@ public record ActualizarVehiculoRequest(
         @Pattern(regexp = "MOTO|CARRO", message = "El tipo debe ser MOTO o CARRO")
         String tipo,
 
-        Boolean activo) {
+        Boolean activo,
+
+        LocalDate fechaVencimientoSoat,
+
+        LocalDate fechaVencimientoTecnomecanica) {
+
+    public ActualizarVehiculoRequest(String placa, String imei, String modelo, String tipo, Boolean activo) {
+        this(placa, imei, modelo, tipo, activo, null, null);
+    }
 }
