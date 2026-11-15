@@ -114,4 +114,30 @@ class GT06UtilsTest {
 
         ack.release();
     }
+
+    @Test
+    @DisplayName("El ACK genérico de estado (0x16) y alarma (0x26) construye la trama correcta")
+    void ackGenericoEstadoYAlarma() {
+        ByteBuf ackEstado = GT06Utils.ACKRespuesta((byte) 0x16, (short) 0x002A);
+        byte[] bytesEstado = new byte[ackEstado.readableBytes()];
+        ackEstado.getBytes(0, bytesEstado);
+
+        assertEquals(10, bytesEstado.length);
+        assertEquals((byte) 0x78, bytesEstado[0]);
+        assertEquals((byte) 0x78, bytesEstado[1]);
+        assertEquals((byte) 0x05, bytesEstado[2]);
+        assertEquals((byte) 0x16, bytesEstado[3]);
+        assertEquals((byte) 0x00, bytesEstado[4]);
+        assertEquals((byte) 0x2A, bytesEstado[5]);
+        assertEquals((byte) 0x0D, bytesEstado[8]);
+        assertEquals((byte) 0x0A, bytesEstado[9]);
+        ackEstado.release();
+
+        ByteBuf ackAlarma = GT06Utils.ACKRespuesta((byte) 0x26, (short) 0x0099);
+        byte[] bytesAlarma = new byte[ackAlarma.readableBytes()];
+        ackAlarma.getBytes(0, bytesAlarma);
+
+        assertEquals((byte) 0x26, bytesAlarma[3]);
+        ackAlarma.release();
+    }
 }

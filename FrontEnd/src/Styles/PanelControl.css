@@ -644,8 +644,33 @@
     background: rgba(160, 85, 64, .22);
 }
 
+.pc-boton-restablecer {
+    border: 1px solid rgba(134, 161, 125, .5);
+    background: rgba(86, 122, 75, .2);
+    color: var(--pc-acento) !important;
+}
+
+.pc-boton-restablecer:hover {
+    background: rgba(86, 122, 75, .35);
+}
+
+.pc-boton-esperando {
+    opacity: 0.75;
+    cursor: wait !important;
+}
+
+.pc-anim-spin {
+    animation: pc-girar 1s linear infinite;
+}
+
+@keyframes pc-girar {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
 .pc-boton-seguir .material-symbols-outlined,
 .pc-boton-peligro .material-symbols-outlined,
+.pc-boton-restablecer .material-symbols-outlined,
 .pc-boton-contorno .material-symbols-outlined {
     font-size: 18px;
 }

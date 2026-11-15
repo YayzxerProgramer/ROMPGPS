@@ -51,6 +51,7 @@ export default function PanelControl() {
     const [toast, setToast] = useState("");
     const [dialogo, setDialogo] = useState(null); // null | "corte" | "restablecer"
     const [enviando, setEnviando] = useState(false);
+    const [esperandoRespuesta, setEsperandoRespuesta] = useState(null); // null | "corte" | "restablecer"
     const [errorDialogo, setErrorDialogo] = useState(null);
     const toastRef = useRef(null);
 
@@ -182,19 +183,46 @@ export default function PanelControl() {
         e.preventDefault();
         setEnviando(true);
         setErrorDialogo(null);
+        const accionSolicitada = dialogo; // "corte" | "restablecer"
         try {
             const res = await post("/gps/comando-sms", {
                 imei,
-                comando: dialogo === "corte" ? "CORTE_MOTOR" : "RESTAURAR_MOTOR",
+                comando: accionSolicitada === "corte" ? "CORTE_MOTOR" : "RESTAURAR_MOTOR",
             });
             setDialogo(null);
-            avisar(res?.mensaje || (dialogo === "corte" ? `Orden de corte enviada a ${placa}` : `Orden de restablecer enviada a ${placa}`));
+            setEsperandoRespuesta(accionSolicitada);
+            avisar(res?.mensaje || (accionSolicitada === "corte" 
+                ? `Orden de corte enviada a ${placa}. Esperando confirmación del GPS...` 
+                : `Orden de restablecer enviada a ${placa}. Esperando confirmación del GPS...`));
         } catch (err) {
             setErrorDialogo(err.message || "No se pudo enviar el comando.");
         } finally {
             setEnviando(false);
         }
     };
+
+    // Reaccionar al cambio de estado confirmado por el GPS en tiempo real
+    useEffect(() => {
+        if (!esperandoRespuesta) return;
+
+        if (esperandoRespuesta === "corte" && inmovilizado) {
+            setEsperandoRespuesta(null);
+            avisar(`🔒 Motor de ${placa} inmovilizado con éxito.`);
+        } else if (esperandoRespuesta === "restablecer" && !inmovilizado) {
+            setEsperandoRespuesta(null);
+            avisar(`⚡ Motor de ${placa} restablecido con éxito.`);
+        }
+    }, [inmovilizado, esperandoRespuesta, placa]);
+
+    // Timeout de seguridad si el GPS tarda más de 35s en responder
+    useEffect(() => {
+        if (!esperandoRespuesta) return;
+        const timer = setTimeout(() => {
+            setEsperandoRespuesta(null);
+            avisar("⚠️ Comando despachado. Esperando que el GPS reporte el cambio de estado.");
+        }, 35000);
+        return () => clearTimeout(timer);
+    }, [esperandoRespuesta]);
 
     function salir() {
         cerrarSesion();
@@ -356,14 +384,16 @@ export default function PanelControl() {
                                             <div className="pc-metrica-valor pc-metrica-valor-chico">{velocidad}<small> km/h</small></div>
                                         </div>
                                         <div className="pc-metrica">
-                                            <div className="pc-metrica-etiqueta">Motor</div>
+                                            <div className="pc-metrica-etiqueta">Motor (ACC)</div>
                                             <div className={`pc-metrica-texto ${motorEncendido ? "pc-texto-acento" : "pc-texto-peligro"}`}>
                                                 {motorEncendido ? "Encendido" : "Apagado"}
                                             </div>
                                         </div>
                                         <div className="pc-metrica">
-                                            <div className="pc-metrica-etiqueta">GPS</div>
-                                            <div className={`pc-metrica-texto ${gpsValido ? "" : "pc-texto-peligro"}`}>{gpsValido ? "Válido" : "Sin señal"}</div>
+                                            <div className="pc-metrica-etiqueta">Relé</div>
+                                            <div className={`pc-metrica-texto ${inmovilizado ? "pc-texto-peligro" : "pc-texto-acento"}`}>
+                                                {inmovilizado ? "Cortado" : "Normal"}
+                                            </div>
                                         </div>
                                     </div>
 
@@ -373,8 +403,21 @@ export default function PanelControl() {
                                         <button className={`pc-boton-seguir ${siguiendo ? "activo" : ""}`} onClick={() => (siguiendo ? setSiguiendo(false) : recentrar())}>
                                             <span className="material-symbols-outlined icono-relleno">near_me</span>{siguiendo ? "Siguiendo" : "Seguir"}
                                         </button>
-                                        <button className="pc-boton-peligro" onClick={abrirDialogo}>
-                                            <span className="material-symbols-outlined">power_settings_new</span>{inmovilizado ? "Restablecer" : "Corte motor"}
+                                        <button 
+                                            className={`${inmovilizado ? "pc-boton-restablecer" : "pc-boton-peligro"} ${esperandoRespuesta ? "pc-boton-esperando" : ""}`} 
+                                            onClick={abrirDialogo}
+                                            disabled={Boolean(esperandoRespuesta)}
+                                        >
+                                            <span className={`material-symbols-outlined ${esperandoRespuesta ? "pc-anim-spin" : ""}`}>
+                                                {esperandoRespuesta ? "sync" : "power_settings_new"}
+                                            </span>
+                                            {esperandoRespuesta === "corte" 
+                                                ? "Inmovilizando…" 
+                                                : esperandoRespuesta === "restablecer" 
+                                                    ? "Restableciendo…" 
+                                                    : inmovilizado 
+                                                        ? "Restablecer" 
+                                                        : "Corte motor"}
                                         </button>
                                     </div>
 

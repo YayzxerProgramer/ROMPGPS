@@ -61,14 +61,21 @@ public class GT06Utils {
     }
 
     public static ByteBuf ACKHeartbeat(short serial) {
+        return ACKRespuesta((byte) 0x13, serial);
+    }
 
+    /**
+     * Construye un paquete de confirmación (ACK) genérico para tramas GT06
+     * como 0x13 (Heartbeat), 0x16 (Estado) y 0x26 (Alarma).
+     */
+    public static ByteBuf ACKRespuesta(byte protocolo, short serial) {
         ByteBuf buffer = Unpooled.buffer();
 
         buffer.writeByte(0x78);
         buffer.writeByte(0x78);
 
-        buffer.writeByte(0x05);      // longitud
-        buffer.writeByte(0x13);      // protocolo heartbeat
+        buffer.writeByte(0x05);      // longitud (5 bytes: protocolo + serial 2B + crc 2B)
+        buffer.writeByte(protocolo); // byte del protocolo
 
         buffer.writeShort(serial);   // serial recibido
 
@@ -85,5 +92,4 @@ public class GT06Utils {
 
         return buffer;
     }
-
 }

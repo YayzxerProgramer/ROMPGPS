@@ -44,6 +44,7 @@ public class GpsServerHandler extends SimpleChannelInboundHandler<TramaGt06> {
     private static final byte PROTO_UBICACION = 0x12;
     private static final byte PROTO_HEARTBEAT = 0x13;
     private static final byte PROTO_ESTADO = 0x16;
+    private static final byte PROTO_ALARMA = 0x26;
 
     private final GpsDataService gpsDataService;
     private final PublicadorBackend publicador;
@@ -52,6 +53,7 @@ public class GpsServerHandler extends SimpleChannelInboundHandler<TramaGt06> {
     private String imei;
     private boolean accEncendido = false;
     private boolean corteMotor = false;
+    private volatile GPSData ultimaPosicion = null;
 
     public GpsServerHandler(GpsDataService gpsDataService, PublicadorBackend publicador) {
         this.gpsDataService = gpsDataService;
@@ -78,7 +80,10 @@ public class GpsServerHandler extends SimpleChannelInboundHandler<TramaGt06> {
                 heartbeat(contexto, trama);
                 break;
             case PROTO_ESTADO:
-                log.info("Trama de estado (0x16) recibida de {}", imeiCorto());
+                estado(contexto, trama);
+                break;
+            case PROTO_ALARMA:
+                alarma(contexto, trama);
                 break;
             default:
                 log.warn("Protocolo no soportado: {} de {}", hex(trama.protocolo()), imeiCorto());
@@ -157,8 +162,13 @@ public class GpsServerHandler extends SimpleChannelInboundHandler<TramaGt06> {
         GPSData gps = new GPSData(imei, instante, latitud, longitud,
                 velocidad, gpsValido, accEncendido, corteMotor);
 
-        log.info("Posición de {}: {},{} a {} km/h (GPS {})",
-                imeiCorto(), latitud, longitud, velocidad, gpsValido ? "válido" : "inválido");
+        this.ultimaPosicion = gps;
+
+        log.info("Posición de {}: {},{} a {} km/h (GPS {}) [ACC={}, Corte={}]",
+                imeiCorto(), latitud, longitud, velocidad,
+                gpsValido ? "válido" : "inválido",
+                accEncendido ? "ON" : "OFF",
+                corteMotor ? "ACTIVO" : "NORMAL");
 
         gpsDataService.recibirData(gps);
 
@@ -171,14 +181,11 @@ public class GpsServerHandler extends SimpleChannelInboundHandler<TramaGt06> {
     /**
      * Trama de heartbeat: terminalInfo(1) + voltaje(1) + señalGsm(1) +
      * alarma/idioma(2) + serial(2).
-     *
-     * La versión anterior leía terminalInfo, luego un byte que etiquetaba como
-     * "nivelGsm" pero que en realidad es el VOLTAJE, y después tomaba como
-     * serial los bytes [señalGsm, alarmaAlta]: el ACK devolvía un serial
-     * inventado. Ahora el serial se lee por posición desde el final de la trama.
      */
     private void heartbeat(ChannelHandlerContext contexto, TramaGt06 trama) {
         byte[] datos = trama.datos();
+        boolean accAnterior = this.accEncendido;
+        boolean corteAnterior = this.corteMotor;
 
         if (datos.length >= 1) {
             byte terminalInfo = datos[0];
@@ -187,11 +194,136 @@ public class GpsServerHandler extends SimpleChannelInboundHandler<TramaGt06> {
         }
 
         if (datos.length >= 3) {
-            log.info("Heartbeat de {}: voltaje {}, señal GSM {}",
-                    imeiCorto(), datos[1] & 0xFF, datos[2] & 0xFF);
+            log.info("Heartbeat de {}: voltaje {}, señal GSM {} [ACC={}, Corte={}]",
+                    imeiCorto(), datos[1] & 0xFF, datos[2] & 0xFF,
+                    accEncendido ? "ON" : "OFF", corteMotor ? "ACTIVO" : "NORMAL");
         }
 
         contexto.writeAndFlush(GT06Utils.ACKHeartbeat(trama.serial()));
+
+        // Si cambió el estado de ignición o corte, o no teníamos posición previa, emitir de inmediato
+        if (accAnterior != accEncendido || corteAnterior != corteMotor || ultimaPosicion == null) {
+            notificarCambioEstado("Heartbeat");
+        }
+    }
+
+    // ---------------------------------------------------------- 0x16 estado
+
+    /**
+     * Trama de estado (0x16): terminalInfo(1) + voltaje(1) + señalGsm(1) +
+     * alarma/idioma(2) + serial(2).
+     *
+     * Enviada al cambiar el estado del switch (ACC ON/OFF con ACCONALM) o tras
+     * una orden de corte o restablecimiento de motor.
+     */
+    private void estado(ChannelHandlerContext contexto, TramaGt06 trama) {
+        byte[] datos = trama.datos();
+
+        if (datos.length >= 1) {
+            byte terminalInfo = datos[0];
+            accEncendido = (terminalInfo & 0x02) != 0;
+            corteMotor = (terminalInfo & 0x80) != 0;
+        }
+
+        int voltaje = datos.length >= 2 ? (datos[1] & 0xFF) : 0;
+        int senalGsm = datos.length >= 3 ? (datos[2] & 0xFF) : 0;
+        int alarma = datos.length >= 5 ? (((datos[3] & 0xFF) << 8) | (datos[4] & 0xFF)) : 0;
+
+        log.info("Trama Estado (0x16) de {}: voltaje {}, GSM {}, alarma 0x{} [ACC={}, Corte={}]",
+                imeiCorto(), voltaje, senalGsm, Integer.toHexString(alarma),
+                accEncendido ? "ON" : "OFF", corteMotor ? "ACTIVO" : "NORMAL");
+
+        // Responder confirmación ACK al GPS para completar el ciclo
+        contexto.writeAndFlush(GT06Utils.ACKRespuesta(PROTO_ESTADO, trama.serial()));
+
+        // Publicar de inmediato a Redis y WebSocket para actualizar el frontend en milisegundos
+        notificarCambioEstado("Estado 0x16");
+    }
+
+    // ---------------------------------------------------------- 0x26 alarma
+
+    /**
+     * Trama de alarma (0x26): fechaHora(6) + satélites(1) + lat(4) + lon(4) +
+     * vel(1) + rumbo/estado(2) + LBS + terminalInfo + voltaje + gsm + alarma(2) + serial(2).
+     */
+    private void alarma(ChannelHandlerContext contexto, TramaGt06 trama) {
+        byte[] datos = trama.datos();
+
+        if (datos.length >= 18) {
+            ByteBuffer bb = ByteBuffer.wrap(datos);
+
+            int anio = 2000 + (bb.get() & 0xFF);
+            int mes = bb.get() & 0xFF;
+            int dia = bb.get() & 0xFF;
+            int hora = bb.get() & 0xFF;
+            int minuto = bb.get() & 0xFF;
+            int segundo = bb.get() & 0xFF;
+
+            bb.get(); // satélites
+
+            long latitudCruda = bb.getInt() & 0xFFFFFFFFL;
+            long longitudCruda = bb.getInt() & 0xFFFFFFFFL;
+            int velocidad = bb.get() & 0xFF;
+            int rumboEstado = bb.getShort() & 0xFFFF;
+
+            double latitud = latitudCruda / 1800000.0;
+            double longitud = longitudCruda / 1800000.0;
+            boolean gpsValido = (rumboEstado & 0x1000) != 0;
+            boolean sur = (rumboEstado & 0x0400) == 0;
+            boolean oeste = (rumboEstado & 0x0800) != 0;
+
+            if (sur) latitud = -latitud;
+            if (oeste) longitud = -longitud;
+
+            // Extraer terminalInfo si está disponible tras LBS
+            if (datos.length >= 28) {
+                byte terminalInfo = datos[datos.length - 8];
+                accEncendido = (terminalInfo & 0x02) != 0;
+                corteMotor = (terminalInfo & 0x80) != 0;
+            }
+
+            var instante = seguro(anio, mes, dia, hora, minuto, segundo);
+            GPSData gps = new GPSData(imei, instante, latitud, longitud,
+                    velocidad, gpsValido, accEncendido, corteMotor);
+
+            this.ultimaPosicion = gps;
+
+            log.info("Alarma (0x26) de {}: {},{} a {} km/h (GPS {}) [ACC={}, Corte={}]",
+                    imeiCorto(), latitud, longitud, velocidad,
+                    gpsValido ? "válido" : "inválido",
+                    accEncendido ? "ON" : "OFF", corteMotor ? "ACTIVO" : "NORMAL");
+
+            gpsDataService.recibirData(gps);
+            publicador.publicar(gps);
+        } else {
+            notificarCambioEstado("Alarma 0x26");
+        }
+
+        // Responder confirmación ACK al GPS
+        contexto.writeAndFlush(GT06Utils.ACKRespuesta(PROTO_ALARMA, trama.serial()));
+    }
+
+    /**
+     * Emite una actualización inmediata de estado hacia Redis y WebSocket
+     * reutilizando la última ubicación conocida para no tener que esperar a que
+     * el dispositivo envíe una nueva trama de coordenadas (0x12).
+     */
+    private void notificarCambioEstado(String motivo) {
+        if (imei == null) return;
+
+        double lat = ultimaPosicion != null ? ultimaPosicion.getLatitud() : 0.0;
+        double lon = ultimaPosicion != null ? ultimaPosicion.getLongitud() : 0.0;
+        int vel = ultimaPosicion != null ? ultimaPosicion.getVelocidad() : 0;
+        boolean valido = ultimaPosicion != null && ultimaPosicion.isGpsValido();
+
+        GPSData evento = new GPSData(imei, java.time.Instant.now(), lat, lon, vel, valido, accEncendido, corteMotor);
+        this.ultimaPosicion = evento;
+
+        log.info("Telemetría en tiempo real ({}) para {}: ACC={}, CorteMotor={}",
+                motivo, imeiCorto(), accEncendido ? "ON" : "OFF", corteMotor ? "ACTIVO" : "NORMAL");
+
+        gpsDataService.recibirData(evento);
+        publicador.publicar(evento);
     }
 
     // ------------------------------------------------------- ciclo del canal
