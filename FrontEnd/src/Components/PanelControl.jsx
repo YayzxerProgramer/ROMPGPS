@@ -311,15 +311,18 @@ export default function PanelControl() {
                 </div>
 
                 <div className="pc-vidrio pc-cabecera-usuario">
-                    <Link to="/configuracion" className="pc-boton-icono" title="Configuración" aria-label="Configuración">
-                        <span className="material-symbols-outlined">settings</span>
+                    <Link
+                        to="/configuracion"
+                        className="pc-usuario-link"
+                        title="Configuración de perfil"
+                        aria-label="Configuración de perfil"
+                    >
+                        <img className="pc-avatar" alt="Perfil" src={usuarioData?.imagenUrl || AVATAR_RESPALDO} referrerPolicy="no-referrer" />
+                        <div className="pc-usuario">
+                            <span>{usuarioData?.nombre || usuarioData?.usuario || "Usuario"}</span>
+                            <small>{activas} {activas === 1 ? "unidad activa" : "unidades activas"}</small>
+                        </div>
                     </Link>
-                    <div className="pc-separador" />
-                    <img className="pc-avatar" alt="Perfil" src={usuarioData?.imagenUrl || AVATAR_RESPALDO} referrerPolicy="no-referrer" />
-                    <div className="pc-usuario">
-                        <span>{usuarioData?.nombre || usuarioData?.usuario || "Usuario"}</span>
-                        <small>{activas} {activas === 1 ? "unidad activa" : "unidades activas"}</small>
-                    </div>
                     <button className="pc-boton-salir" onClick={salir} aria-label="Cerrar sesión">
                         <span className="material-symbols-outlined" aria-hidden="true">logout</span>
                         <span className="pc-boton-salir__texto">Salir</span>
