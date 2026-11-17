@@ -218,12 +218,20 @@
     .mnt-pildora { transition: none; }
 }
 
+/* ── Contenedor principal del vehículo seleccionado ─────── */
+
+.mnt-contenido-vehiculo {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
 /* ── Documentos y Vigencias RUNT ─────────────────────────── */
 
 .mnt-panel--documentos {
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 16px;
 }
 
 .mnt-doc-cabecera {
@@ -284,18 +292,18 @@
 
 .mnt-doc-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
-    gap: 12px;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px;
 }
 
 .mnt-doc-tarjeta {
-    padding: 12px;
+    padding: 16px;
     border-radius: 10px;
     background: rgba(0, 0, 0, .25);
     border: 1px solid var(--mnt-borde);
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    gap: 8px;
 }
 
 .mnt-doc-tarjeta-cab {

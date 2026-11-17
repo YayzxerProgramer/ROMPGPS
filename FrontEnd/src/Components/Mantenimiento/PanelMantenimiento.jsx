@@ -89,7 +89,7 @@ export default function PanelMantenimiento({ usuarioId }) {
                         <div><strong>Aún no hay vehículos para analizar.</strong><p>Registra una unidad y asigna un GPS para comenzar a construir su historial de uso.</p></div>
                     </section>
                 ) : (
-                    <>
+                    <div className="mnt-contenido-vehiculo">
                         <section className="mnt-selector" aria-labelledby="mnt-selector-titulo">
                             <div className="mnt-selector-cabecera"><span id="mnt-selector-titulo">Unidad que quieres consultar</span><small>{unidades.length} {unidades.length === 1 ? "unidad disponible" : "unidades disponibles"}</small></div>
                             <div className="mnt-selector-lista" role="list">
@@ -115,7 +115,7 @@ export default function PanelMantenimiento({ usuarioId }) {
                             <FormularioRegistro idVehiculo={vehiculoSeleccionado.id} onRegistrado={recargar} />
                             <Historial idVehiculo={vehiculoSeleccionado.id} version={version} onEliminado={recargar} />
                         </div>
-                    </>
+                    </div>
                 )}
             </div>
         </main>
