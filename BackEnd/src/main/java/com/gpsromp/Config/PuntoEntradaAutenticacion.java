@@ -13,6 +13,7 @@ import com.gpsromp.common.dto.ErrorResponse;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
 
 /**
  * Respuesta para peticiones sin autenticar: 401 con cuerpo JSON.
@@ -23,9 +24,10 @@ import jakarta.servlet.http.HttpServletResponse;
  * eso ningún componente maneja el caso de sesión caducada.
  */
 @Component
+@RequiredArgsConstructor
 public class PuntoEntradaAutenticacion implements AuthenticationEntryPoint {
 
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper;
 
     @Override
     public void commence(HttpServletRequest request,

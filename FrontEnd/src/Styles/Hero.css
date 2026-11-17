@@ -274,11 +274,8 @@
     aspect-ratio: 16 / 10;
     border-radius: 16px;
     overflow: hidden;
-    background:
-        linear-gradient(rgba(178, 206, 168, 0.07) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(178, 206, 168, 0.07) 1px, transparent 1px),
-        #12160f;
-    background-size: 28px 28px, 28px 28px, auto;
+    background: #111512;
+    border: 1px solid rgba(178, 206, 168, 0.14);
 }
 
 .superposicion-mapa {

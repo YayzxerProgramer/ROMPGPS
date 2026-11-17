@@ -1,6 +1,6 @@
 import { GoogleMap, useJsApiLoader, Polyline } from "@react-google-maps/api";
 import { useState, useRef, useEffect } from "react";
-import markerCircle from "../assets/marker-circle.svg";
+import { distancia } from "./mapaUtils";
 import "../Styles/MapaGPS.css";
 
 const GOOGLE_MAPS_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
@@ -42,17 +42,72 @@ function MapaGPS({ position, connected, siguiendo = true, atenuado = false, onAr
   const targetPosRef = useRef(null);
   const startTimeRef = useRef(null);
 
-  // Cuando llega una nueva posición, se actualiza suavemente sin lag
-  
+  // Control para cambio de unidad o reseteo de saltos espurios
+  const ultimoImeiRef = useRef(null);
+  const saltoSospechosoRef = useRef(null);
+
+  // Reiniciar trazado cuando se cambia de vehículo para no cruzar líneas entre unidades
+  useEffect(() => {
+    if (position?.imei && ultimoImeiRef.current && ultimoImeiRef.current !== position.imei) {
+      setPath([]);
+      startPosRef.current = null;
+      saltoSospechosoRef.current = null;
+    }
+    if (position?.imei) {
+      ultimoImeiRef.current = position.imei;
+    }
+  }, [position?.imei]);
+
+  // Cuando llega una nueva posición, se filtra y actualiza suavemente
   useEffect(() => {
     if (!position || !markerRef.current) return;
 
-    const newTarget = {
-      lat: Number(position.latitud),
-      lng: Number(position.longitud),
-    };
+    // 1. Descartar tramas sin fix satelital válido reportadas por el módulo
+    if (position.gpsValido === false) {
+      return;
+    }
 
-    if (isNaN(newTarget.lat) || isNaN(newTarget.lng)) return;
+    const lat = Number(position.latitud);
+    const lng = Number(position.longitud);
+
+    // 2. Descartar coordenadas inválidas, nulas o con hemisferio corrupto
+    if (isNaN(lat) || isNaN(lng) || lat <= 0 || (Math.abs(lat) < 0.001 && Math.abs(lng) < 0.001)) {
+      return;
+    }
+
+    const newTarget = { lat, lng };
+
+    // 3. Filtro Anti-Rebote / Glitch LBS:
+    // Evita que rebotes a antenas celulares (LBS) o fallos de multipath tracen
+    // líneas de ida y vuelta a kilómetros de distancia mientras se circula.
+    const currentPos = markerRef.current.getPosition();
+    const posActual = currentPos
+      ? {
+          lat: typeof currentPos.lat === "function" ? currentPos.lat() : currentPos.lat,
+          lng: typeof currentPos.lng === "function" ? currentPos.lng() : currentPos.lng,
+        }
+      : null;
+
+    if (posActual && Math.abs(posActual.lat) > 0.001) {
+      const d = distancia(posActual, newTarget);
+      const vel = Number(position.velocidad) || 0;
+
+      // Salto instantáneo mayor a 450 metros a velocidad normal urbana
+      if (d > 450 && vel < 160) {
+        // Si es la primera vez que se detecta este punto lejano, se retiene como sospechoso
+        if (!saltoSospechosoRef.current || distancia(saltoSospechosoRef.current, newTarget) > 100) {
+          saltoSospechosoRef.current = newTarget;
+          console.warn(`[GPS Filter] Rebote descartado: salto de ${Math.round(d)}m`);
+          return;
+        }
+
+        // Si se confirma en dos reportes seguidos, el vehículo realmente se movió allí (p. ej. transporte en grúa)
+        saltoSospechosoRef.current = null;
+        setPath([newTarget]); // Reiniciar la línea para no trazar la recta gigante
+      } else {
+        saltoSospechosoRef.current = null;
+      }
+    }
 
     setPath((prev) => {
       if (prev.length > 0) {
@@ -68,10 +123,7 @@ function MapaGPS({ position, connected, siguiendo = true, atenuado = false, onAr
       mapRef.current.panTo(newTarget);
     }
 
-    const currentPos = markerRef.current.getPosition();
-    startPosRef.current = currentPos
-      ? { lat: currentPos.lat(), lng: currentPos.lng() }
-      : newTarget;
+    startPosRef.current = posActual || newTarget;
     targetPosRef.current = newTarget;
 
     if (animationRef.current) {
@@ -126,16 +178,94 @@ function MapaGPS({ position, connected, siguiendo = true, atenuado = false, onAr
       ? { lat: Number(position.latitud), lng: Number(position.longitud) }
       : centroDefault;
 
-    const marker = new window.google.maps.Marker({
-      map,
-      position: posInicial,
-      opacity: atenuado ? 0.35 : 1,
-      icon: {
-        url: markerCircle,
-        scaledSize: new window.google.maps.Size(48, 48),
-        anchor: new window.google.maps.Point(24, 24),
-      },
-    });
+    // Marcador con animación intermitente (aparece y desaparece como baliza GPS)
+    class MarcadorIntermitenteGPS extends window.google.maps.OverlayView {
+      constructor(pos, atenuadoInicial, tituloInicial) {
+        super();
+        this.pos = pos;
+        this.div = document.createElement("div");
+        this.div.className = "marcador-gps-contenedor";
+        if (atenuadoInicial) this.div.style.opacity = "0.35";
+        this.div.title = tituloInicial || "Vehículo en vivo";
+        this.div.innerHTML = `
+          <div class="marcador-gps-intermitente">
+            <div class="marcador-halo-intermitente"></div>
+            <div class="marcador-nucleo">
+              <div class="marcador-anillo-blanco">
+                <div class="marcador-centro-verde">
+                  <div class="marcador-punto-luz"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+
+      onAdd() {
+        const panes = this.getPanes();
+        if (panes && panes.overlayLayer) {
+          panes.overlayLayer.appendChild(this.div);
+        }
+      }
+
+      draw() {
+        const proyeccion = this.getProjection();
+        if (!proyeccion || !this.pos) {
+          if (this.div) this.div.style.display = "none";
+          return;
+        }
+
+        const latLng = typeof this.pos.lat === "function"
+          ? this.pos
+          : new window.google.maps.LatLng(this.pos.lat, this.pos.lng);
+
+        const pixel = proyeccion.fromLatLngToDivPixel(latLng);
+        if (!pixel) return;
+
+        this.div.style.display = "";
+        const mitad = 24; // 48px / 2
+        this.div.style.left = `${pixel.x - mitad}px`;
+        this.div.style.top = `${pixel.y - mitad}px`;
+      }
+
+      onRemove() {
+        if (this.div && this.div.parentNode) {
+          this.div.parentNode.removeChild(this.div);
+        }
+      }
+
+      setPosition(pos) {
+        this.pos = pos;
+        this.draw();
+      }
+
+      getPosition() {
+        if (!this.pos) return null;
+        return {
+          lat: () => (typeof this.pos.lat === "function" ? this.pos.lat() : this.pos.lat),
+          lng: () => (typeof this.pos.lng === "function" ? this.pos.lng() : this.pos.lng),
+        };
+      }
+
+      setOpacity(valor) {
+        if (this.div) {
+          this.div.style.opacity = String(valor);
+        }
+      }
+
+      setTitle(texto) {
+        if (this.div) {
+          this.div.title = texto || "";
+        }
+      }
+    }
+
+    const marker = new MarcadorIntermitenteGPS(
+      posInicial,
+      atenuado,
+      connected ? "Vehículo en vivo" : "Última posición vista"
+    );
+    marker.setMap(map);
 
     markerRef.current = marker;
 

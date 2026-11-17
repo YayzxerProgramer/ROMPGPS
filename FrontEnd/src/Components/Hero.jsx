@@ -1,6 +1,23 @@
+import { useState, useCallback } from "react";
+import MiniMapaHero from "./MiniMapaHero";
 import "../Styles/Hero.css";
 
 function Hero() {
+    const [telemetria, setTelemetria] = useState({
+        velocidad: 58.4,
+        lat: "10.4285° N",
+        lng: "75.5512° O",
+        senal: 99.8,
+        alt: "2.4m"
+    });
+
+    const handleTelemetryUpdate = useCallback((data) => {
+        setTelemetria((prev) => ({
+            ...prev,
+            ...data
+        }));
+    }, []);
+
     return (
         <section className="hero">
 
@@ -51,30 +68,28 @@ function Hero() {
                         </div>
 
                         <div className="mapa-tarjeta">
-                            <div className="superposicion-mapa"></div>
-                            <div className="punto-mapa"></div>
+                            <MiniMapaHero onTelemetryUpdate={handleTelemetryUpdate} />
                         </div>
 
                         <div className="estadisticas-tarjeta">
                             <div className="caja-estadistica-hero">
                                 <small>Velocidad</small>
-                                <h3>84.2 <span>km/h</span></h3>
+                                <h3>{telemetria.velocidad.toFixed(1)} <span>km/h</span></h3>
                             </div>
 
                             <div className="caja-estadistica-hero">
                                 <small>Señal</small>
-                                <h3>99.8 <span>%</span></h3>
+                                <h3>{telemetria.senal.toFixed(1)} <span>%</span></h3>
                             </div>
                         </div>
 
                     </div>
 
-                    {/* Cartagena, igual que el centro por defecto del mapa.
-                        Antes eran las coordenadas de Berlín. */}
+                    {/* Coordenadas en vivo sincronizadas con el recorrido GPS en Cartagena */}
                     <div className="coordenadas">
-                        Lat: 10.4236° N <br />
-                        Long: 75.5478° O <br />
-                        Alt: 2.0m
+                        Lat: {telemetria.lat} <br />
+                        Long: {telemetria.lng} <br />
+                        Alt: {telemetria.alt}
                     </div>
 
                 </div>

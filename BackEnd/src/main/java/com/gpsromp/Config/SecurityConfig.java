@@ -2,6 +2,7 @@ package com.gpsromp.config;
 
 import java.util.List;
 
+import jakarta.servlet.DispatcherType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -64,6 +65,10 @@ public class SecurityConfig {
                         .authenticationEntryPoint(puntoEntradaAutenticacion)
                         .accessDeniedHandler(manejadorAccesoDenegado))
                 .authorizeHttpRequests(auth -> auth
+                        // Despachos internos de error y reenvíos del contenedor (Tomcat)
+                        .dispatcherTypeMatchers(DispatcherType.ERROR, DispatcherType.FORWARD).permitAll()
+                        .requestMatchers("/error").permitAll()
+
                         // Preflight
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 

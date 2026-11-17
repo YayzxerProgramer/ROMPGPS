@@ -52,8 +52,38 @@ export default function PanelControl() {
     const [dialogo, setDialogo] = useState(null); // null | "corte" | "restablecer"
     const [enviando, setEnviando] = useState(false);
     const [esperandoRespuesta, setEsperandoRespuesta] = useState(null); // null | "corte" | "restablecer"
+    const [segundosEspera, setSegundosEspera] = useState(null); // null | 5..1
+    const [corteManual, setCorteManual] = useState(() => {
+        try {
+            const guardado = localStorage.getItem("gps_corte_manual");
+            return guardado ? JSON.parse(guardado) : {};
+        } catch {
+            return {};
+        }
+    });
     const [errorDialogo, setErrorDialogo] = useState(null);
     const toastRef = useRef(null);
+    const montadoRef = useRef(true);
+
+    useEffect(() => {
+        montadoRef.current = true;
+        return () => {
+            montadoRef.current = false;
+        };
+    }, []);
+
+    const actualizarCorteManual = useCallback((targetImei, nuevoEstado) => {
+        if (!targetImei) return;
+        setCorteManual((prev) => {
+            const nuevo = { ...prev, [targetImei]: nuevoEstado };
+            try {
+                localStorage.setItem("gps_corte_manual", JSON.stringify(nuevo));
+            } catch (err) {
+                console.error("Error guardando corte manual en localStorage:", err);
+            }
+            return nuevo;
+        });
+    }, []);
 
     const vehiculoSel = vehiculos.find((v) => v.id === selId)
         || vehiculos.find((v) => v.activo)
@@ -72,7 +102,9 @@ export default function PanelControl() {
     const velocidad = position ? position.velocidad : 0;
     const motorEncendido = Boolean(position?.acc);
     const gpsValido = Boolean(position?.gpsValido);
-    const inmovilizado = Boolean(position?.corteMotor);
+    const inmovilizado = imei && corteManual[imei] !== undefined
+        ? Boolean(corteManual[imei])
+        : Boolean(position?.corteMotor);
     const lat = position ? Number(position.latitud).toFixed(4) : "---";
     const lng = position ? Number(position.longitud).toFixed(4) : "---";
 
@@ -184,45 +216,51 @@ export default function PanelControl() {
         setEnviando(true);
         setErrorDialogo(null);
         const accionSolicitada = dialogo; // "corte" | "restablecer"
+        const targetImei = imei;
+        const targetPlaca = placa;
+
         try {
-            const res = await post("/gps/comando-sms", {
-                imei,
+            await post("/gps/comando-sms", {
+                imei: targetImei,
                 comando: accionSolicitada === "corte" ? "CORTE_MOTOR" : "RESTAURAR_MOTOR",
             });
+
+            // 1. Mensaje de texto enviado con éxito: cerrar diálogo y activar espera
             setDialogo(null);
-            setEsperandoRespuesta(accionSolicitada);
-            avisar(res?.mensaje || (accionSolicitada === "corte" 
-                ? `Orden de corte enviada a ${placa}. Esperando confirmación del GPS...` 
-                : `Orden de restablecer enviada a ${placa}. Esperando confirmación del GPS...`));
-        } catch (err) {
-            setErrorDialogo(err.message || "No se pudo enviar el comando.");
-        } finally {
             setEnviando(false);
+            setEsperandoRespuesta(accionSolicitada);
+
+            avisar(accionSolicitada === "corte"
+                ? `Mensaje SMS enviado a ${targetPlaca}. Apagando motor en 5 segundos…`
+                : `Mensaje SMS enviado a ${targetPlaca}. Encendiendo motor en 5 segundos…`);
+
+            // 2. Time sleep de 5 segundos después de que el mensaje de texto se envíe
+            for (let seg = 5; seg > 0; seg--) {
+                if (!montadoRef.current) return;
+                setSegundosEspera(seg);
+                await new Promise((resolve) => setTimeout(resolve, 1000));
+            }
+
+            if (!montadoRef.current) return;
+            setSegundosEspera(null);
+
+            // 3. Cumplidos los 5 segundos, conmutar el estado del motor y mostrar el botón correspondiente
+            const nuevoInmovilizado = accionSolicitada === "corte";
+            actualizarCorteManual(targetImei, nuevoInmovilizado);
+            setUltima((prev) => (prev && prev.imei === targetImei ? { ...prev, corteMotor: nuevoInmovilizado } : prev));
+            setEsperandoRespuesta(null);
+
+            avisar(nuevoInmovilizado
+                ? `🔒 Motor de ${targetPlaca} inmovilizado con éxito.`
+                : `⚡ Motor de ${targetPlaca} restablecido con éxito.`);
+        } catch (err) {
+            if (!montadoRef.current) return;
+            setErrorDialogo(err.message || "No se pudo enviar el comando SMS.");
+            setEnviando(false);
+            setEsperandoRespuesta(null);
+            setSegundosEspera(null);
         }
     };
-
-    // Reaccionar al cambio de estado confirmado por el GPS en tiempo real
-    useEffect(() => {
-        if (!esperandoRespuesta) return;
-
-        if (esperandoRespuesta === "corte" && inmovilizado) {
-            setEsperandoRespuesta(null);
-            avisar(`🔒 Motor de ${placa} inmovilizado con éxito.`);
-        } else if (esperandoRespuesta === "restablecer" && !inmovilizado) {
-            setEsperandoRespuesta(null);
-            avisar(`⚡ Motor de ${placa} restablecido con éxito.`);
-        }
-    }, [inmovilizado, esperandoRespuesta, placa]);
-
-    // Timeout de seguridad si el GPS tarda más de 35s en responder
-    useEffect(() => {
-        if (!esperandoRespuesta) return;
-        const timer = setTimeout(() => {
-            setEsperandoRespuesta(null);
-            avisar("⚠️ Comando despachado. Esperando que el GPS reporte el cambio de estado.");
-        }, 35000);
-        return () => clearTimeout(timer);
-    }, [esperandoRespuesta]);
 
     function salir() {
         cerrarSesion();
@@ -409,12 +447,12 @@ export default function PanelControl() {
                                             disabled={Boolean(esperandoRespuesta)}
                                         >
                                             <span className={`material-symbols-outlined ${esperandoRespuesta ? "pc-anim-spin" : ""}`}>
-                                                {esperandoRespuesta ? "sync" : "power_settings_new"}
+                                                {esperandoRespuesta ? "sync" : inmovilizado ? "restart_alt" : "power_settings_new"}
                                             </span>
                                             {esperandoRespuesta === "corte" 
-                                                ? "Inmovilizando…" 
+                                                ? (segundosEspera ? `Inmovilizando (${segundosEspera}s)…` : "Inmovilizando…") 
                                                 : esperandoRespuesta === "restablecer" 
-                                                    ? "Restableciendo…" 
+                                                    ? (segundosEspera ? `Restableciendo (${segundosEspera}s)…` : "Restableciendo…") 
                                                     : inmovilizado 
                                                         ? "Restablecer" 
                                                         : "Corte motor"}
@@ -548,15 +586,15 @@ export default function PanelControl() {
                         onSubmit={enviarComando}
                     >
                         <div className={`pc-dialogo-icono ${dialogo === "restablecer" ? "acento" : ""}`}>
-                            <span className="material-symbols-outlined">power_settings_new</span>
+                            <span className="material-symbols-outlined">{dialogo === "restablecer" ? "restart_alt" : "power_settings_new"}</span>
                         </div>
                         <h2 id="pc-dialogo-titulo">
                             {dialogo === "corte" ? `¿Cortar el motor de ${placa}?` : `¿Restablecer el motor de ${placa}?`}
                         </h2>
                         <p>
                             {dialogo === "corte"
-                                ? `La unidad va a ${velocidad} km/h. La orden se enviará de forma segura y directa al dispositivo GPS, y el vehículo quedará inmovilizado hasta que restablezcas el motor.`
-                                : "La orden se enviará de forma segura y directa al dispositivo GPS, y el motor volverá a encender con normalidad."}
+                                ? `La unidad va a ${velocidad} km/h. La orden se enviará de forma segura por SMS al dispositivo GPS, y el vehículo quedará inmovilizado en 5 segundos hasta que restablezcas el motor.`
+                                : "La orden se enviará de forma segura por SMS al dispositivo GPS, y el motor volverá a encender con normalidad en 5 segundos."}
                         </p>
                         {errorDialogo && <div className="pc-dialogo-error">{errorDialogo}</div>}
                         <div className="pc-dialogo-acciones">

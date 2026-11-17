@@ -18,6 +18,7 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -36,13 +37,14 @@ import lombok.extern.slf4j.Slf4j;
  * información sobre la clave a través del tiempo de respuesta.
  */
 @Component
+@RequiredArgsConstructor
 @Slf4j
 public class FiltroApiKeyGps extends OncePerRequestFilter {
 
     private static final String CABECERA = "X-API-Key";
     private static final String RUTA_INGESTA = "/gps";
 
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper;
 
     @Value("${gps.ingesta.api-key}")
     private String apiKeyEsperada;
