@@ -12,6 +12,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
 
 import com.gpsromp.common.exception.OperacionNoPermitidaException;
@@ -212,6 +213,7 @@ public class ServicioOauth {
             HttpHeaders cabeceras = new HttpHeaders();
             cabeceras.set("Authorization", "Basic " + credenciales);
             cabeceras.set("Accept", "application/vnd.github+json");
+            cabeceras.set(HttpHeaders.USER_AGENT, "RompGPS-App");
             cabeceras.setContentType(MediaType.APPLICATION_JSON);
 
             ResponseEntity<Map> respuesta = restTemplate.exchange(
@@ -227,9 +229,12 @@ public class ServicioOauth {
 
         } catch (OperacionNoPermitidaException e) {
             throw e;
+        } catch (HttpStatusCodeException e) {
+            log.warn("Error HTTP de GitHub al verificar token [{}]: {}", e.getStatusCode(), e.getResponseBodyAsString());
+            throw new OperacionNoPermitidaException("Error al validar identidad con GitHub: " + e.getStatusCode());
         } catch (Exception e) {
-            log.warn("No se pudo verificar el token de GitHub: {}", e.getMessage());
-            throw new OperacionNoPermitidaException("No se pudo verificar la identidad con GitHub");
+            log.warn("No se pudo verificar el token de GitHub: {}", e.getMessage(), e);
+            throw new OperacionNoPermitidaException("No se pudo verificar la identidad con GitHub: " + e.getMessage());
         }
     }
 
@@ -238,6 +243,7 @@ public class ServicioOauth {
             HttpHeaders cabeceras = new HttpHeaders();
             cabeceras.setBearerAuth(accessToken);
             cabeceras.set("Accept", "application/vnd.github+json");
+            cabeceras.set(HttpHeaders.USER_AGENT, "RompGPS-App");
 
             ResponseEntity<Map> respuesta = restTemplate.exchange(
                     GITHUB_USER, HttpMethod.GET, new HttpEntity<>(cabeceras), Map.class);
@@ -249,7 +255,11 @@ public class ServicioOauth {
 
         } catch (OperacionNoPermitidaException e) {
             throw e;
+        } catch (HttpStatusCodeException e) {
+            log.warn("Error HTTP de GitHub al pedir perfil [{}]: {}", e.getStatusCode(), e.getResponseBodyAsString());
+            throw new OperacionNoPermitidaException("No se pudo obtener el perfil de GitHub: " + e.getStatusCode());
         } catch (Exception e) {
+            log.warn("Error inesperado al pedir perfil de GitHub: {}", e.getMessage(), e);
             throw new OperacionNoPermitidaException("No se pudo obtener el perfil de GitHub");
         }
     }
@@ -260,6 +270,7 @@ public class ServicioOauth {
             HttpHeaders cabeceras = new HttpHeaders();
             cabeceras.setBearerAuth(accessToken);
             cabeceras.set("Accept", "application/vnd.github+json");
+            cabeceras.set(HttpHeaders.USER_AGENT, "RompGPS-App");
 
             ResponseEntity<List> respuesta = restTemplate.exchange(
                     GITHUB_EMAILS, HttpMethod.GET, new HttpEntity<>(cabeceras), List.class);
@@ -276,7 +287,7 @@ public class ServicioOauth {
                     .orElse(null);
 
         } catch (Exception e) {
-            log.warn("No se pudieron leer los correos de GitHub: {}", e.getMessage());
+            log.warn("No se pudieron leer los correos de GitHub: {}", e.getMessage(), e);
             return null;
         }
     }
@@ -286,6 +297,7 @@ public class ServicioOauth {
         try {
             HttpHeaders cabeceras = new HttpHeaders();
             cabeceras.set("Accept", "application/json");
+            cabeceras.set(HttpHeaders.USER_AGENT, "RompGPS-App");
             cabeceras.setContentType(MediaType.APPLICATION_JSON);
 
             ResponseEntity<Map> respuesta = restTemplate.exchange(
@@ -301,7 +313,10 @@ public class ServicioOauth {
                 throw new OperacionNoPermitidaException("Respuesta vacía de GitHub");
             }
             if (cuerpo.get("error") != null) {
-                throw new OperacionNoPermitidaException("GitHub rechazó el código: " + cuerpo.get("error"));
+                String error = String.valueOf(cuerpo.get("error"));
+                String desc = cuerpo.get("error_description") != null ? String.valueOf(cuerpo.get("error_description")) : "";
+                log.warn("GitHub rechazó el código OAuth: error={}, descripcion={}", error, desc);
+                throw new OperacionNoPermitidaException("GitHub rechazó el código (" + error + "): " + desc);
             }
 
             String accessToken = (String) cuerpo.get("access_token");
@@ -312,9 +327,12 @@ public class ServicioOauth {
 
         } catch (OperacionNoPermitidaException e) {
             throw e;
+        } catch (HttpStatusCodeException e) {
+            log.warn("Error HTTP de GitHub al intercambiar código [{}]: {}", e.getStatusCode(), e.getResponseBodyAsString());
+            throw new OperacionNoPermitidaException("Error de comunicación con GitHub: " + e.getStatusCode());
         } catch (Exception e) {
-            log.warn("Error en el callback de GitHub: {}", e.getMessage());
-            throw new OperacionNoPermitidaException("Error en el intercambio con GitHub");
+            log.warn("Error en el callback de GitHub: {}", e.getMessage(), e);
+            throw new OperacionNoPermitidaException("Error en el intercambio con GitHub: " + e.getMessage());
         }
     }
 
