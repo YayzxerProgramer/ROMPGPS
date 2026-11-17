@@ -1621,7 +1621,7 @@ body {
     width: min(370px, calc(100vw - 32px));
     padding: 8px;
     border-radius: 16px;
-    background: rgba(23, 27, 23, .96);
+    background: #171b17;
     border: 1px solid var(--adm-borde-2);
     box-shadow: 0 24px 60px rgba(0, 0, 0, .5);
     backdrop-filter: var(--adm-vidrio);
@@ -1632,18 +1632,51 @@ body {
 .adm-avisos-cab {
     display: flex;
     justify-content: space-between;
-    align-items: baseline;
+    align-items: center;
     padding: 8px 10px 10px;
+    border-bottom: 1px solid rgba(178, 206, 168, .08);
+    margin-bottom: 4px;
 }
 
 .adm-avisos-cab b {
     font-family: var(--adm-titular);
     font-size: 15px;
+    color: var(--adm-texto);
+}
+
+.adm-avisos-cab-acciones {
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
 
 .adm-avisos-cab span {
     font-size: 11px;
     color: var(--adm-texto-3);
+}
+
+.adm-avisos-cerrar-btn {
+    width: 24px;
+    height: 24px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    background: transparent;
+    border-radius: 6px;
+    color: var(--adm-texto-3);
+    cursor: pointer;
+    padding: 0;
+    transition: background .15s ease, color .15s ease;
+}
+
+.adm-avisos-cerrar-btn:hover {
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--adm-texto);
+}
+
+.adm-avisos-cerrar-btn .material-symbols-outlined {
+    font-size: 16px;
 }
 
 .adm-avisos-vacio {
@@ -2877,6 +2910,36 @@ body {
 
     .adm-avatar {
         margin-left: 4px;
+    }
+
+    /* En móvil, el desplegable de notificaciones no queda encasillado en el botón:
+       se expande con márgenes limpios y fondo opaco para no pisar el contenido */
+    .adm-desplegable {
+        position: static;
+    }
+
+    .adm-desplegable-velo {
+        background: rgba(0, 0, 0, 0.65);
+        backdrop-filter: blur(4px);
+        -webkit-backdrop-filter: blur(4px);
+    }
+
+    .adm-avisos-panel {
+        position: absolute;
+        top: calc(100% + 8px);
+        left: 12px;
+        right: 12px;
+        width: auto;
+        max-width: 440px;
+        margin: 0 auto;
+        padding: 10px;
+        background: #171b17;
+        border: 1px solid rgba(178, 206, 168, 0.25);
+        box-shadow: 0 16px 50px rgba(0, 0, 0, 0.8);
+        max-height: calc(100dvh - 84px);
+        overflow-y: auto;
+        border-radius: 16px;
+        z-index: 100;
     }
 
     .adm-principal {

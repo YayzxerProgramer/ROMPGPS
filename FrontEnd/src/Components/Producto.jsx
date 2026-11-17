@@ -49,7 +49,7 @@ function Producto() {
 
                         <li>
                             <span className="punto"></span>
-                            Resistencia IP68 contra agua y polvo
+                            Resistencia IP66 contra salpicaduras y polvo
                         </li>
 
                         <li>

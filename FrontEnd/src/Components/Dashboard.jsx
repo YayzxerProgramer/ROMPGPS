@@ -328,7 +328,7 @@ function PanelAdmin() {
 
       <div className="adm-cuerpo">
         <header className="adm-cabecera">
-          <button className="adm-icono-btn adm-menu-btn" aria-label="Abrir menú" onClick={() => setMenuAbierto(true)}>
+          <button className="adm-icono-btn adm-menu-btn" aria-label="Abrir menú" onClick={() => { setMenuAbierto(true); setPanel(null); }}>
             <span className="material-symbols-outlined">menu</span>
           </button>
           {conBuscador ? (
@@ -357,7 +357,7 @@ function PanelAdmin() {
                 className={`adm-icono-btn ${panel === "avisos" ? "activo" : ""}`}
                 title="Notificaciones"
                 aria-expanded={panel === "avisos"}
-                onClick={() => setPanel((p) => (p === "avisos" ? null : "avisos"))}
+                onClick={() => { setMenuAbierto(false); setPanel((p) => (p === "avisos" ? null : "avisos")); }}
               >
                 <span className="material-symbols-outlined">notifications</span>
                 {alertas.length > 0 && <span className="adm-icono-punto">{alertas.length}</span>}
@@ -368,7 +368,18 @@ function PanelAdmin() {
                   <div className="adm-avisos-panel" role="dialog" aria-label="Notificaciones">
                     <div className="adm-avisos-cab">
                       <b>Notificaciones</b>
-                      <span>{alertas.length ? `${alertas.length} ${alertas.length === 1 ? "pendiente" : "pendientes"}` : "Todo en orden"}</span>
+                      <div className="adm-avisos-cab-acciones">
+                        <span>{alertas.length ? `${alertas.length} ${alertas.length === 1 ? "pendiente" : "pendientes"}` : "Todo en orden"}</span>
+                        <button
+                          type="button"
+                          className="adm-avisos-cerrar-btn"
+                          onClick={() => setPanel(null)}
+                          aria-label="Cerrar notificaciones"
+                          title="Cerrar"
+                        >
+                          <span className="material-symbols-outlined">close</span>
+                        </button>
+                      </div>
                     </div>
                     {alertas.length === 0 && (
                       <div className="adm-avisos-vacio">
