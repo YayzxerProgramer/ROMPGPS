@@ -1,15 +1,22 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48" fill="none">
-  <!-- Outer halo / radar pulse -->
-  <circle cx="24" cy="24" r="22" fill="#22c55e" fill-opacity="0.2"/>
-  <circle cx="24" cy="24" r="16" fill="#22c55e" fill-opacity="0.35"/>
-  <!-- Shadow offset -->
-  <circle cx="24" cy="25" r="11.5" fill="#000000" fill-opacity="0.45"/>
-  <!-- Dark backing / outer contrast border -->
-  <circle cx="24" cy="24" r="11" fill="#0f120e"/>
-  <!-- Crisp white ring -->
-  <circle cx="24" cy="24" r="9.5" fill="#ffffff"/>
-  <!-- Emerald core circle -->
-  <circle cx="24" cy="24" r="7" fill="#22c55e"/>
-  <!-- Center specular highlight dot -->
-  <circle cx="24" cy="24" r="2.2" fill="#ffffff" fill-opacity="0.95"/>
+  <!-- Grupo intermitente: aparece brillante y desaparece -->
+  <g>
+    <animate attributeName="opacity" values="0; 0; 1; 1; 1; 0; 0" keyTimes="0; 0.15; 0.32; 0.55; 0.72; 0.86; 1" dur="1.4s" repeatCount="indefinite" />
+    <animateTransform attributeName="transform" type="scale" values="0.7; 0.7; 1.05; 1; 1; 0.7; 0.7" keyTimes="0; 0.15; 0.32; 0.55; 0.72; 0.86; 1" dur="1.4s" additive="sum" repeatCount="indefinite" origin="24 24" />
+
+    <!-- Halo resplandeciente exterior -->
+    <circle cx="24" cy="24" r="20" fill="#22c55e" fill-opacity="0.3" />
+    <circle cx="24" cy="24" r="15" fill="#22c55e" fill-opacity="0.45" />
+
+    <!-- Sombra del núcleo -->
+    <circle cx="24" cy="25" r="11.5" fill="#000000" fill-opacity="0.5" />
+    <!-- Borde exterior oscuro -->
+    <circle cx="24" cy="24" r="11" fill="#0f120e" />
+    <!-- Anillo blanco -->
+    <circle cx="24" cy="24" r="9.5" fill="#ffffff" />
+    <!-- Núcleo verde esmeralda -->
+    <circle cx="24" cy="24" r="7" fill="#22c55e" />
+    <!-- Punto blanco central de precisión -->
+    <circle cx="24" cy="24" r="2.2" fill="#ffffff" fill-opacity="0.95" />
+  </g>
 </svg>

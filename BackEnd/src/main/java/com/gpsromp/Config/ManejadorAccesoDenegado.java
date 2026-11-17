@@ -13,15 +13,17 @@ import com.gpsromp.common.dto.ErrorResponse;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
 
 /**
  * Respuesta para peticiones autenticadas sin permisos: 403 con el mismo formato
  * de error que el resto de la API, en vez de la página de error por defecto.
  */
 @Component
+@RequiredArgsConstructor
 public class ManejadorAccesoDenegado implements AccessDeniedHandler {
 
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper;
 
     @Override
     public void handle(HttpServletRequest request,

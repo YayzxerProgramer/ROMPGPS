@@ -37,3 +37,102 @@
         height: calc(100vh - 120px);
     }
 }
+
+/* ============================================================
+   Marcador de Telemetría GPS con Efecto Intermitente (Parpadeo)
+   ============================================================ */
+
+.marcador-gps-contenedor {
+    position: absolute;
+    width: 48px;
+    height: 48px;
+    pointer-events: none;
+    z-index: 10;
+    transition: opacity 0.3s ease;
+    user-select: none;
+}
+
+.marcador-gps-intermitente {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: intermitente-punto-gps 1.4s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+    will-change: opacity, transform;
+}
+
+/* El punto aparece brillante, permanece visible y luego desaparece por completo */
+@keyframes intermitente-punto-gps {
+    0%, 15% {
+        opacity: 0;
+        transform: scale(0.65);
+    }
+    32% {
+        opacity: 1;
+        transform: scale(1.1);
+    }
+    42%, 70% {
+        opacity: 1;
+        transform: scale(1);
+    }
+    85%, 100% {
+        opacity: 0;
+        transform: scale(0.65);
+    }
+}
+
+/* Resplandor del halo cuando el punto se enciende */
+.marcador-halo-intermitente {
+    position: absolute;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(34, 197, 94, 0.45) 0%, rgba(34, 197, 94, 0.12) 55%, transparent 75%);
+    box-shadow: 0 0 16px rgba(34, 197, 94, 0.75);
+    pointer-events: none;
+}
+
+/* Núcleo central del localizador */
+.marcador-nucleo {
+    position: relative;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: #0f120e;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6), 0 0 14px rgba(34, 197, 94, 0.85);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2;
+}
+
+.marcador-anillo-blanco {
+    width: 17px;
+    height: 17px;
+    border-radius: 50%;
+    background: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.marcador-centro-verde {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: #22c55e;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: inset 0 0 4px rgba(0, 0, 0, 0.35);
+}
+
+.marcador-punto-luz {
+    width: 3.5px;
+    height: 3.5px;
+    border-radius: 50%;
+    background: #ffffff;
+    box-shadow: 0 0 5px #ffffff;
+}

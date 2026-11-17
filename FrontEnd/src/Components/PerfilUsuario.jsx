@@ -882,7 +882,7 @@ export default function PerfilUsuario() {
                 setModalGuardar(false);
                 setModalExito(true);
                 setTimeout(() => {
-                    navigate("/configuracion");
+                    navigate("/panel-control");
                 }, 2000);
             })
             .catch((error) => console.error("Error actualizando usuario:", error));

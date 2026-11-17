@@ -236,18 +236,18 @@ function FormularioRegistro() {
     const [cargandoGoogle, setCargandoGoogle] = useState(false);
 
     function validar() {
-    if (!nombre || !apellido || !telefono || !usuario || !correo || !contrasena) {
-        setError("Complete todos los campos.");
-        return false;
-    }
+        if (!nombre || !apellido || !telefono || !usuario || !correo || !contrasena) {
+            setError("Complete todos los campos.");
+            return false;
+        }
 
-    if (!terminos) {
-        setError("Debes aceptar los términos de servicio y la política de privacidad.");
-        return false;
-    }
+        if (!terminos) {
+            setError("Debes aceptar los términos de servicio y la política de privacidad.");
+            return false;
+        }
 
-    return true;
-}
+        return true;
+    }
 
     const manejarEnvio = async (e) => {
         e.preventDefault();
@@ -355,9 +355,27 @@ function FormularioRegistro() {
 
                     <CampoContrasena contrasena={contrasena} onchange={(e) => setContrasena(e.target.value)} />
 
-                    {error && <p className="mensaje-error grupo-ancho-completo">{error}</p>}
+                    {error && (
+                        <div className="reg-alerta reg-alerta--error grupo-ancho-completo" role="alert">
+                            <span className="material-symbols-outlined reg-alerta__icono">error</span>
+                            <div className="reg-alerta__cuerpo">
+                                <strong className="reg-alerta__titulo">Algo salió mal</strong>
+                                <span className="reg-alerta__mensaje">{error}</span>
+                            </div>
+                        </div>
+                    )}
 
                     <CheckboxTerminos checked={terminos} onChange={() => setTerminos(!terminos)} />
+
+                    {enviado && (
+                        <div className="reg-alerta reg-alerta--exito grupo-ancho-completo" role="status">
+                            <span className="material-symbols-outlined reg-alerta__icono">check_circle</span>
+                            <div className="reg-alerta__cuerpo">
+                                <strong className="reg-alerta__titulo">¡Cuenta creada!</strong>
+                                <span className="reg-alerta__mensaje">Redirigiendo al inicio de sesión…</span>
+                            </div>
+                        </div>
+                    )}
 
                     <div className="grupo-campo grupo-ancho-completo grupo-boton">
                         <button
