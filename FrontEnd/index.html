@@ -1,12 +1,97 @@
 <!doctype html>
-<html lang="es">
+<html lang="es" dir="ltr" prefix="og: https://ogp.me/ns#">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <meta name="theme-color" content="#0d0f0d" />
-    <meta name="description" content="ROMP GPS — Rastreo satelital de precisión para flotas y activos de alto valor." />
 
+    <!-- ── Título y Meta Primarios para Motores de Búsqueda ── -->
+    <title>ROMP GPS | Rastreo Satelital en Tiempo Real y Control de Flotas</title>
+    <meta
+      name="title"
+      content="ROMP GPS | Rastreo Satelital en Tiempo Real y Control de Flotas" />
+    <meta
+      name="description"
+      content="Plataforma de rastreo satelital GPS 4G en tiempo real, apagado remoto de motor, sensores inerciales y telemetría de precisión para flotas y vehículos en Colombia." />
+    <meta
+      name="keywords"
+      content="rastreo gps colombia, rastreo satelital tiempo real, gps gt06, telemetria vehicular, control de flotas, apagado de motor remoto, romp gps, plataforma gps 4g, gnxis gps, seguridad vehicular colombia" />
+    <meta name="author" content="ROMP GPS" />
+    <meta name="publisher" content="ROMP GPS" />
+    <meta name="application-name" content="ROMP GPS" />
+    <meta name="theme-color" content="#0d0f0d" />
+    <meta name="format-detection" content="telephone=no" />
+
+    <!-- ── Directivas de Indexación para Robots (Googlebot, Bingbot) ── -->
+    <meta
+      name="robots"
+      content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+    <meta
+      name="googlebot"
+      content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
+    <meta
+      name="bingbot"
+      content="index, follow, max-snippet:-1, max-image-preview:large" />
+
+    <!-- ── URL Canónica Oficial ── -->
+    <link rel="canonical" href="https://rompgps.com/" />
+
+    <!-- ── Geo-etiquetas para SEO Local (Colombia) ── -->
+    <meta name="geo.region" content="CO" />
+    <meta name="geo.placename" content="Colombia" />
+    <meta name="geo.position" content="10.4285;-75.5512" />
+    <meta name="ICBM" content="10.4285, -75.5512" />
+
+    <!-- ── Favicons y Touch Icons (Optimizados para Google SERP y Móviles) ── -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/png" sizes="48x48" href="/favicon-48x48.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+    <link rel="shortcut icon" href="/favicon.ico" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+
+    <!-- ── iOS Web App Capabilities ── -->
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="ROMP GPS" />
+
+    <!-- ── Open Graph / Facebook / WhatsApp / LinkedIn / Discord ── -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="ROMP GPS" />
+    <meta property="og:url" content="https://rompgps.com/" />
+    <meta
+      property="og:title"
+      content="ROMP GPS | Rastreo Satelital en Tiempo Real y Control de Flotas" />
+    <meta
+      property="og:description"
+      content="Rastreo satelital GPS 4G con telemetría de grado industrial, apagado de motor remoto, modelo 3D GNXIS y monitoreo en vivo sin latencia." />
+    <meta property="og:image" content="https://rompgps.com/og-image.png" />
+    <meta property="og:image:secure_url" content="https://rompgps.com/og-image.png" />
+    <meta property="og:image:type" content="image/png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta
+      property="og:image:alt"
+      content="ROMP GPS - Ecosistema de Rastreo Satelital y Telemetría Vehicular" />
+    <meta property="og:locale" content="es_CO" />
+    <meta property="og:locale:alternate" content="es_ES" />
+
+    <!-- ── Twitter Cards (X) ── -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:site" content="@rompgps" />
+    <meta name="twitter:creator" content="@rompgps" />
+    <meta
+      name="twitter:title"
+      content="ROMP GPS | Rastreo Satelital en Tiempo Real y Control de Flotas" />
+    <meta
+      name="twitter:description"
+      content="Rastreo satelital GPS 4G con telemetría de grado industrial, apagado de motor remoto y monitoreo en vivo sin latencia." />
+    <meta name="twitter:image" content="https://rompgps.com/og-image.png" />
+    <meta
+      name="twitter:image:alt"
+      content="ROMP GPS - Telemetría y Rastreo Satelital de Precisión" />
+
+    <!-- ── Fuentes y Estilos Críticos ── -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -16,10 +101,180 @@
       href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
       rel="stylesheet" />
 
-    <title>ROMP GPS</title>
+    <!-- ── Datos Estructurados JSON-LD (Schema.org) para Google Rich Snippets ── -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "WebSite",
+          "@id": "https://rompgps.com/#website",
+          "url": "https://rompgps.com/",
+          "name": "ROMP GPS",
+          "alternateName": ["RompGPS", "ROMP Telemetría"],
+          "description": "Plataforma de telemetría y rastreo satelital vehicular en tiempo real con protocolo GT06.",
+          "inLanguage": "es-CO",
+          "publisher": {
+            "@id": "https://rompgps.com/#organization"
+          }
+        },
+        {
+          "@type": "Organization",
+          "@id": "https://rompgps.com/#organization",
+          "name": "ROMP GPS",
+          "url": "https://rompgps.com/",
+          "logo": {
+            "@type": "ImageObject",
+            "url": "https://rompgps.com/android-chrome-512x512.png",
+            "width": "512",
+            "height": "512",
+            "caption": "ROMP GPS Logo"
+          },
+          "image": "https://rompgps.com/og-image.png",
+          "email": "soporte@rompgps.com",
+          "telephone": "+57-313-365-7311",
+          "address": {
+            "@type": "PostalAddress",
+            "addressCountry": "CO",
+            "addressRegion": "Bolívar",
+            "addressLocality": "Cartagena"
+          },
+          "contactPoint": [
+            {
+              "@type": "ContactPoint",
+              "telephone": "+57-313-365-7311",
+              "contactType": "customer service",
+              "contactOption": "TollFree",
+              "areaServed": "CO",
+              "availableLanguage": ["Spanish", "English"]
+            }
+          ]
+        },
+        {
+          "@type": "SoftwareApplication",
+          "@id": "https://rompgps.com/#software",
+          "name": "ROMP GPS Plataforma & GNXIS Control",
+          "applicationCategory": "BusinessApplication, VehicleTrackingSystem",
+          "operatingSystem": "Web, iOS, Android",
+          "offers": {
+            "@type": "AggregateOffer",
+            "priceCurrency": "COP",
+            "lowPrice": "229000",
+            "highPrice": "339000",
+            "offerCount": "3",
+            "offers": [
+              {
+                "@type": "Offer",
+                "name": "Plan Básico",
+                "price": "229000",
+                "priceCurrency": "COP",
+                "description": "Equipo GPS 4G, ubicación en tiempo real, apagado remoto de motor y sistema anti jammer.",
+                "availability": "https://schema.org/InStock",
+                "url": "https://rompgps.com/#pricing"
+              },
+              {
+                "@type": "Offer",
+                "name": "Plan Garantía",
+                "price": "289000",
+                "priceCurrency": "COP",
+                "description": "Garantía extendida por 2 años, equipo GPS 4G y todo lo incluido en el Plan Básico.",
+                "availability": "https://schema.org/InStock",
+                "url": "https://rompgps.com/#pricing"
+              },
+              {
+                "@type": "Offer",
+                "name": "Plan Premium",
+                "price": "339000",
+                "priceCurrency": "COP",
+                "description": "Rastreador de respaldo inalámbrico, doble protección total y todo lo del Plan Garantía.",
+                "availability": "https://schema.org/InStock",
+                "url": "https://rompgps.com/#pricing"
+              }
+            ]
+          },
+          "aggregateRating": {
+            "@type": "AggregateRating",
+            "ratingValue": "4.9",
+            "ratingCount": "127",
+            "bestRating": "5",
+            "worstRating": "1"
+          }
+        },
+        {
+          "@type": "FAQPage",
+          "@id": "https://rompgps.com/#faq",
+          "mainEntity": [
+            {
+              "@type": "Question",
+              "name": "¿Qué es ROMP GPS y cómo funciona el rastreo satelital en tiempo real?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "ROMP GPS es un ecosistema telemático de alta precisión que conecta dispositivos GPS físicos con protocolo GT06 a través de un servidor Netty TCP de alto rendimiento. Las coordenadas se decodifican en milisegundos y se transmiten instantáneamente al panel web mediante WebSockets STOMP, permitiendo visualizar ubicación, velocidad y rumbo en vivo sin recargar la página."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "¿Cómo funciona el apagado remoto de motor y la protección anti-jammer?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "A través del panel web de ROMP GPS, el usuario puede enviar un comando inmediato y seguro para cortar la corriente o combustible de su vehículo ante cualquier sospecha de robo. Además, los dispositivos 4G incorporan sensores inerciales y detección de interferencias (anti-jammer) con alertas en tiempo real."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "¿Cuáles son los planes y precios de ROMP GPS?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Ofrecemos tres planes en pesos colombianos (COP): Plan Básico ($229.000 COP) con equipo GPS 4G y apagado de motor; Plan Garantía ($289.000 COP) con 2 años de garantía total; y Plan Premium ($339.000 COP) que incluye un segundo rastreador inalámbrico de respaldo independiente."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "¿Puedo monitorear flotas de empresas o solo vehículos particulares?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "ROMP GPS está diseñado tanto para vehículos particulares (motos, automóviles familiares) como para flotas corporativas completas, ofreciendo panel administrativo multi-usuario, roles de acceso, historial de rutas y estimación de mantenimientos predictivos."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "¿En qué ciudades de Colombia opera ROMP GPS?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "ROMP GPS opera con cobertura total en Colombia sobre redes celulares 4G LTE y constelaciones satelitales multibanda, disponible en Bogotá, Medellín, Cali, Barranquilla, Cartagena, Bucaramanga y en todas las carreteras del país."
+              }
+            }
+          ]
+        },
+        {
+          "@type": "SiteNavigationElement",
+          "@id": "https://rompgps.com/#navigation",
+          "name": [
+            "Nosotros",
+            "Producto",
+            "Pricing",
+            "Equipo",
+            "Área de Clientes",
+            "Registro"
+          ],
+          "url": [
+            "https://rompgps.com/#nosotros",
+            "https://rompgps.com/#producto",
+            "https://rompgps.com/#pricing",
+            "https://rompgps.com/#equipo",
+            "https://rompgps.com/login",
+            "https://rompgps.com/registro"
+          ]
+        }
+      ]
+    }
+    </script>
   </head>
   <body>
+    <!-- Contenedor de la Aplicación React -->
     <div id="root"></div>
+
+    <!-- Script de Entrada de la Aplicación -->
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>

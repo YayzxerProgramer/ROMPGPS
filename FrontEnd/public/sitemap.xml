@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:xhtml="http://www.w3.org/1999/xhtml"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
+
+  <!-- Página de Inicio / Landing Principal -->
+  <url>
+    <loc>https://rompgps.com/</loc>
+    <lastmod>2026-11-17</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>1.0</priority>
+    <image:image>
+      <image:loc>https://rompgps.com/og-image.png</image:loc>
+      <image:title>ROMP GPS - Ecosistema de Rastreo Satelital y Telemetría</image:title>
+      <image:caption>Plataforma de alta precisión con streaming de datos en vivo y decodificación GT06.</image:caption>
+    </image:image>
+    <image:image>
+      <image:loc>https://rompgps.com/models/previews/gps-device.webp</image:loc>
+      <image:title>Dispositivo GPS GNXIS 4G</image:title>
+      <image:caption>Unidad de control GNXIS con sensores inerciales y conectividad multibanda.</image:caption>
+    </image:image>
+  </url>
+
+  <!-- Planes y Pasarela de Pago -->
+  <url>
+    <loc>https://rompgps.com/pago</loc>
+    <lastmod>2026-11-17</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+  </url>
+
+  <!-- Portal de Acceso / Login de Clientes -->
+  <url>
+    <loc>https://rompgps.com/login</loc>
+    <lastmod>2026-11-17</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.80</priority>
+  </url>
+
+  <!-- Registro de Nuevos Clientes -->
+  <url>
+    <loc>https://rompgps.com/registro</loc>
+    <lastmod>2026-11-17</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.80</priority>
+  </url>
+
+  <!-- Documentación Legal y Términos -->
+  <url>
+    <loc>https://rompgps.com/terminos</loc>
+    <lastmod>2026-11-17</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.50</priority>
+  </url>
+
+  <!-- Política de Privacidad y Tratamiento de Datos -->
+  <url>
+    <loc>https://rompgps.com/privacidad</loc>
+    <lastmod>2026-11-17</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.50</priority>
+  </url>
+
+</urlset>

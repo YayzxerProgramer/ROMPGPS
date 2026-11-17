@@ -1,0 +1,47 @@
+# ==============================================================================
+# ROMP GPS — robots.txt
+# Ecosistema de Rastreo Satelital y Telemetría Vehicular
+# https://rompgps.com
+# ==============================================================================
+
+User-agent: *
+Allow: /
+Allow: /pago
+Allow: /privacidad
+Allow: /terminos
+Allow: /login
+Allow: /registro
+Allow: /models/
+Allow: /docs/
+Allow: /assets/
+Allow: /favicon*
+Allow: /og-image.png
+Allow: /site.webmanifest
+
+# Bloqueo estricto de rutas privadas, autenticación y paneles protegidos
+Disallow: /admin
+Disallow: /admin/*
+Disallow: /panel-control
+Disallow: /panel-control/*
+Disallow: /configuracion
+Disallow: /configuracion/*
+Disallow: /cambiar-contrasena
+Disallow: /recuperar-contrasena
+Disallow: /auth/callback
+
+# Googlebot y Bingbot específicos
+User-agent: Googlebot
+Allow: /
+
+User-agent: Googlebot-Image
+Allow: /
+Allow: /og-image.png
+Allow: /models/previews/
+Allow: /favicon*
+
+User-agent: Bingbot
+Allow: /
+
+# Sitemap oficial
+Sitemap: https://rompgps.com/sitemap.xml
+Host: https://rompgps.com

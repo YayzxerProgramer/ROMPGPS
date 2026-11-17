@@ -1,0 +1,6 @@
+# ROMP GPS Security Policy
+Contact: mailto:soporte@rompgps.com
+Expires: 2027-12-31T23:59:59.000Z
+Preferred-Languages: es, en
+Canonical: https://rompgps.com/.well-known/security.txt
+Policy: https://rompgps.com/privacidad
