@@ -522,6 +522,10 @@ input {
     color: var(--color-primario);
 }
 
+.tarjeta-vehiculo__boton-accion--eliminar:hover {
+    color: var(--color-error-dim, #ba573f) !important;
+}
+
 .tarjeta-vehiculo__boton-accion .material-symbols-outlined {
     font-size: 1.25rem;
 }

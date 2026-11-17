@@ -2,6 +2,9 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { GoogleMap, useJsApiLoader } from "@react-google-maps/api";
 import { ESTILO_MAPA } from "../mapaUtils";
 import { ESTADOS, haceCuanto } from "./adminUtils";
+import { post } from "../../Service/api";
+import { Confirmar } from "./AdminUI";
+import { useAvisar } from "./avisos";
 
 // Mismas opciones de carga que Mapa.jsx: el cargador de Google Maps falla si se
 // invoca dos veces con opciones distintas.
@@ -89,7 +92,8 @@ function crearMarcadorFlota(google, mapa, posicion, onClick) {
   return marcador;
 }
 
-export default function MapaFlota({ flota, conteo, seleccion, onElegir, ahora, titulo = "Cartagena · en tiempo real", grande = false }) {
+export default function MapaFlota({ flota, conteo, seleccion, onElegir, ahora, titulo = "Cartagena · en tiempo real", grande = false, onMotorCambiado }) {
+  const avisar = useAvisar();
   const esClaveValida = GOOGLE_MAPS_API_KEY && GOOGLE_MAPS_API_KEY.startsWith("AIzaSy");
   const { isLoaded, loadError } = useJsApiLoader({
     id: "google-map-script",
@@ -100,8 +104,34 @@ export default function MapaFlota({ flota, conteo, seleccion, onElegir, ahora, t
   const [mapa, setMapa] = useState(null);
   const marcadoresRef = useRef({});
   const encuadradoRef = useRef(false);
+  const [dialogoMotor, setDialogoMotor] = useState(null); // null | "corte" | "restablecer"
+  const [enviandoComando, setEnviandoComando] = useState(false);
+
+  const [corteManual, setCorteManual] = useState(() => {
+    try {
+      const guardado = localStorage.getItem("gps_corte_manual");
+      return guardado ? JSON.parse(guardado) : {};
+    } catch {
+      return {};
+    }
+  });
+
+  const actualizarCorteManual = useCallback((targetImei, nuevoEstado) => {
+    setCorteManual((prev) => {
+      const nuevo = { ...prev, [targetImei]: nuevoEstado };
+      try {
+        localStorage.setItem("gps_corte_manual", JSON.stringify(nuevo));
+      } catch (err) {
+        console.error("Error guardando corte manual en localStorage:", err);
+      }
+      return nuevo;
+    });
+  }, []);
 
   const seleccionado = flota.find((v) => v.id === seleccion) || null;
+  const inmovilizado = seleccionado?.imei && corteManual[seleccionado.imei] !== undefined
+    ? Boolean(corteManual[seleccionado.imei])
+    : Boolean(seleccionado?.pos?.corteMotor || seleccionado?.ultimaPosicion?.corteMotor);
 
   const encuadrarFlota = useCallback(() => {
     if (!mapa || !window.google) return;
@@ -227,6 +257,36 @@ export default function MapaFlota({ flota, conteo, seleccion, onElegir, ahora, t
             <span>{seleccionado.pos ? `${seleccionado.pos.lat.toFixed(5)}, ${seleccionado.pos.lng.toFixed(5)}` : "—"}</span>
             <span>{seleccionado.pos ? haceCuanto(seleccionado.pos.fecha, ahora) : "sin reportes"}</span>
           </div>
+
+          {seleccionado.imei ? (
+            <div className="adm-ficha-motor">
+              <div className="adm-ficha-motor-cab">
+                <span className="adm-etiqueta">ESTADO MOTOR</span>
+                <span className={`adm-ficha-motor-tag ${inmovilizado ? "adm-ficha-motor-tag--cortado" : "adm-ficha-motor-tag--activo"}`}>
+                  <span className={`adm-chip-punto ${inmovilizado ? "adm-chip-punto--detenido" : "adm-chip-punto--marcha"}`} />
+                  {inmovilizado ? "INMOVILIZADO" : seleccionado.pos?.acc ? "IGNICIÓN ON" : "OPERATIVO"}
+                </span>
+              </div>
+              <button
+                type="button"
+                className={`adm-btn-motor ${inmovilizado ? "adm-btn-motor--restablecer" : "adm-btn-motor--apagar"}`}
+                onClick={() => setDialogoMotor(inmovilizado ? "restablecer" : "corte")}
+                disabled={enviandoComando}
+                title={inmovilizado ? "Rehabilitar encendido del motor" : "Enviar orden de corte de motor"}
+              >
+                <span className="material-symbols-outlined">
+                  {inmovilizado ? "restart_alt" : "power_settings_new"}
+                </span>
+                {inmovilizado ? "Restablecer motor" : "Apagar motor"}
+              </button>
+            </div>
+          ) : (
+            <div className="adm-ficha-sin-gps">
+              <span className="material-symbols-outlined">satellite_alt</span>
+              <span>Sin GPS asignado · Comandos inactivos</span>
+            </div>
+          )}
+
           {seleccionado.pos && (
             <a
               className="adm-enlace"
@@ -238,6 +298,46 @@ export default function MapaFlota({ flota, conteo, seleccion, onElegir, ahora, t
             </a>
           )}
         </div>
+      )}
+
+      {dialogoMotor && seleccionado && (
+        <Confirmar
+          titulo={dialogoMotor === "corte" ? `¿Apagar motor de ${seleccionado.placa}?` : `¿Restablecer motor de ${seleccionado.placa}?`}
+          peligro={dialogoMotor === "corte"}
+          icono={dialogoMotor === "corte" ? "power_settings_new" : "restart_alt"}
+          textoConfirmar={dialogoMotor === "corte" ? "Apagar motor" : "Restablecer motor"}
+          mensaje={
+            dialogoMotor === "corte"
+              ? `¿Confirmas enviar la orden de apagado de motor para ${seleccionado.placa} (${seleccionado.modelo})? Se enviará un comando SMS (RELAY,1#) al GPS GT06 para inmovilizar la unidad de inmediato.`
+              : `Se enviará la orden SMS (RELAY,0#) al GPS GT06 para rehabilitar el encendido del motor de ${seleccionado.placa}.`
+          }
+          onConfirmar={async () => {
+            setEnviandoComando(true);
+            const accion = dialogoMotor;
+            try {
+              await post("/gps/comando-sms", {
+                imei: seleccionado.imei,
+                comando: accion === "corte" ? "CORTE_MOTOR" : "RESTAURAR_MOTOR",
+              });
+              const nuevoCorte = accion === "corte";
+              actualizarCorteManual(seleccionado.imei, nuevoCorte);
+              if (onMotorCambiado) {
+                onMotorCambiado(seleccionado.imei, nuevoCorte);
+              }
+              avisar(
+                nuevoCorte
+                  ? `Comando enviado: Motor de ${seleccionado.placa} apagado.`
+                  : `Comando enviado: Motor de ${seleccionado.placa} restablecido.`
+              );
+              setDialogoMotor(null);
+            } catch (err) {
+              avisar(err.message || "Error al enviar el comando SMS al vehículo", "error");
+            } finally {
+              setEnviandoComando(false);
+            }
+          }}
+          onCerrar={() => setDialogoMotor(null)}
+        />
       )}
 
       <div className="adm-zoom">

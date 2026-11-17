@@ -248,6 +248,29 @@ function PanelAdmin() {
     }
   };
 
+  const manejarMotorCambiado = useCallback((imei, nuevoCorte) => {
+    setPosiciones((prev) => {
+      const actual = prev[imei] || {};
+      return {
+        ...prev,
+        [imei]: {
+          ...actual,
+          corteMotor: nuevoCorte,
+          acc: nuevoCorte ? false : actual.acc,
+        },
+      };
+    });
+    setVehiculos((prev) => prev.map((v) => {
+      if (v.imei === imei) {
+        return {
+          ...v,
+          ultimaPosicion: v.ultimaPosicion ? { ...v.ultimaPosicion, corteMotor: nuevoCorte } : null,
+        };
+      }
+      return v;
+    }));
+  }, []);
+
   const exportarCsv = () => {
     const cabecera = "imei,placa,modelo,tipo,activo,propietario,creadoEn";
     const filas = flota.map((v) =>
@@ -463,7 +486,7 @@ function PanelAdmin() {
                 </div>
 
                 <div className="adm-fila">
-                  <MapaFlota flota={flota} conteo={conteo} seleccion={seleccion} onElegir={elegir} ahora={ahora} />
+                  <MapaFlota flota={flota} conteo={conteo} seleccion={seleccion} onElegir={elegir} ahora={ahora} onMotorCambiado={manejarMotorCambiado} />
 
                   <div className="adm-columna">
                     <div className="adm-tarjeta">
@@ -546,7 +569,7 @@ function PanelAdmin() {
                   </button>
                 </div>
                 <div className="adm-monitor">
-                  <MapaFlota flota={flota} conteo={conteo} seleccion={seleccion} onElegir={elegir} ahora={ahora} grande />
+                  <MapaFlota flota={flota} conteo={conteo} seleccion={seleccion} onElegir={elegir} ahora={ahora} grande onMotorCambiado={manejarMotorCambiado} />
                   <div className="adm-tarjeta adm-monitor-lista">
                     <Segmentos opciones={FILTRO_MONITOR} valor={filtroMonitor} onCambiar={setFiltroMonitor} pequeno />
                     <div className="adm-monitor-scroll">

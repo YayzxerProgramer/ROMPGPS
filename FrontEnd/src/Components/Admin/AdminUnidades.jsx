@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { del, get, patch } from "../../Service/api";
+import { del, get, patch, post } from "../../Service/api";
 import { Confirmar, InsigniaEstado, Modal, Paginacion, Segmentos, Vacio } from "./AdminUI";
 import { useAvisar } from "./avisos";
 import { FormVehiculo, FormVincular } from "./AdminFormularios";
@@ -170,6 +170,17 @@ export default function AdminUnidades({ busqueda, dialogoInicial, onDialogoAbier
                         <span className="material-symbols-outlined">my_location</span>
                       </button>
                     )}
+                    {v.imei && (
+                      <button
+                        className={`adm-accion ${v.ultimaPosicion?.corteMotor ? "adm-accion--peligro" : ""}`}
+                        title={v.ultimaPosicion?.corteMotor ? "Restablecer motor" : "Apagar motor"}
+                        onClick={() => setDialogo({ tipo: "motor", vehiculo: v, inmovilizado: Boolean(v.ultimaPosicion?.corteMotor) })}
+                      >
+                        <span className="material-symbols-outlined">
+                          {v.ultimaPosicion?.corteMotor ? "restart_alt" : "power_settings_new"}
+                        </span>
+                      </button>
+                    )}
                     <MantenimientoVehiculo idVehiculo={v.id} etiqueta={`${v.modelo} · ${v.placa}`} variante="icono" claseBoton="adm-accion" onVehiculoActualizado={cargar} />
                     <button className="adm-accion" title="Vincular propietario" onClick={() => setDialogo({ tipo: "vincular", vehiculo: v, propietario: duenno })}>
                       <span className="material-symbols-outlined">link</span>
@@ -203,6 +214,27 @@ export default function AdminUnidades({ busqueda, dialogoInicial, onDialogoAbier
           : <ElegirVehiculo onCerrar={() => setDialogo(null)} onElegir={(v) => {
               setDialogo({ tipo: "vincular", vehiculo: v, propietario: v.propietario });
             }} />
+      )}
+      {dialogo?.tipo === "motor" && (
+        <Confirmar
+          titulo={dialogo.inmovilizado ? `¿Restablecer motor de ${dialogo.vehiculo.placa}?` : `¿Apagar motor de ${dialogo.vehiculo.placa}?`}
+          peligro={!dialogo.inmovilizado}
+          icono={dialogo.inmovilizado ? "restart_alt" : "power_settings_new"}
+          textoConfirmar={dialogo.inmovilizado ? "Restablecer motor" : "Apagar motor"}
+          mensaje={
+            dialogo.inmovilizado
+              ? `Se enviará un comando SMS (RELAY,0#) al equipo GPS (${dialogo.vehiculo.imei}) para restablecer el motor de ${dialogo.vehiculo.placa}.`
+              : `¿Confirmas apagar el motor de ${dialogo.vehiculo.placa} (${dialogo.vehiculo.modelo})? Se enviará la orden de corte inmediato de combustible/corriente (RELAY,1#) mediante SMS al GPS GT06.`
+          }
+          onConfirmar={async () => {
+            await post("/gps/comando-sms", {
+              imei: dialogo.vehiculo.imei,
+              comando: dialogo.inmovilizado ? "RESTAURAR_MOTOR" : "CORTE_MOTOR",
+            });
+            tras(null, dialogo.inmovilizado ? `Motor de ${dialogo.vehiculo.placa} restablecido` : `Motor de ${dialogo.vehiculo.placa} apagado`);
+          }}
+          onCerrar={() => setDialogo(null)}
+        />
       )}
       {dialogo?.tipo === "eliminar" && (
         <Confirmar

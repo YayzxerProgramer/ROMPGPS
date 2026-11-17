@@ -1061,6 +1061,110 @@ body {
     gap: 6px;
 }
 
+/* Control y estado de motor en la ficha de unidad seleccionada */
+.adm-ficha-motor {
+    margin-top: 12px;
+    padding-top: 10px;
+    border-top: 1px solid rgba(178, 206, 168, .12);
+}
+
+.adm-ficha-motor-cab {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.adm-ficha-motor-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: 6px;
+    letter-spacing: .05em;
+}
+
+.adm-ficha-motor-tag--activo {
+    background: rgba(178, 206, 168, .12);
+    color: #b2cea8;
+    border: 1px solid rgba(178, 206, 168, .25);
+}
+
+.adm-ficha-motor-tag--cortado {
+    background: rgba(198, 40, 40, .2);
+    color: #ff6b6b;
+    border: 1px solid rgba(198, 40, 40, .35);
+}
+
+.adm-btn-motor {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 9px 12px;
+    border-radius: 10px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all .2s ease;
+    border: none;
+    font-family: var(--adm-titular, sans-serif);
+}
+
+.adm-btn-motor--apagar {
+    background: rgba(186, 87, 63, .2);
+    color: #fca5a5;
+    border: 1px solid rgba(220, 38, 38, .4);
+}
+
+.adm-btn-motor--apagar:hover:not(:disabled) {
+    background: rgba(220, 38, 38, .85);
+    color: #ffffff;
+    box-shadow: 0 4px 14px rgba(220, 38, 38, .35);
+}
+
+.adm-btn-motor--restablecer {
+    background: rgba(53, 77, 47, .4);
+    color: #b2cea8;
+    border: 1px solid rgba(178, 206, 168, .35);
+}
+
+.adm-btn-motor--restablecer:hover:not(:disabled) {
+    background: #b2cea8;
+    color: #111411;
+    box-shadow: 0 4px 14px rgba(178, 206, 168, .3);
+}
+
+.adm-btn-motor:disabled {
+    opacity: .6;
+    cursor: not-allowed;
+}
+
+.adm-ficha-sin-gps {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 10px;
+    font-size: 11px;
+    color: var(--adm-texto-2);
+    padding: 6px 8px;
+    border-radius: 8px;
+    background: rgba(15, 18, 14, .5);
+}
+
+.adm-ficha-sin-gps .material-symbols-outlined {
+    font-size: 16px;
+    opacity: .7;
+}
+
+.adm-chip-punto--corte {
+    background: #ff5252;
+    box-shadow: 0 0 8px rgba(255, 82, 82, .6);
+}
+
 .adm-zoom {
     position: absolute;
     right: 14px;
