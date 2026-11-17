@@ -4,7 +4,7 @@ import luchoimg from "../Image/Luis.jpeg"
 import yanniorimg from "../Image/Yannior.jpeg"
 import jaimeimg from "../Image/Chang.jpeg"
 import holmertimg from "../Image/Holmert.jpg"
-import santiagoimg from "../Image/Santiago.jpeg"
+import santiagoimg from "../Image/santiago.png"
 
 const miembros = [
     {
@@ -28,7 +28,7 @@ const miembros = [
         imagen: jaimeimg
     },
     {
-        nombre: "Santiago",
+        nombre: "Santiago Marimon",
         cargo: "Admin de Bases de Datos",
         imagen: santiagoimg
     }

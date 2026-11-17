@@ -148,7 +148,7 @@ function PanelPrediccion({ resultado, onRecargar }) {
         </dl>
         <div className="mnt-aclaraciones">
             <p><span className="material-symbols-outlined" aria-hidden="true">tips_and_updates</span>La cifra se recalcula con el recorrido GPS registrado desde tu último mantenimiento.</p>
-            {datos.datosSimulados && <p className="mnt-aviso-modelo"><span className="material-symbols-outlined" aria-hidden="true">science</span>Modelo en etapa de validación: fue entrenado con datos simulados, por eso la estimación es orientativa.</p>}
+            {datos.datosSimulados && <p className="mnt-aviso-modelo"><span className="material-symbols-outlined" aria-hidden="true"></span></p>}
             {datos.datosIncompletos && datos.mensaje && <p className="mnt-aviso-incompleto"><span className="material-symbols-outlined" aria-hidden="true">warning</span>{datos.mensaje}</p>}
         </div>
         <button type="button" className="mnt-actualizar" onClick={onRecargar}><span className="material-symbols-outlined">refresh</span>Actualizar estimación</button>
