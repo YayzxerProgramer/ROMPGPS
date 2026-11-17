@@ -425,15 +425,15 @@ export default function PanelControl() {
                                             <div className="pc-metrica-valor pc-metrica-valor-chico">{velocidad}<small> km/h</small></div>
                                         </div>
                                         <div className="pc-metrica">
-                                            <div className="pc-metrica-etiqueta">Motor (ACC)</div>
+                                            <div className="pc-metrica-etiqueta">Motor</div>
                                             <div className={`pc-metrica-texto ${motorEncendido ? "pc-texto-acento" : "pc-texto-peligro"}`}>
                                                 {motorEncendido ? "Encendido" : "Apagado"}
                                             </div>
                                         </div>
                                         <div className="pc-metrica">
-                                            <div className="pc-metrica-etiqueta">Relé</div>
+                                            <div className="pc-metrica-etiqueta">Motor</div>
                                             <div className={`pc-metrica-texto ${inmovilizado ? "pc-texto-peligro" : "pc-texto-acento"}`}>
-                                                {inmovilizado ? "Cortado" : "Normal"}
+                                                {inmovilizado ? "Cortado" : "Activo"}
                                             </div>
                                         </div>
                                     </div>
