@@ -63,7 +63,7 @@ function Pricing() {
         const periodo = facturacionAnual ? "anual" : "mensual";
         const mensaje = `Hola, necesito información y asesoría sobre el ${plan.nombre} de ROMP GPS. Me interesa la modalidad ${periodo}. ¿Me pueden ayudar?`;
         window.open(
-            `https://wa.me/17814123921?text=${encodeURIComponent(mensaje)}`,
+            `https://wa.me/573133657311?text=${encodeURIComponent(mensaje)}`,
             "_blank",
             "noopener,noreferrer"
         );
