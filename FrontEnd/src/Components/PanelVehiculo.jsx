@@ -1,9 +1,9 @@
 import { useState, useEffect, useRef } from "react";
 import "../Styles/PanelVehiculo.css";
-import { del, get, post } from "../Service/api";
+import { del, get, post, put } from "../Service/api";
 import MantenimientoVehiculo from "./Mantenimiento/MantenimientoVehiculo";
 
-function TarjetaVehiculo({ vehiculo, onDelete, onActualizado }) {
+function TarjetaVehiculo({ vehiculo, onDelete, onEdit, onActualizado }) {
     return (
         <article className="tarjeta-vehiculo-configuracion" role="row">
             <div className="tarjeta-vehiculo__celda-imagen tarjeta-vehiculo__imagen-envoltorio">
@@ -60,7 +60,22 @@ function TarjetaVehiculo({ vehiculo, onDelete, onActualizado }) {
                 </div>
             </div>
             <div className="tarjeta-vehiculo__celda-acciones tarjeta-vehiculo__acciones">
-                <button className="tarjeta-vehiculo__boton-accion" type="button" aria-label="Eliminar vehículo" onClick={() => onDelete(vehiculo.id)}>
+                <button
+                    className="tarjeta-vehiculo__boton-accion"
+                    type="button"
+                    aria-label="Editar vehículo"
+                    title="Editar vehículo"
+                    onClick={() => onEdit(vehiculo)}
+                >
+                    <span className="material-symbols-outlined">edit</span>
+                </button>
+                <button
+                    className="tarjeta-vehiculo__boton-accion tarjeta-vehiculo__boton-accion--eliminar"
+                    type="button"
+                    aria-label="Eliminar vehículo"
+                    title="Eliminar vehículo"
+                    onClick={() => onDelete(vehiculo)}
+                >
                     <span className="material-symbols-outlined">delete</span>
                 </button>
             </div>
@@ -285,12 +300,253 @@ function ModalRegistro({ visible, onCerrar, onRegistrado, usuarioId }) {
     );
 }
 
+function ModalEditarVehiculo({ vehiculo, visible, onCerrar, onActualizado }) {
+    const [formulario, setFormulario] = useState({
+        modelo: "",
+        placa: "",
+        tipo: "MOTO",
+        activo: true,
+        fechaVencimientoSoat: "",
+        fechaVencimientoTecnomecanica: "",
+    });
+    const [errores, setErrores] = useState({});
+    const [error, setError] = useState("");
+    const [cargando, setCargando] = useState(false);
+
+    useEffect(() => {
+        const manejarTeclado = (e) => { if (e.key === "Escape" && visible) onCerrar(); };
+        document.addEventListener("keydown", manejarTeclado);
+        return () => document.removeEventListener("keydown", manejarTeclado);
+    }, [visible, onCerrar]);
+
+    useEffect(() => {
+        document.body.style.overflow = visible ? "hidden" : "";
+        return () => { document.body.style.overflow = ""; };
+    }, [visible]);
+
+    useEffect(() => {
+        if (!visible || !vehiculo) return;
+        setFormulario({
+            modelo: vehiculo.modelo || "",
+            placa: vehiculo.placa || "",
+            tipo: vehiculo.tipo || "MOTO",
+            activo: vehiculo.activo ?? true,
+            fechaVencimientoSoat: vehiculo.fechaVencimientoSoat || "",
+            fechaVencimientoTecnomecanica: vehiculo.fechaVencimientoTecnomecanica || "",
+        });
+        setErrores({});
+        setError("");
+    }, [visible, vehiculo]);
+
+    const manejarCambio = (e) => {
+        const { name, value, type, checked } = e.target;
+        setFormulario((prev) => ({
+            ...prev,
+            [name]: name === "placa" ? value.toUpperCase() : type === "checkbox" ? checked : value,
+        }));
+        setErrores((prev) => ({ ...prev, [name]: undefined }));
+    };
+
+    const validar = () => {
+        const encontrados = {};
+        if (!formulario.modelo.trim()) encontrados.modelo = "El modelo es obligatorio.";
+        const placa = formulario.placa.trim();
+        if (!placa) encontrados.placa = "La placa es obligatoria.";
+        else if (!PLACA_VALIDA.test(placa)) encontrados.placa = "La placa debe tener 5 o 6 letras, números o guion.";
+        return encontrados;
+    };
+
+    const manejarGuardar = async (e) => {
+        e.preventDefault();
+        setError("");
+
+        const encontrados = validar();
+        setErrores(encontrados);
+        if (Object.keys(encontrados).length) return;
+
+        setCargando(true);
+        try {
+            await put(`/vehiculo/${vehiculo.id}`, {
+                modelo: formulario.modelo.trim(),
+                placa: formulario.placa.trim().toUpperCase(),
+                tipo: formulario.tipo,
+                activo: formulario.activo,
+                fechaVencimientoSoat: formulario.fechaVencimientoSoat || null,
+                fechaVencimientoTecnomecanica: formulario.fechaVencimientoTecnomecanica || null,
+            });
+            onActualizado();
+            onCerrar();
+        } catch (err) {
+            if (err.campos) setErrores(err.campos);
+            setError(
+                err.campos ? "Revisa los campos marcados."
+                    : err instanceof TypeError ? "No pudimos conectar con el servidor. Revisa tu conexión."
+                        : err.message || "No se pudo actualizar el vehículo."
+            );
+        } finally {
+            setCargando(false);
+        }
+    };
+
+    if (!visible || !vehiculo) return null;
+
+    return (
+        <div className="modal-fondo modal-fondo--visible" role="dialog" aria-modal="true"
+            aria-labelledby="modal-editar-titulo"
+            onClick={(e) => { if (e.target === e.currentTarget) onCerrar(); }}>
+            <div className="modal-contenido">
+                <div className="modal-cabecera">
+                    <div>
+                        <h2 className="modal-titulo" id="modal-editar-titulo">Editar vehículo</h2>
+                        <p className="modal-subtitulo">Modifica la información de tu unidad.</p>
+                    </div>
+                    <button className="modal-boton-cerrar" type="button" onClick={onCerrar} aria-label="Cerrar">
+                        <span className="material-symbols-outlined">close</span>
+                    </button>
+                </div>
+
+                <form className="formulario" onSubmit={manejarGuardar} noValidate>
+                    <div className="formulario__grupo">
+                        <label className="formulario__etiqueta" htmlFor="campo-edit-modelo">Modelo</label>
+                        <input
+                            className="formulario__campo"
+                            id="campo-edit-modelo"
+                            name="modelo"
+                            type="text"
+                            placeholder="Ej: Yamaha MT-03"
+                            autoComplete="off"
+                            maxLength={60}
+                            value={formulario.modelo}
+                            onChange={manejarCambio}
+                            aria-invalid={Boolean(errores.modelo)}
+                            aria-describedby={errores.modelo ? "error-edit-modelo" : undefined}
+                            autoFocus
+                        />
+                        {errores.modelo && <p className="formulario__error-campo" id="error-edit-modelo">{errores.modelo}</p>}
+                    </div>
+
+                    <div className="formulario__grupo">
+                        <label className="formulario__etiqueta" htmlFor="campo-edit-placa">Placa</label>
+                        <input
+                            className="formulario__campo formulario__campo--placa"
+                            id="campo-edit-placa"
+                            name="placa"
+                            type="text"
+                            placeholder="ABC123"
+                            autoComplete="off"
+                            autoCapitalize="characters"
+                            maxLength={6}
+                            value={formulario.placa}
+                            onChange={manejarCambio}
+                            aria-invalid={Boolean(errores.placa)}
+                            aria-describedby={errores.placa ? "error-edit-placa" : undefined}
+                        />
+                        {errores.placa && <p className="formulario__error-campo" id="error-edit-placa">{errores.placa}</p>}
+                    </div>
+
+                    <div className="formulario__grupo">
+                        <label className="formulario__etiqueta" htmlFor="campo-edit-tipo">Tipo de vehículo</label>
+                        <select
+                            className="formulario__campo formulario__select"
+                            id="campo-edit-tipo"
+                            name="tipo"
+                            value={formulario.tipo}
+                            onChange={manejarCambio}
+                        >
+                            <option value="MOTO">Moto</option>
+                            <option value="CARRO">Carro</option>
+                        </select>
+                    </div>
+
+                    <div className="formulario__grupo">
+                        <label className="formulario__etiqueta" htmlFor="campo-edit-activo">Estado operativo</label>
+                        <select
+                            className="formulario__campo formulario__select"
+                            id="campo-edit-activo"
+                            name="activo"
+                            value={formulario.activo ? "true" : "false"}
+                            onChange={(e) => setFormulario((prev) => ({ ...prev, activo: e.target.value === "true" }))}
+                        >
+                            <option value="true">Activo</option>
+                            <option value="false">Inactivo</option>
+                        </select>
+                    </div>
+
+                    <div className="formulario__grupo">
+                        <label className="formulario__etiqueta" htmlFor="campo-edit-soat">
+                            Vencimiento SOAT <span style={{ opacity: 0.6, fontWeight: 400 }}>(opcional)</span>
+                        </label>
+                        <input
+                            className="formulario__campo"
+                            id="campo-edit-soat"
+                            name="fechaVencimientoSoat"
+                            type="date"
+                            value={formulario.fechaVencimientoSoat}
+                            onChange={manejarCambio}
+                        />
+                    </div>
+
+                    <div className="formulario__grupo">
+                        <label className="formulario__etiqueta" htmlFor="campo-edit-tecno">
+                            Vencimiento Tecnomecánica <span style={{ opacity: 0.6, fontWeight: 400 }}>(opcional)</span>
+                        </label>
+                        <input
+                            className="formulario__campo"
+                            id="campo-edit-tecno"
+                            name="fechaVencimientoTecnomecanica"
+                            type="date"
+                            value={formulario.fechaVencimientoTecnomecanica}
+                            onChange={manejarCambio}
+                        />
+                    </div>
+
+                    <div className="formulario__grupo">
+                        <label className="formulario__etiqueta" htmlFor="campo-edit-imei">
+                            Equipo GPS (IMEI)
+                        </label>
+                        <input
+                            className="formulario__campo"
+                            id="campo-edit-imei"
+                            type="text"
+                            value={vehiculo.imei || "Sin equipo asignado"}
+                            disabled
+                            style={{ opacity: 0.65, cursor: "not-allowed" }}
+                        />
+                    </div>
+
+                    <div className="formulario__aviso">
+                        <span className="material-symbols-outlined" aria-hidden="true">info</span>
+                        <span>
+                            La asignación y modificación del IMEI del <strong>equipo GPS</strong> es gestionada
+                            exclusivamente por los administradores.
+                        </span>
+                    </div>
+
+                    {error && (
+                        <p className="formulario__error" role="alert">
+                            <span className="material-symbols-outlined" aria-hidden="true">error</span>
+                            {error}
+                        </p>
+                    )}
+
+                    <div className="formulario__pie">
+                        <button className="formulario__boton-confirmar" type="submit" disabled={cargando}>
+                            {cargando ? "Guardando cambios…" : "Guardar cambios"}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    );
+}
+
 export default function PanelVehiculo() {
     const [vehiculos, setVehiculos] = useState([]);
     const [usuarioId, setUsuarioId] = useState(null);
     const [cargando, setCargando] = useState(true);
     const usuario = localStorage.getItem("usuario");
     const [modalVisible, setModalVisible] = useState(false);
+    const [vehiculoAEditar, setVehiculoAEditar] = useState(null);
     const orbePrimarioRef = useRef(null);
     const orbeSecundarioRef = useRef(null);
 
@@ -300,11 +556,15 @@ export default function PanelVehiculo() {
             .catch((error) => console.error("Error cargando vehículos:", error))
             .finally(() => setCargando(false));
 
-    const eliminarVehiculo = async (id) => {
+    const eliminarVehiculo = async (vehiculo) => {
+        const id = vehiculo?.id || vehiculo;
+        const nombre = vehiculo?.placa ? `${vehiculo.placa} (${vehiculo.modelo})` : "este vehículo";
+        if (!window.confirm(`¿Estás seguro de que deseas eliminar ${nombre}?`)) {
+            return;
+        }
         try {
             await del(`/vehiculo/${id}`);
             cargarVehiculos(usuarioId);
-
         } catch (e) {
             console.error(e);
         }
@@ -322,7 +582,7 @@ export default function PanelVehiculo() {
                 console.error("Error obteniendo usuario:", error);
                 setCargando(false);
             });
-    },);
+    }, [usuario]);
 
     useEffect(() => {
         const manejarMouse = (e) => {
@@ -395,6 +655,7 @@ export default function PanelVehiculo() {
                                     key={v.id}
                                     vehiculo={v}
                                     onDelete={eliminarVehiculo}
+                                    onEdit={setVehiculoAEditar}
                                     onActualizado={() => cargarVehiculos(usuarioId)}
                                 />
                             ))
@@ -408,6 +669,13 @@ export default function PanelVehiculo() {
                 onCerrar={() => setModalVisible(false)}
                 onRegistrado={() => cargarVehiculos(usuarioId)}
                 usuarioId={usuarioId}
+            />
+
+            <ModalEditarVehiculo
+                visible={Boolean(vehiculoAEditar)}
+                vehiculo={vehiculoAEditar}
+                onCerrar={() => setVehiculoAEditar(null)}
+                onActualizado={() => cargarVehiculos(usuarioId)}
             />
 
             <div className="telemetria-decorativa" aria-hidden="true">

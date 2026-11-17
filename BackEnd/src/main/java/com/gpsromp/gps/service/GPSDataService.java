@@ -314,6 +314,55 @@ public class GPSDataService {
                 .build();
     }
 
+    /**
+     * Actualiza el estado de corte de motor tras el envío de un comando SMS
+     * y difunde la telemetría actualizada de inmediato por WebSocket y Redis.
+     */
+    public void actualizarEstadoCorteMotor(String imei, boolean corte) {
+        if (imei == null || imei.isBlank()) {
+            return;
+        }
+
+        Optional<GPSData> opt = getLastPosition(imei);
+        GPSData base = opt.orElse(null);
+        Instant ahora = Instant.now();
+
+        GPSData actualizada = GPSData.builder()
+                .imei(imei)
+                .latitud(base != null ? base.getLatitud() : 0.0)
+                .longitud(base != null ? base.getLongitud() : 0.0)
+                .velocidad(base != null ? (corte ? 0 : base.getVelocidad()) : 0)
+                .gpsValido(base != null && base.isGpsValido())
+                .acc(base != null ? (!corte && base.isAcc()) : !corte)
+                .corteMotor(corte)
+                .registradoEn(ahora)
+                .creadosEn(ahora)
+                .build();
+
+        // 1. Difundir por WebSocket al instante
+        try {
+            messagingTemplate.convertAndSend("/socket/gps/" + imei, actualizada);
+        } catch (Exception e) {
+            log.warn("No se pudo emitir evento de corte por WebSocket para {}: {}", imei, e.getMessage());
+        }
+
+        // 2. Actualizar caché en Redis
+        try {
+            redisTemplate.opsForValue().set(REDIS_PREFIX_GPS + imei, actualizada);
+        } catch (Exception e) {
+            log.warn("No se pudo cachear estado de corte en Redis para {}: {}", imei, e.getMessage());
+        }
+
+        // 3. Persistir asíncronamente en MongoDB
+        mongoPersistenciaExecutor.submit(() -> {
+            try {
+                repository.save(actualizada);
+            } catch (Exception e) {
+                log.error("Fallo al persistir estado de corte en Mongo para {}: {}", imei, e.getMessage());
+            }
+        });
+    }
+
     private double calcularHaversineKm(double lat1, double lon1, double lat2, double lon2) {
         final int R = 6371; // Radio de la Tierra en Km
         double latDistance = Math.toRadians(lat2 - lat1);

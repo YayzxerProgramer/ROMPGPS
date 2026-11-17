@@ -30,13 +30,18 @@ export const formatoMoneda = (valor) =>
 
 /** Normaliza una trama GPSData del backend. */
 export function aPosicion(d) {
-  if (!d || d.latitud == null || d.longitud == null) return null;
-  const fecha = d.registradoEn || d.creadosEn;
+  if (!d || (d.latitud == null && d.lat == null) || (d.longitud == null && d.lng == null)) return null;
+  const fecha = d.registradoEn || d.creadosEn || d.fechaIso || d.fecha;
+  const lat = d.latitud != null ? d.latitud : d.lat;
+  const lng = d.longitud != null ? d.longitud : d.lng;
+  const vel = d.velocidad != null ? d.velocidad : d.vel;
   return {
-    lat: Number(d.latitud),
-    lng: Number(d.longitud),
-    vel: Number(d.velocidad) || 0,
-    fecha: fecha ? new Date(fecha).getTime() : Date.now(),
+    lat: Number(lat),
+    lng: Number(lng),
+    vel: Number(vel) || 0,
+    acc: Boolean(d.acc != null ? d.acc : d.ignicion),
+    corteMotor: Boolean(d.corteMotor),
+    fecha: typeof fecha === "number" ? fecha : fecha ? new Date(fecha).getTime() : Date.now(),
   };
 }
 

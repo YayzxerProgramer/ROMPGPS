@@ -17,6 +17,7 @@ import com.gpsromp.common.exception.OperacionNoPermitidaException;
 import com.gpsromp.common.service.SmsService;
 import com.gpsromp.gps.model.DispositivoGps;
 import com.gpsromp.gps.repository.DispositivoGpsRepository;
+import com.gpsromp.gps.service.GPSDataService;
 import com.gpsromp.vehiculo.model.Vehiculo;
 import com.gpsromp.vehiculo.repository.VehiculoRepository;
 
@@ -32,11 +33,14 @@ class GpsComandoSmsControllerTest {
     @Mock
     private SmsService smsService;
 
+    @Mock
+    private GPSDataService gpsDataService;
+
     private GpsComandoSmsController controller;
 
     @BeforeEach
     void setUp() {
-        controller = new GpsComandoSmsController(vehiculoRepository, dispositivoGpsRepository, smsService);
+        controller = new GpsComandoSmsController(vehiculoRepository, dispositivoGpsRepository, smsService, gpsDataService);
     }
 
     @Test
@@ -55,7 +59,7 @@ class GpsComandoSmsControllerTest {
 
         when(vehiculoRepository.findByImei(imei)).thenReturn(Optional.of(vehiculo));
         when(dispositivoGpsRepository.findByImei(imei)).thenReturn(Optional.of(dispositivo));
-        when(smsService.enviarSms("+573133657311", "#RELAY,1#")).thenReturn(true);
+        when(smsService.enviarSms("+573133657311", "RELAY,1#")).thenReturn(true);
 
         GpsComandoSmsController.ComandoSmsRequest request = new GpsComandoSmsController.ComandoSmsRequest();
         request.setImei(imei);
@@ -77,7 +81,8 @@ class GpsComandoSmsControllerTest {
         assertFalse(body.containsKey("numeroSim"));
         assertFalse(body.get("mensaje").toString().contains("3133657311"));
 
-        verify(smsService).enviarSms("+573133657311", "#RELAY,1#");
+        verify(smsService).enviarSms("+573133657311", "RELAY,1#");
+        verify(gpsDataService).actualizarEstadoCorteMotor(imei, true);
     }
 
     @Test

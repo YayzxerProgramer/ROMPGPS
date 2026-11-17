@@ -14,6 +14,7 @@ import com.gpsromp.common.exception.RecursoNoEncontradoException;
 import com.gpsromp.common.service.SmsService;
 import com.gpsromp.gps.model.DispositivoGps;
 import com.gpsromp.gps.repository.DispositivoGpsRepository;
+import com.gpsromp.gps.service.GPSDataService;
 import com.gpsromp.vehiculo.model.Vehiculo;
 import com.gpsromp.vehiculo.repository.VehiculoRepository;
 
@@ -35,6 +36,7 @@ public class GpsComandoSmsController {
     private final VehiculoRepository vehiculoRepository;
     private final DispositivoGpsRepository dispositivoGpsRepository;
     private final SmsService smsService;
+    private final GPSDataService gpsDataService;
 
     @Data
     public static class ComandoSmsRequest {
@@ -89,6 +91,16 @@ public class GpsComandoSmsController {
         boolean enviado = smsService.enviarSms(destinoSms, comandoHex);
         log.info("Comando SMS {} ('{}') despachado hacia el dispositivo GPS con IMEI {} (Placa {})",
                 request.getComando(), comandoHex, imeiLimpio, vehiculo.getPlaca());
+
+        // 5. Reflejar inmediatamente el estado en telemetría Redis, WebSocket y MongoDB
+        if (enviado && gpsDataService != null) {
+            String c = request.getComando().trim().toUpperCase();
+            if ("CORTE_MOTOR".equals(c)) {
+                gpsDataService.actualizarEstadoCorteMotor(imeiLimpio, true);
+            } else if ("RESTAURAR_MOTOR".equals(c)) {
+                gpsDataService.actualizarEstadoCorteMotor(imeiLimpio, false);
+            }
+        }
 
         return ResponseEntity.ok(Map.of(
                 "exito", enviado,
